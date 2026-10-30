@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">BarLineX</string>
+    <string name="barly_bigfoot_logo">Bar.ly Logo</string>
+    <string name="barly">Bar.ly</string>
+    <string name="view_saved_barcodes">View Saved Barcodes</string>
+    <string name="create_a_barcode">Create A Barcode</string>
+    <string name="turn_text_or_a_value_into_a_scannable_code">Turn text or numbers into usable barcodes.</string>
+    <string name="code_128">Code 128</string>
+    <string name="qr_code">QR Code</string>
+    <string name="save_barcode">Save Barcode</string>
+    <string name="share_barcode">Share Barcode</string>
+    <string name="save_barcode_image">Save Barcode Image</string>
+    <string name="barcode_format">Barcode Format</string>
+</resources>

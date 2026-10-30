@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.BarLineX"
+        parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">#5278FF</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#91A8FF</item>
+
+        <item name="android:windowSplashScreenBackground">#000000</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <item name="android:windowBackground">#101827</item>
+
+        <item name="android:statusBarColor">#101827</item>
+        <item name="android:navigationBarColor">#101827</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+
+</resources>

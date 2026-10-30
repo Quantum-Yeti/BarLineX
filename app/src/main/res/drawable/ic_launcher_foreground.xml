@@ -1,0 +1,115 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <group android:scaleX="0.66"
+      android:scaleY="0.66"
+      android:translateX="18.69"
+      android:translateY="16.71">
+
+      <!-- Shaggy head outline -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3.5"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M28,29
+              L20,22 22,35 14,32 19,45
+              12,43 18,55 14,61
+              22,68 19,78 29,80
+              30,90 40,87 44,97
+              53,90 60,98 65,87
+              76,90 77,80 87,77
+              85,67 94,61 89,53
+              95,44 87,44 91,32
+              82,35 84,23 76,29
+              68,19 61,24 54,15
+              47,24 40,19 Z" />
+
+      <!-- Forehead fur -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M28,34
+              Q37,27 45,32
+              L54,26 63,32
+              Q72,27 80,34" />
+
+      <!-- Heavy brow -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="4"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M25,44
+              Q37,34 49,44
+              M59,44
+              Q72,34 83,44" />
+
+      <!-- Eyes -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3"
+          android:strokeLineCap="round"
+          android:pathData="M30,48 Q39,55 47,48
+              M62,48 Q70,55 79,48" />
+
+      <!-- Nose bridge -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3"
+          android:strokeLineCap="round"
+          android:pathData="M48,49 L44,58
+              Q54,65 64,58 L60,49" />
+
+      <!-- Broad nostrils -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3.5"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M43,59
+              Q47,55 52,60
+              M56,60
+              Q61,55 65,59" />
+
+      <!-- Muzzle and mouth -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M35,63
+              Q31,72 41,76
+              Q54,81 67,76
+              Q77,72 73,63
+              M42,76 Q54,73 66,76" />
+
+      <!-- Beard and cheek fur -->
+      <path
+          android:fillColor="#00000000"
+          android:strokeColor="#F4F6FF"
+          android:strokeWidth="3"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:pathData="M28,58
+              L34,65 29,70
+              L38,75 35,82
+              M80,58
+              L74,65 79,70
+              L70,75 73,82
+              M40,82 L45,88 53,84
+              62,88 68,82" />
+
+  </group>
+</vector>
