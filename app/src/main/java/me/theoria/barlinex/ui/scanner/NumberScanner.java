@@ -1,4 +1,4 @@
-package me.theoria.barly.ui.scanner;
+package me.theoria.barlinex.ui.scanner;
 
 import android.content.Context;
 import android.net.Uri;

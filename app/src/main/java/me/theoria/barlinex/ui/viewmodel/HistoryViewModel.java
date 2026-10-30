@@ -1,4 +1,4 @@
-package me.theoria.barly.ui.viewmodel;
+package me.theoria.barlinex.ui.viewmodel;
 
 import android.app.Application;
 
@@ -9,8 +9,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
-import me.theoria.barly.data.BarcodeRepository;
-import me.theoria.barly.data.SavedBarcode;
+import me.theoria.barlinex.data.BarcodeRepository;
+import me.theoria.barlinex.data.SavedBarcode;
 
 public class HistoryViewModel extends AndroidViewModel {
 

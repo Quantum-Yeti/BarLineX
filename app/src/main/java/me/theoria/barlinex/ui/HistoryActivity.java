@@ -1,6 +1,5 @@
-package me.theoria.barly.ui;
+package me.theoria.barlinex.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -12,10 +11,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import me.theoria.barly.R;
-import me.theoria.barly.ui.adapter.BarcodeHistoryAdapter;
-import me.theoria.barly.data.SavedBarcode;
-import me.theoria.barly.ui.viewmodel.HistoryViewModel;
+import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.adapter.BarcodeHistoryAdapter;
+import me.theoria.barlinex.utils.CodeGenerator;
+import me.theoria.barlinex.data.SavedBarcode;
+import me.theoria.barlinex.ui.viewmodel.HistoryViewModel;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -88,7 +88,7 @@ public class HistoryActivity extends AppCompatActivity {
                     com.google.zxing.BarcodeFormat.valueOf(barcode.format);
 
             android.graphics.Bitmap bitmap =
-                    me.theoria.barly.utils.CodeGenerator.generate(
+                    CodeGenerator.generate(
                             barcode.content,
                             format,
                             800,

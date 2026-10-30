@@ -1,9 +1,8 @@
-package me.theoria.barly.ui.adapter;
+package me.theoria.barlinex.ui.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -15,8 +14,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import me.theoria.barly.R;
-import me.theoria.barly.data.SavedBarcode;
+import me.theoria.barlinex.R;
+import me.theoria.barlinex.data.SavedBarcode;
 
 public class BarcodeHistoryAdapter
         extends RecyclerView.Adapter<BarcodeHistoryAdapter.BarcodeViewHolder> {

@@ -1,4 +1,4 @@
-package me.theoria.barly.ui.helper;
+package me.theoria.barlinex.ui.helper;
 
 import android.content.ContentValues;
 import android.content.Context;

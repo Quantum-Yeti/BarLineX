@@ -1,4 +1,4 @@
-package me.theoria.barly.data;
+package me.theoria.barlinex.data;
 
 import androidx.room.Dao;
 import androidx.room.Insert;

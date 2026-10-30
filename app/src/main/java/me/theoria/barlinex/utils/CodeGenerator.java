@@ -1,4 +1,4 @@
-package me.theoria.barly.utils;
+package me.theoria.barlinex.utils;
 
 import android.graphics.Bitmap;
 

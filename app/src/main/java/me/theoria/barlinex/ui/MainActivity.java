@@ -1,4 +1,4 @@
-package me.theoria.barly.ui;
+package me.theoria.barlinex.ui;
 
 import android.content.ContentValues;
 import android.app.AlertDialog;
@@ -32,11 +32,11 @@ import com.google.zxing.BarcodeFormat;
 
 import java.io.IOException;
 
-import me.theoria.barly.R;
-import me.theoria.barly.ui.helper.BarcodeImageHelper;
-import me.theoria.barly.ui.helper.ClipboardHelper;
-import me.theoria.barly.ui.scanner.NumberScanner;
-import me.theoria.barly.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.helper.BarcodeImageHelper;
+import me.theoria.barlinex.ui.helper.ClipboardHelper;
+import me.theoria.barlinex.ui.scanner.NumberScanner;
+import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class MainActivity extends AppCompatActivity {
 

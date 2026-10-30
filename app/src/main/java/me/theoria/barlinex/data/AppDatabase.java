@@ -1,4 +1,4 @@
-package me.theoria.barly.data;
+package me.theoria.barlinex.data;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;

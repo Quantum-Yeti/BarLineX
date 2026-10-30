@@ -1,4 +1,4 @@
-package me.theoria.barly.ui.viewmodel;
+package me.theoria.barlinex.ui.viewmodel;
 
 import android.app.Application;
 import android.graphics.Bitmap;
@@ -11,9 +11,9 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
-import me.theoria.barly.data.BarcodeRepository;
-import me.theoria.barly.data.SavedBarcode;
-import me.theoria.barly.utils.CodeGenerator;
+import me.theoria.barlinex.data.BarcodeRepository;
+import me.theoria.barlinex.data.SavedBarcode;
+import me.theoria.barlinex.utils.CodeGenerator;
 
 public class BarcodeViewModel extends AndroidViewModel {
 

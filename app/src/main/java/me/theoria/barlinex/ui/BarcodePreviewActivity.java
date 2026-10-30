@@ -1,9 +1,8 @@
-package me.theoria.barly.ui;
+package me.theoria.barlinex.ui;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,8 +11,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import me.theoria.barly.R;
-import me.theoria.barly.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodePreviewActivity extends AppCompatActivity {
 
