@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="brand_primary">#8B9EFF</color>
+    <color name="brand_secondary">#A5B2FF</color>
+
+    <color name="background_main">#121212</color>
+    <color name="background_surface">#1C1C1E</color>
+    <color name="background_elevated">#252528</color>
+    <color name="background_variant">#303034</color>
+
+    <color name="text_primary">#E5E5E5</color>
+    <color name="text_secondary">#A1A1AA</color>
+    <color name="text_muted">#71717A</color>
+
+    <color name="border_default">#38383B</color>
+    <color name="border_subtle">#2C2C30</color>
+
+    <color name="barcode_canvas">#FFFFFF</color>
 </resources>

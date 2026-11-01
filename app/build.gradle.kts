@@ -36,6 +36,9 @@ android {
 dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
+    implementation(libs.camera.core)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
     implementation(libs.constraintlayout)
     implementation(libs.material)
     testImplementation(libs.junit)
@@ -61,4 +64,12 @@ dependencies {
 
     // Native Simple Text OCR
     implementation("com.google.mlkit:text-recognition:16.0.1")
+
+    // Camera
+    val cameraxVersion = "1.4.2"
+
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
 }

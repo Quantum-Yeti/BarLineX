@@ -4,96 +4,76 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#101827"
-    android:paddingTop="36dp">
+    android:background="#1A1A1D"
+    android:orientation="vertical">
 
     <!-- App Header -->
     <LinearLayout
         android:id="@+id/mainToolbar"
         android:layout_width="match_parent"
-        android:layout_height="76dp"
-        android:orientation="horizontal"
+        android:layout_height="56dp"
+        android:background="#121212"
         android:gravity="center_vertical"
-        android:paddingStart="24dp"
-        android:paddingEnd="8dp"
-        android:background="#101827">
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
 
         <ImageView
             android:id="@+id/imageYeti"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:src="@drawable/ic_yeti"
-            android:contentDescription="@string/barly_bigfoot_logo"
-            android:scaleType="fitCenter" />
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:contentDescription="@string/barlinex_bigfoot_logo"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_yeti" />
 
         <TextView
             android:id="@+id/textAppTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
+            android:includeFontPadding="false"
             android:text="@string/app_name"
-            android:textColor="#F4F6FF"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:fontFamily="sans"
-            android:includeFontPadding="false" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/buttonHistory"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/view_saved_barcodes"
-            android:padding="12dp"
-            android:src="@drawable/ic_history"
-            android:scaleType="fitCenter"
-            android:backgroundTint="@null"
-            app:tint="#AFC0FF" />
+            android:textColor="#F5F5F5"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
-    <!-- Scrollable Generator -->
+    <!-- Main Workspace -->
     <ScrollView
+        android:id="@+id/createContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="#121212"
+        android:clipToPadding="false"
         android:fillViewport="true"
-        android:clipToPadding="false">
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="24dp">
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="12dp">
 
-            <!-- Live Preview -->
+            <!-- PREVIEW (hero) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/previewCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="0dp"
-                android:layout_marginTop="8dp"
-                app:cardBackgroundColor="#0B1020"
-                app:cardCornerRadius="0dp"
+                app:cardBackgroundColor="#1C1C1E"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                app:strokeColor="#303034"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="14dp">
 
-                    <!-- Preview heading -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -104,9 +84,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Live Preview"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
+                            android:text="Live preview"
+                            android:textColor="#F5F5F5"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -117,8 +97,8 @@
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="5dp"
                             android:text="QR CODE"
-                            android:textColor="#8EAFFF"
-                            android:textSize="11sp"
+                            android:textColor="#E4E8FF"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
 
                     </LinearLayout>
@@ -126,9 +106,9 @@
                     <!-- Barcode canvas -->
                     <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_marginTop="16dp"
-                        android:background="#FFFFFF"
+                        android:layout_height="176dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_barcode_canvas"
                         android:padding="12dp">
 
                         <ImageView
@@ -146,194 +126,211 @@
                             android:gravity="center"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="▦"
-                                android:textColor="#9CA3AF"
-                                android:textSize="42sp" />
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_qr_code"
+                                 />
 
                             <TextView
+                                android:id="@+id/textPlaceholder"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="Your barcode will appear here"
-                                android:textColor="#6B7280"
+                                android:gravity="center"
+                                android:text="Your barcode appears here"
+                                android:textColor="#5B5B63"
                                 android:textSize="13sp" />
 
                         </LinearLayout>
 
                     </FrameLayout>
 
-                    <!-- Four preview actions -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:weightSum="4"
-                        android:gravity="center"
-                        android:layout_marginTop="12dp">
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <!-- Share -->
-                        <ImageButton
+                        <TextView
+                            android:id="@+id/textPreviewContent"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="middle"
+                            android:maxLines="1"
+                            android:text="Enter text to begin"
+                            android:textColor="#E5E5E5"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/textPreviewInfo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="QR Code • 0 characters"
+                            android:textColor="#A1A1AA"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <!-- Actions -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="-4dp"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.card.MaterialCardView
                             android:id="@+id/buttonShare"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="60dp"
+                            android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/share_barcode"
-                            android:padding="14dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_share"
-                            app:tint="#8EAFFF" />
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#232326"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#303034"
+                            app:strokeWidth="1dp">
 
-                        <!-- Save Image -->
-                        <ImageButton
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/ic_share"
+                                     />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Share"
+                                    android:textColor="#D4D4D8"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
                             android:id="@+id/buttonSaveImage"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="60dp"
+                            android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/save_barcode_image"
-                            android:padding="14dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_save"
-                            app:tint="#8EAFFF" />
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#232326"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#303034"
+                            app:strokeWidth="1dp">
 
-                        <!-- Copy Text -->
-                        <ImageButton
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/ic_save"
+                                     />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Save"
+                                    android:textColor="#D4D4D8"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
                             android:id="@+id/buttonCopyText"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="60dp"
+                            android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Copy Text"
-                            android:padding="14dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_copy"
-                            app:tint="#8EAFFF" />
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#232326"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#303034"
+                            app:strokeWidth="1dp">
 
-                        <!-- Enlarge -->
-                        <ImageButton
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/ic_copy"
+                                     />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Copy"
+                                    android:textColor="#D4D4D8"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
                             android:id="@+id/buttonEnlarge"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="60dp"
+                            android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Enlarge Barcode"
-                            android:padding="14dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/ic_enlarge"
-                            app:tint="#8EAFFF" />
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:cardBackgroundColor="#232326"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="#303034"
+                            app:strokeWidth="1dp">
 
-                    </LinearLayout>
-
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="14dp"
-                        android:background="#28334A" />
-
-                    <!-- Barcode Content row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="#222D45"
-                            android:gravity="center"
-                            android:text="T"
-                            android:textColor="#8EAFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Barcode Content"
-                                android:textColor="#8F9BB1"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/textPreviewContent"
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:ellipsize="middle"
-                                android:maxLines="1"
-                                android:text="Enter text below"
-                                android:textColor="#FFFFFF"
-                                android:textSize="14sp" />
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical">
 
-                        </LinearLayout>
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/ic_enlarge"
+                                     />
 
-                        <ImageButton
-                            android:id="@+id/buttonCopyContent"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Copy barcode content"
-                            android:padding="12dp"
-                            android:src="@drawable/ic_copy"
-                            app:tint="#8EAFFF" />
-
-                    </LinearLayout>
-
-                    <!-- Barcode information row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="#222D45"
-                            android:gravity="center"
-                            android:text="i"
-                            android:textColor="#8EAFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Barcode Information"
-                                android:textColor="#8F9BB1"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/textPreviewInfo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="3dp"
-                                android:text="QR Code  •  0 characters"
-                                android:textColor="#D4D9E5"
-                                android:textSize="13sp" />
-
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Expand"
+                                    android:textColor="#D4D4D8"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
 
                     </LinearLayout>
 
@@ -341,124 +338,274 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Content Input -->
+            <!-- CONTENT -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
+                android:letterSpacing="0.1"
                 android:text="CONTENT"
-                android:textColor="#AAB7D4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
+                android:textColor="#A1A1AA"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/contentInputLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter text or a value"
-                app:boxBackgroundMode="outline"
-                app:boxBackgroundColor="#182337"
-                app:boxCornerRadiusTopStart="14dp"
-                app:boxCornerRadiusTopEnd="14dp"
-                app:boxCornerRadiusBottomStart="14dp"
+                app:boxBackgroundColor="#1C1C1E"
                 app:boxCornerRadiusBottomEnd="14dp"
-                app:boxStrokeColor="#5278FF"
-                app:hintTextColor="#9AA9C2"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxStrokeColor="#8B9EFF"
+                app:boxStrokeErrorColor="#FF9A9A"
                 app:boxStrokeWidth="1dp"
                 app:boxStrokeWidthFocused="2dp"
-                app:endIconMode="custom"
-                app:endIconDrawable="@drawable/ic_scan_number"
-                app:endIconTint="#AFC0FF"
+                app:counterEnabled="false"
+                app:endIconCheckable="false"
                 app:endIconContentDescription="Scan number with camera"
-                app:endIconCheckable="false">
+                app:endIconDrawable="@drawable/ic_scan_number"
+                app:endIconMode="custom"
+                app:endIconTint="#8B9EFF"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@null"
+                app:errorTextColor="#FF9A9A"
+                app:helperText="Any text or link"
+                app:helperTextEnabled="true"
+                app:helperTextTextColor="#A1A1AA"
+                app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="54dp"
-                    android:singleLine="true"
-                    android:inputType="text"
+                    android:hint="Enter text or a value"
                     android:imeOptions="actionDone"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:textColor="#F4F6FF"
-                    android:textColorHint="#78849E"
-                    android:textSize="15sp" />
+                    android:inputType="text"
+                    android:minHeight="56dp"
+                    android:paddingHorizontal="16dp"
+                    android:singleLine="true"
+                    android:textColor="#F5F5F5"
+                    android:textColorHint="#A1A1AA"
+                    android:textSize="16sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Barcode Format -->
-            <TextView
+            <!-- FORMAT (chips are added in MainActivity) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
-                android:text="BARCODE FORMAT"
-                android:textColor="#AAB7D4"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
-
-            <RadioGroup
-                android:id="@+id/formatGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/radioCode128"
+                <TextView
                     android:layout_width="0dp"
-                    android:layout_height="54dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_format_option"
-                    android:buttonTint="#91A8FF"
-                    android:gravity="center_vertical"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="4dp"
-                    android:text="@string/code_128"
-                    android:textColor="#F4F6FF"
-                    android:textSize="14sp"
-                    android:checked="true" />
+                    android:letterSpacing="0.1"
+                    android:text="FORMAT"
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/radioQr"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    android:background="@drawable/bg_format_option"
-                    android:buttonTint="#91A8FF"
-                    android:gravity="center_vertical"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="4dp"
-                    android:text="@string/qr_code"
-                    android:textColor="#F4F6FF"
-                    android:textSize="14sp"
-                    android:checked="false" />
+                <TextView
+                    android:id="@+id/textFormatCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#A1A1AA"
+                    android:textSize="12sp" />
 
-            </RadioGroup>
+            </LinearLayout>
 
-            <!-- Save Current Barcode -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonGenerate"
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginTop="18dp"
-                android:text="@string/save_barcode"
-                android:textAllCaps="false"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                app:cornerRadius="14dp"
-                app:backgroundTint="#5278FF"
-                app:icon="@drawable/ic_qr_code"
-                app:iconGravity="textStart"
-                app:iconTint="#FFFFFF" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="-16dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:paddingHorizontal="16dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/formatChips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:chipSpacingHorizontal="8dp"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:singleSelection="true" />
+
+            </HorizontalScrollView>
+
+            <!-- APPEARANCE -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/buttonAppearance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="#1C1C1E"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#303034"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_qr_code"
+                         />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Appearance"
+                            android:textColor="#F5F5F5"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Classic • Black on white"
+                            android:textColor="#A1A1AA"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="no"
+                        android:text="›"
+                        android:textColor="#A1A1AA"
+                        android:textSize="22sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
+
     </ScrollView>
+
+    <!-- Scanner: replaces the form while the Scan tab is selected.
+         The bottom dock below stays on screen. -->
+    <FrameLayout
+        android:id="@+id/scanOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#000000"
+        android:visibility="gone">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/cameraPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:scaleType="fillCenter" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"
+            android:background="#99000000"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:text="Frame the number, then tap the button"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCapture"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="Take photo"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text=""
+            app:backgroundTint="#8B9EFF"
+            app:cornerRadius="36dp"
+            app:icon="@drawable/ic_scan_number"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="28dp"
+            app:iconTint="#121212"
+            app:strokeColor="#FFFFFF"
+            app:strokeWidth="3dp" />
+
+    </FrameLayout>
+
+    <!-- Bottom dock: save action + navigation share one surface -->
+    <LinearLayout
+        android:id="@+id/bottomDock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1D"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#303034" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGenerate"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Save Barcode"
+            android:textAllCaps="false"
+            android:textColor="#121212"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#8B9EFF"
+            app:cornerRadius="14dp"
+            app:icon="@drawable/ic_qr_code"
+            app:iconGravity="textStart"
+            app:iconTint="#121212" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1A1A1D"
+            app:elevation="0dp"
+            app:itemIconTint="@color/nav_item_color"
+            app:itemTextColor="@color/nav_item_color"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/menu_bottom_navigation" />
+
+    </LinearLayout>
 
 </LinearLayout>

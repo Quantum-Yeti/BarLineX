@@ -1,86 +1,122 @@
 package me.theoria.barlinex.ui;
 
-import android.content.ContentValues;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
 
 import java.io.IOException;
 
 import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.controller.BarcodeInputController;
+import me.theoria.barlinex.ui.controller.BarcodePreviewController;
+import me.theoria.barlinex.ui.controller.NumberScannerController;
 import me.theoria.barlinex.ui.helper.BarcodeImageHelper;
 import me.theoria.barlinex.ui.helper.ClipboardHelper;
-import me.theoria.barlinex.ui.scanner.NumberScanner;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Input controls
-    private EditText inputContent;
-    private RadioGroup formatGroup;
-    private Button buttonGenerate;
+    // Constants
+    private static final String TAG = "BarLineX";
 
-    // Preview views
+    private static final String EXTRA_BARCODE_CONTENT = "barcode_content";
+    private static final String EXTRA_BARCODE_FORMAT = "barcode_format";
+
+    private static final long PREVIEW_DEBOUNCE_MS = 150L;
+
+    private static final int COLOR_PRIMARY_SOFT = 0x268B9EFF;
+
+    // Views
+    private EditText inputContent;
+    private TextInputLayout contentInputLayout;
+
+    private MaterialButton buttonGenerate;
+
     private ImageView imagePreview;
     private View previewPlaceholder;
-    private TextView textStatus;
+    private TextView textPlaceholder;
+
     private TextView textPreviewFormat;
     private TextView textPreviewContent;
     private TextView textPreviewInfo;
-    private TextInputLayout contentInputLayout;
 
-    // ViewModel
+    private BottomNavigationView bottomNavigation;
+
+    private View createContent;
+    private View scanOverlay;
+
+    private PreviewView cameraPreview;
+    private MaterialButton buttonCapture;
+
+    // Controllers and ViewModel
+    private BarcodeInputController inputController;
+    private BarcodePreviewController previewController;
+
     private BarcodeViewModel barcodeViewModel;
 
-    // Prevents listeners from reacting while loading saved content.
+    // Camera
+    private ActivityResultLauncher<String> cameraPermissionLauncher;
+    private NumberScannerController scannerController;
+
+    // State
     private boolean isOpeningSavedBarcode = false;
 
-    // Camera capture target used by the number scanner.
-    private ActivityResultLauncher<Uri> cameraLauncher;
-    private Uri scanImageUri;
+    private final Handler uiHandler =
+            new Handler(Looper.getMainLooper());
 
-    // Number scanner field
-    private final NumberScanner numberScanner = new NumberScanner();
+    private final Runnable previewRunnable = () -> {
+        if (previewController != null) {
+            previewController.updateLivePreview();
+        }
+    };
 
+    private final OnBackPressedCallback scanBackCallback =
+            new OnBackPressedCallback(false) {
+                @Override
+                public void handleOnBackPressed() {
+                    bottomNavigation.setSelectedItemId(R.id.nav_create);
+                }
+            };
+
+    // Activity lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        cameraLauncher = registerForActivityResult(
-                new ActivityResultContracts.TakePicture(),
-                success -> {
-                    if (success && scanImageUri != null) {
-                        processScannedImage(scanImageUri);
-                    } else {
-                        deleteScanImage();
-                    }
-                }
-        );
+        registerPermissionLauncher();
 
         setContentView(R.layout.activity_main);
 
@@ -88,62 +124,103 @@ public class MainActivity extends AppCompatActivity {
 
         initializeViews();
         initializeViewModel();
-        observeBarcode();
+
+        initializeInputController();
+        initializePreviewController();
+
         setupInputListeners();
         setupButtons();
+        setupBottomNavigation();
+        setupScanner();
 
-        updatePreviewLabels();
+        previewController.updatePreviewLabels();
+
         openSavedBarcode();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        uiHandler.removeCallbacks(previewRunnable);
+
+        if (scannerController != null) {
+            scannerController.close();
+        }
+
+        super.onDestroy();
     }
 
     // Initialization
     private void initializeViews() {
+
         inputContent = findViewById(R.id.inputContent);
-        formatGroup = findViewById(R.id.formatGroup);
+        contentInputLayout = findViewById(R.id.contentInputLayout);
+
         buttonGenerate = findViewById(R.id.buttonGenerate);
 
         imagePreview = findViewById(R.id.imagePreview);
         previewPlaceholder = findViewById(R.id.previewPlaceholder);
+        textPlaceholder = findViewById(R.id.textPlaceholder);
 
         textPreviewFormat = findViewById(R.id.textPreviewFormat);
         textPreviewContent = findViewById(R.id.textPreviewContent);
         textPreviewInfo = findViewById(R.id.textPreviewInfo);
-        contentInputLayout = findViewById(R.id.contentInputLayout);
+
+        createContent = findViewById(R.id.createContent);
+        scanOverlay = findViewById(R.id.scanOverlay);
+
+        cameraPreview = findViewById(R.id.cameraPreview);
+        buttonCapture = findViewById(R.id.buttonCapture);
     }
 
     private void initializeViewModel() {
+
         barcodeViewModel = new ViewModelProvider(this)
                 .get(BarcodeViewModel.class);
     }
 
-    private void observeBarcode() {
+    private void initializeInputController() {
 
-        // Show or hide the generated barcode image.
-        barcodeViewModel.getBarcodeImage().observe(this, bitmap -> {
-            if (bitmap == null) {
-                imagePreview.setImageDrawable(null);
-                imagePreview.setVisibility(View.GONE);
-                previewPlaceholder.setVisibility(View.VISIBLE);
-            } else {
-                imagePreview.setImageBitmap(bitmap);
-                imagePreview.setVisibility(View.VISIBLE);
-                previewPlaceholder.setVisibility(View.GONE);
-            }
-        });
+        inputController = new BarcodeInputController(
+                inputContent,
+                contentInputLayout,
+                findViewById(R.id.formatChips),
+                findViewById(R.id.textFormatCount)
+        );
 
-        // Only display validation errors here.
-        barcodeViewModel.getStatus().observe(this, message -> {
-            if ("Enter some text first".equals(message)) {
-                inputContent.setError(message);
-            } else {
-                inputContent.setError(null);
+        inputController.setOnFormatChangedListener(format -> {
+
+            if (previewController == null) {
+                return;
             }
+
+            uiHandler.removeCallbacks(previewRunnable);
+
+            previewController.updateLivePreview();
         });
     }
 
-    // Input and live preview
+    private void initializePreviewController() {
+
+        previewController = new BarcodePreviewController(
+                barcodeViewModel,
+                inputController,
+                imagePreview,
+                previewPlaceholder,
+                textPlaceholder,
+                textPreviewFormat,
+                textPreviewContent,
+                textPreviewInfo
+        );
+
+        previewController.observeBarcode(this);
+    }
+
+    // Input
     private void setupInputListeners() {
+
         inputContent.addTextChangedListener(new TextWatcher() {
+
             @Override
             public void beforeTextChanged(
                     CharSequence s,
@@ -161,9 +238,19 @@ public class MainActivity extends AppCompatActivity {
                     int before,
                     int count
             ) {
-                if (!isOpeningSavedBarcode) {
-                    updateLivePreview();
+
+                if (isOpeningSavedBarcode) {
+                    return;
                 }
+
+                previewController.updatePreviewLabels();
+
+                uiHandler.removeCallbacks(previewRunnable);
+
+                uiHandler.postDelayed(
+                        previewRunnable,
+                        PREVIEW_DEBOUNCE_MS
+                );
             }
 
             @Override
@@ -171,169 +258,166 @@ public class MainActivity extends AppCompatActivity {
                 // No action needed.
             }
         });
-
-        formatGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (!isOpeningSavedBarcode) {
-                updateLivePreview();
-            }
-        });
     }
 
-    private void updateLivePreview() {
-        updatePreviewLabels();
-
-        String content = getCurrentContent();
-
-        if (content.isEmpty()) {
-            // Clear the previous barcode when the input is empty.
-            imagePreview.setImageDrawable(null);
-            imagePreview.setVisibility(View.GONE);
-            previewPlaceholder.setVisibility(View.VISIBLE);
-            return;
-        }
-
-        // Generate a preview without saving it to history.
-        barcodeViewModel.generateBarcode(
-                content,
-                getSelectedFormat(),
-                false
-        );
+    private String getCurrentContent() {
+        return inputController.getCurrentContent();
     }
 
-    private void updatePreviewLabels() {
-        String content = getCurrentContent();
-        BarcodeFormat format = getSelectedFormat();
-
-        boolean isCode128 = format == BarcodeFormat.CODE_128;
-
-        textPreviewFormat.setText(
-                isCode128 ? "CODE 128" : "QR CODE"
-        );
-
-        textPreviewContent.setText(
-                content.isEmpty() ? "Enter text below" : content
-        );
-
-        textPreviewInfo.setText(
-                (isCode128 ? "Code 128" : "QR Code")
-                        + "  •  "
-                        + content.length()
-                        + (content.length() == 1
-                        ? " character"
-                        : " characters")
-        );
-    }
-
-    // Button setup
+    // Barcode actions
     private void setupButtons() {
-        // Save the barcode to history.
-        buttonGenerate.setText("Save Barcode");
-        buttonGenerate.setOnClickListener(v -> saveBarcode());
 
-        // Open barcode history.
-        ImageButton buttonHistory = findViewById(R.id.buttonHistory);
-        buttonHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    HistoryActivity.class
-            );
-            startActivity(intent);
-        });
+        buttonGenerate.setOnClickListener(
+                v -> saveBarcode()
+        );
 
-        // Copy the barcode's underlying text.
-        ImageButton buttonCopyText = findViewById(R.id.buttonCopyText);
-        buttonCopyText.setOnClickListener(v -> copyBarcodeContent());
+        findViewById(R.id.buttonShare).setOnClickListener(
+                v -> shareBarcode()
+        );
 
-        // Copy icon beside the Barcode Content row.
-        ImageButton buttonCopyContent =
-                findViewById(R.id.buttonCopyContent);
-        buttonCopyContent.setOnClickListener(
+        findViewById(R.id.buttonSaveImage).setOnClickListener(
+                v -> saveBarcodeImage()
+        );
+
+        findViewById(R.id.buttonCopyText).setOnClickListener(
                 v -> copyBarcodeContent()
         );
 
-        // Save the generated barcode as a PNG image.
-        View buttonSaveImage = findViewById(R.id.buttonSaveImage);
-        buttonSaveImage.setOnClickListener(v -> saveBarcodeImage());
+        findViewById(R.id.buttonEnlarge).setOnClickListener(
+                v -> openEnlargedPreview()
+        );
 
-        // Open the enlarged barcode screen.
-        View buttonEnlarge = findViewById(R.id.buttonEnlarge);
-        buttonEnlarge.setOnClickListener(v -> openEnlargedPreview());
+        findViewById(R.id.buttonAppearance).setOnClickListener(
+                v -> Snackbar.make(
+                        findViewById(R.id.main),
+                        "Appearance options are coming soon",
+                        Snackbar.LENGTH_SHORT
+                ).setAnchorView(buttonGenerate).show()
+        );
 
-        // Scan a number
-        contentInputLayout.setEndIconOnClickListener(v -> startNumberScan());
-
-        // Share is the next action to implement.
+        contentInputLayout.setEndIconOnClickListener(
+                v -> startNumberScan()
+        );
     }
 
-    // Save barcode to history
     private void saveBarcode() {
-        String content = getCurrentContent();
 
-        if (content.isEmpty()) {
-            inputContent.setError("Enter some text first");
+        String content = getCurrentContent();
+        BarcodeFormat format = inputController.getSelectedFormat();
+
+        String error = BarcodeInputController.validate(
+                format,
+                content
+        );
+
+        if (error != null) {
+
+            inputController.setError(error);
             inputContent.requestFocus();
+
             return;
         }
 
+        inputController.clearError();
+
         barcodeViewModel.generateBarcode(
                 content,
-                getSelectedFormat(),
+                format,
                 true
         );
 
-        Toast.makeText(
-                this,
-                "Barcode Saved Successfully",
-                Toast.LENGTH_SHORT
-        ).show();
+        buttonGenerate.performHapticFeedback(
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                        ? HapticFeedbackConstants.CONFIRM
+                        : HapticFeedbackConstants.VIRTUAL_KEY
+        );
+
+        Snackbar.make(
+                        findViewById(R.id.main),
+                        "Barcode saved",
+                        Snackbar.LENGTH_LONG
+                )
+                .setAnchorView(buttonGenerate)
+                .setAction(
+                        "View",
+                        v -> openHistory()
+                )
+                .show();
     }
 
-    // Copy barcode content
+    private void shareBarcode() {
+
+        String content = getCurrentContent();
+
+        if (content.isEmpty()) {
+
+            Toast.makeText(
+                    this,
+                    "Enter text to share first",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+        Intent send = new Intent(Intent.ACTION_SEND);
+
+        send.setType("text/plain");
+        send.putExtra(Intent.EXTRA_TEXT, content);
+
+        startActivity(
+                Intent.createChooser(send, "Share barcode")
+        );
+    }
+
     private void copyBarcodeContent() {
 
         String content = getCurrentContent();
 
         if (content.isEmpty()) {
+
             Toast.makeText(
                     this,
                     "Enter text to copy first",
                     Toast.LENGTH_SHORT
             ).show();
+
             return;
         }
 
-        boolean copied = ClipboardHelper.copyText(this, content);
+        boolean copied = ClipboardHelper.copyText(
+                this,
+                content
+        );
 
-        if (copied) {
-            Toast.makeText(
-                    this,
-                    "Barcode content copied",
-                    Toast.LENGTH_SHORT
-            ).show();
-        } else {
-            Toast.makeText(
-                    this,
-                    "Clipboard is unavailable",
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
+        Toast.makeText(
+                this,
+                copied
+                        ? "Barcode content copied"
+                        : "Clipboard is unavailable",
+                Toast.LENGTH_SHORT
+        ).show();
     }
 
-    // Save barcode image to gallery
     private void saveBarcodeImage() {
 
-        Bitmap bitmap = barcodeViewModel.getBarcodeImage().getValue();
+        Bitmap bitmap = barcodeViewModel
+                .getBarcodeImage()
+                .getValue();
 
         if (bitmap == null) {
+
             Toast.makeText(
                     this,
                     "No barcode image available. Generate one first.",
                     Toast.LENGTH_LONG
             ).show();
+
             return;
         }
 
         try {
+
             BarcodeImageHelper.saveImage(this, bitmap);
 
             Toast.makeText(
@@ -345,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException | SecurityException e) {
 
             android.util.Log.e(
-                    "BarLineX",
+                    TAG,
                     "Failed to save barcode PNG",
                     e
             );
@@ -358,182 +442,289 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    // Enlarge barcode
     private void openEnlargedPreview() {
+
         String content = getCurrentContent();
 
-        if (content.isEmpty()) {
+        BarcodeFormat format = inputController.getSelectedFormat();
+
+        String error = BarcodeInputController.validate(
+                format,
+                content
+        );
+
+        if (error != null) {
+
             Toast.makeText(
                     this,
-                    "Enter text to preview first",
+                    "Enter a valid value to preview first",
                     Toast.LENGTH_SHORT
             ).show();
+
             return;
         }
 
         Intent intent = new Intent(
-                MainActivity.this,
+                this,
                 BarcodePreviewActivity.class
         );
 
-        intent.putExtra("barcode_content", content);
-        intent.putExtra(
-                "barcode_format",
-                getSelectedFormat().name()
-        );
+        intent.putExtra(EXTRA_BARCODE_CONTENT, content);
+        intent.putExtra(EXTRA_BARCODE_FORMAT, format.name());
 
         startActivity(intent);
     }
 
-    // Load a barcode selected from history
+    // History
+    private void openHistory() {
+
+        startActivity(
+                new Intent(
+                        this,
+                        HistoryActivity.class
+                )
+        );
+    }
+
     private void openSavedBarcode() {
-        String content = getIntent().getStringExtra("barcode_content");
-        String savedFormat = getIntent().getStringExtra("barcode_format");
+
+        String content = getIntent().getStringExtra(
+                EXTRA_BARCODE_CONTENT
+        );
+
+        String savedFormat = getIntent().getStringExtra(
+                EXTRA_BARCODE_FORMAT
+        );
 
         if (content == null || savedFormat == null) {
             return;
         }
 
-        BarcodeFormat format = "CODE_128".equals(savedFormat)
-                ? BarcodeFormat.CODE_128
-                : BarcodeFormat.QR_CODE;
+        BarcodeFormat format;
+
+        try {
+
+            format = BarcodeFormat.valueOf(savedFormat);
+
+        } catch (IllegalArgumentException e) {
+
+            format = BarcodeFormat.QR_CODE;
+        }
 
         isOpeningSavedBarcode = true;
 
         try {
-            inputContent.setText(content);
 
-            formatGroup.check(
-                    format == BarcodeFormat.CODE_128
-                            ? R.id.radioCode128
-                            : R.id.radioQr
-            );
+            inputController.selectFormat(format);
+            inputController.setContent(content);
+
         } finally {
+
             isOpeningSavedBarcode = false;
         }
 
-        updatePreviewLabels();
+        previewController.updatePreviewLabels();
 
-        // Display the saved barcode without adding a duplicate history entry.
-        barcodeViewModel.generateBarcode(content, format, false);
-
-        // Remove the extras so they are not reprocessed on recreation.
-        getIntent().removeExtra("barcode_content");
-        getIntent().removeExtra("barcode_format");
-    }
-
-    // Shared helpers
-    private String getCurrentContent() {
-        return inputContent.getText().toString().trim();
-    }
-
-    private BarcodeFormat getSelectedFormat() {
-        int selectedId = formatGroup.getCheckedRadioButtonId();
-
-        return selectedId == R.id.radioCode128
-                ? BarcodeFormat.CODE_128
-                : BarcodeFormat.QR_CODE;
-    }
-
-    private void startNumberScan() {
-        ContentValues values = new ContentValues();
-        values.put(
-                MediaStore.Images.Media.DISPLAY_NAME,
-                "Barly_scan_" + System.currentTimeMillis() + ".jpg"
-        );
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            values.put(
-                    MediaStore.Images.Media.RELATIVE_PATH,
-                    "Pictures/Barly/Scans"
-            );
-        }
-
-        scanImageUri = getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                values
+        barcodeViewModel.generateBarcode(
+                content,
+                format,
+                false
         );
 
-        if (scanImageUri == null) {
-            Toast.makeText(
-                    this,
-                    "Could not prepare the camera. Please try again.",
-                    Toast.LENGTH_LONG
-            ).show();
-            return;
-        }
-
-        try {
-            cameraLauncher.launch(scanImageUri);
-        } catch (Exception e) {
-            deleteScanImage();
-            Toast.makeText(
-                    this,
-                    "Could not open the camera app.",
-                    Toast.LENGTH_LONG
-            ).show();
-            android.util.Log.e("Barly", "Could not launch number scanner", e);
-        }
+        getIntent().removeExtra(EXTRA_BARCODE_CONTENT);
+        getIntent().removeExtra(EXTRA_BARCODE_FORMAT);
     }
 
+    // Bottom navigation
+    private void setupBottomNavigation() {
 
-    private void processScannedImage(Uri imageUri) {
+        bottomNavigation = findViewById(R.id.bottomNavigation);
 
-        numberScanner.scan(this, imageUri, new NumberScanner.Listener() {
+        bottomNavigation.setItemActiveIndicatorColor(
+                ColorStateList.valueOf(COLOR_PRIMARY_SOFT)
+        );
 
-            @Override
-            public void onScanResult(String number) {
+        bottomNavigation.setSelectedItemId(R.id.nav_create);
 
-                if (number.isEmpty()) {
-                    Toast.makeText(
-                            MainActivity.this,
-                            "No numbers detected. Try again with better lighting and a clearer photo.",
-                            Toast.LENGTH_LONG
-                    ).show();
-                } else {
-                    showDetectedNumberDialog(number);
-                }
+        bottomNavigation.setOnItemSelectedListener(item -> {
+
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_create) {
+
+                exitScanMode();
+
+                return true;
             }
 
-            @Override
-            public void onScanError(Exception error) {
+            if (itemId == R.id.nav_scan) {
 
-                android.util.Log.e(
-                        "BarLineX",
-                        "Number recognition failed",
-                        error
-                );
+                enterScanMode();
 
-                Toast.makeText(
-                        MainActivity.this,
-                        "Could not read the number. Please try another photo.",
-                        Toast.LENGTH_LONG
-                ).show();
+                return true;
             }
 
-            @Override
-            public void onScanComplete() {
+            if (itemId == R.id.nav_history) {
 
-                getContentResolver().delete(imageUri, null, null);
+                openHistory();
 
-                if (imageUri.equals(scanImageUri)) {
-                    scanImageUri = null;
-                }
+                return false;
             }
+
+            return false;
         });
     }
 
+    // Scanner initialization and permissions
+    private void registerPermissionLauncher() {
+
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+
+                    if (granted) {
+
+                        showScanner();
+
+                    } else {
+
+                        Toast.makeText(
+                                this,
+                                "Camera permission is needed to scan numbers.",
+                                Toast.LENGTH_LONG
+                        ).show();
+
+                        bottomNavigation.setSelectedItemId(
+                                R.id.nav_create
+                        );
+                    }
+                }
+        );
+    }
+
+    private void setupScanner() {
+
+        getOnBackPressedDispatcher().addCallback(
+                this,
+                scanBackCallback
+        );
+
+        scannerController = new NumberScannerController(
+                this,
+                cameraPreview,
+                buttonCapture,
+                new NumberScannerController.Listener() {
+
+                    @Override
+                    public void onNumberDetected(String number) {
+                        showDetectedNumberDialog(number);
+                    }
+
+                    @Override
+                    public void onScanError(String message, Exception error) {
+
+                        if (error != null) {
+                            android.util.Log.e(TAG, message, error);
+                        }
+
+                        Toast.makeText(
+                                MainActivity.this,
+                                message,
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                }
+        );
+
+        buttonCapture.setOnClickListener(
+                v -> scannerController.capturePhoto()
+        );
+    }
+
+    private void startNumberScan() {
+        bottomNavigation.setSelectedItemId(R.id.nav_scan);
+    }
+
+    private void enterScanMode() {
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED) {
+
+            showScanner();
+
+        } else {
+
+            cameraPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
+        }
+    }
+
+    // Scanner visibility and camera lifecycle
+    private void showScanner() {
+
+        View focused = getCurrentFocus();
+
+        if (focused != null) {
+
+            InputMethodManager imm = (InputMethodManager)
+                    getSystemService(INPUT_METHOD_SERVICE);
+
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(
+                        focused.getWindowToken(),
+                        0
+                );
+            }
+        }
+
+        createContent.setVisibility(View.GONE);
+        buttonGenerate.setVisibility(View.GONE);
+        scanOverlay.setVisibility(View.VISIBLE);
+
+        scanBackCallback.setEnabled(true);
+
+        scannerController.startCamera();
+    }
+
+    private void exitScanMode() {
+
+        scanBackCallback.setEnabled(false);
+
+        if (scannerController != null) {
+            scannerController.stopCamera();
+        }
+
+        scanOverlay.setVisibility(View.GONE);
+        createContent.setVisibility(View.VISIBLE);
+        buttonGenerate.setVisibility(View.VISIBLE);
+    }
+
+    // Detected number confirmation
     private void showDetectedNumberDialog(String detectedNumber) {
+
         EditText numberInput = new EditText(this);
+
         numberInput.setSingleLine(true);
-        numberInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+
+        numberInput.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER
+        );
+
         numberInput.setText(detectedNumber);
-        numberInput.setSelection(numberInput.getText().length());
+
+        numberInput.setSelection(
+                numberInput.getText().length()
+        );
+
         numberInput.setHint("Review or correct the number");
 
-        int horizontalPadding = (int) (24 * getResources().getDisplayMetrics().density);
+        int horizontalPadding = (int) (
+                24 * getResources().getDisplayMetrics().density
+        );
+
         numberInput.setPadding(
                 horizontalPadding,
                 numberInput.getPaddingTop(),
@@ -541,62 +732,81 @@ public class MainActivity extends AppCompatActivity {
                 numberInput.getPaddingBottom()
         );
 
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Review detected number")
-                .setMessage("Check the digits before using them in your barcode.")
+                .setMessage(
+                        "Check the digits before using them in your barcode."
+                )
                 .setView(numberInput)
-                .setNegativeButton("Retake", (dialog, which) -> startNumberScan())
-                .setPositiveButton("Use Number", (dialog, which) -> {
-                    String confirmedNumber = numberInput.getText().toString().trim();
+                .setNegativeButton("Retake", null)
+                .setPositiveButton("Use Number", null)
+                .create();
 
-                    if (confirmedNumber.isEmpty()) {
+        dialog.setOnShowListener(dialogInterface -> {
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(v -> {
+
+                        String confirmedNumber = numberInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                        if (confirmedNumber.isEmpty()) {
+
+                            numberInput.setError("Enter a number first.");
+
+                            return;
+                        }
+
+                        inputController.setContent(confirmedNumber);
+
+                        inputContent.setSelection(
+                                inputContent.getText().length()
+                        );
+
+                        inputContent.requestFocus();
+
+                        bottomNavigation.setSelectedItemId(
+                                R.id.nav_create
+                        );
+
                         Toast.makeText(
-                                this,
-                                "Enter a number first.",
+                                MainActivity.this,
+                                "Number added to barcode",
                                 Toast.LENGTH_SHORT
                         ).show();
-                        return;
-                    }
 
-                    inputContent.setText(confirmedNumber);
-                    inputContent.setSelection(inputContent.getText().length());
-                    inputContent.requestFocus();
+                        dialog.dismiss();
+                    });
+        });
 
-                    Toast.makeText(
-                            this,
-                            "Number added to barcode",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                })
-                .show();
+        dialog.show();
     }
 
-    private void deleteScanImage() {
-        if (scanImageUri != null) {
-            getContentResolver().delete(scanImageUri, null, null);
-            scanImageUri = null;
-        }
-    }
-
+    // Window insets
     private void applyWindowInsets() {
 
         View root = findViewById(R.id.main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(
+                root,
+                (view, windowInsets) -> {
 
-            int bottomInset = windowInsets.getInsets(
-                    WindowInsetsCompat.Type.navigationBars()
-            ).bottom;
+                    int bottomInset = windowInsets.getInsets(
+                            WindowInsetsCompat.Type.navigationBars()
+                    ).bottom;
 
-            view.setPadding(
-                    view.getPaddingLeft(),
-                    view.getPaddingTop(),
-                    view.getPaddingRight(),
-                    bottomInset
-            );
+                    view.setPadding(
+                            view.getPaddingLeft(),
+                            view.getPaddingTop(),
+                            view.getPaddingRight(),
+                            bottomInset
+                    );
 
-            return windowInsets;
-        });
+                    return windowInsets;
+                }
+        );
 
         ViewCompat.requestApplyInsets(root);
     }
