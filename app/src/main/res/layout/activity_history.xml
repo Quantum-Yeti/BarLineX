@@ -4,178 +4,262 @@
     android:id="@+id/historyRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#0B1020"
-    android:paddingStart="22dp"
-    android:paddingEnd="22dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="12dp">
+    android:background="#121212"
+    android:orientation="vertical">
 
     <!-- App Header -->
     <LinearLayout
         android:id="@+id/historyToolbar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
+        android:background="#121212"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:paddingHorizontal="16dp">
 
         <ImageView
-            android:id="@+id/imageYeti"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_yeti"
-            android:contentDescription="BarLineX Logo"
-            android:scaleType="fitCenter" />
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:contentDescription="@string/barlinex_bigfoot_logo"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_yeti" />
 
         <TextView
-            android:id="@+id/textAppTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="BarLineX"
-            android:textColor="#F4F6FF"
-            android:textSize="23sp"
-            android:textStyle="bold"
-            android:fontFamily="sans"
-            android:includeFontPadding="false" />
-
-        <View
             android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:includeFontPadding="false"
+            android:text="@string/app_name"
+            android:textColor="#F5F5F5"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/buttonBack"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back to barcode generator"
+            android:contentDescription="Go back"
             android:padding="10dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_back"
-            android:scaleType="fitCenter"
-            app:tint="#AFC0FF" />
+            app:tint="#D4D4D8" />
 
     </LinearLayout>
 
-    <!-- Page Heading -->
+    <!-- History Content -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="28dp"
-        android:layout_marginBottom="26dp">
-
-        <TextView
-            android:id="@+id/textHistoryTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="Your Barcode Library"
-            android:textColor="#F4F6FF"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:fontFamily="sans"
-            android:includeFontPadding="false" />
-
-        <TextView
-            android:id="@+id/textHistorySubtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="9dp"
-            android:textAlignment="center"
-            android:text="Access your previously generated codes."
-            android:textColor="#929FB9"
-            android:textSize="14sp" />
-
-    </LinearLayout>
-
-    <!-- Saved Barcode Section Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="14dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SAVED BARCODES"
-            android:textColor="#AAB7D4"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.12" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:layout_marginStart="14dp"
-            android:background="#26334A" />
-
-        <TextView
-            android:id="@+id/textHistoryCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_history_badge"
-            android:paddingHorizontal="11dp"
-            android:paddingVertical="5dp"
-            android:text="SAVED"
-            android:textColor="#AFC0FF"
-            android:textSize="10sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <!-- Empty State -->
-    <LinearLayout
-        android:id="@+id/historyEmptyContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="@drawable/bg_history_empty"
-        android:padding="28dp"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:src="@drawable/ic_yeti"
-            android:scaleType="fitCenter"
-            android:contentDescription="Empty barcode library" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Your library is empty"
-            android:textColor="#F4F6FF"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textHistoryEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Generate your first barcode and save it here. Your saved codes will be ready whenever you need them."
-            android:textColor="#929FB9"
-            android:textSize="13sp"
-            android:lineSpacingExtra="4dp" />
-
-    </LinearLayout>
-
-    <!-- Saved Barcode List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerHistory"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingTop="2dp"
-        android:paddingBottom="16dp"
-        android:scrollbars="vertical" />
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp">
+
+        <!-- Page Heading -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your Library"
+            android:textColor="#F5F5F5"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Your saved barcodes, all in one place."
+            android:textColor="#A1A1AA"
+            android:textSize="14sp" />
+
+        <!-- Library Summary -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="#1C1C1E"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#303034"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <FrameLayout
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:background="#252B40">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_qr_code"
+                        app:tint="#8B9EFF" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Saved barcodes"
+                        android:textColor="#A1A1AA"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/textHistoryCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="0"
+                        android:textColor="#F5F5F5"
+                        android:textSize="25sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_format_badge"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="6dp"
+                    android:text="LIBRARY"
+                    android:textColor="#A9BDFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Section Heading -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="0.08"
+                android:text="RECENTLY SAVED"
+                android:textColor="#A1A1AA"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="24dp"
+                android:layout_height="1dp"
+                android:background="#303034" />
+
+        </LinearLayout>
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/historyEmptyContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="28dp"
+            android:visibility="gone">
+
+            <FrameLayout
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:background="#1C1C1E">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_qr_code"
+                    app:tint="#8B9EFF" />
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Your library is empty"
+                android:textColor="#F5F5F5"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textHistoryEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Barcodes you save will appear here. Create your first barcode to get started."
+                android:textColor="#92929B"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp" />
+
+        </LinearLayout>
+
+        <!-- Saved Barcode List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerHistory"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:id="@+id/bottomDock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1D"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#303034" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1A1A1D"
+            app:elevation="0dp"
+            app:itemIconTint="@color/nav_item_color"
+            app:itemTextColor="@color/nav_item_color"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/menu_bottom_navigation" />
+
+    </LinearLayout>
 
 </LinearLayout>

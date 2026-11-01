@@ -1,5 +1,7 @@
 package me.theoria.barlinex.ui;
 
+import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -11,65 +13,87 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.ui.adapter.BarcodeHistoryAdapter;
-import me.theoria.barlinex.utils.CodeGenerator;
 import me.theoria.barlinex.data.SavedBarcode;
+import me.theoria.barlinex.ui.adapter.BarcodeHistoryAdapter;
+import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
 import me.theoria.barlinex.ui.viewmodel.HistoryViewModel;
+import me.theoria.barlinex.utils.CodeGenerator;
+import me.theoria.barlinex.ui.helper.WindowsInsetHelper;
 
 public class HistoryActivity extends AppCompatActivity {
 
     private BarcodeHistoryAdapter adapter;
     private RecyclerView recyclerHistory;
-    private TextView textHistoryEmpty;
+    private View historyEmptyContainer;
+    private TextView textHistoryCount;
     private HistoryViewModel historyViewModel;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
+        WindowsInsetHelper.applySystemBarInsets(
+                findViewById(R.id.historyRoot)
+        );
+
+        initializeViews();
+        initializeHistory();
+        setupRecyclerView();
+        observeBarcodes();
+        setupBottomNavigation();
+    }
+
+    private void initializeViews() {
         ImageButton buttonBack = findViewById(R.id.buttonBack);
         buttonBack.setOnClickListener(v -> finish());
 
         recyclerHistory = findViewById(R.id.recyclerHistory);
-        textHistoryEmpty = findViewById(R.id.textHistoryEmpty);
+        historyEmptyContainer = findViewById(R.id.historyEmptyContainer);
+        textHistoryCount = findViewById(R.id.textHistoryCount);
+    }
 
+    private void initializeHistory() {
         historyViewModel = new ViewModelProvider(this)
                 .get(HistoryViewModel.class);
 
         adapter = new BarcodeHistoryAdapter(
                 this::openBarcode,
-                this::deleteBarcode);
+                this::deleteBarcode
+        );
+    }
 
-        recyclerHistory.setLayoutManager(new LinearLayoutManager(this));
-        recyclerHistory.setAdapter(adapter);
-
-        recyclerHistory.addItemDecoration(
-                new RecyclerView.ItemDecoration() {
-                    @Override
-                    public void getItemOffsets(
-                            android.graphics.Rect outRect,
-                            View view,
-                            RecyclerView parent,
-                            androidx.recyclerview.widget.RecyclerView.State state) {
-                        outRect.bottom = 4;
-                    }
-                }
+    private void setupRecyclerView() {
+        recyclerHistory.setLayoutManager(
+                new LinearLayoutManager(this)
         );
 
+        recyclerHistory.setAdapter(adapter);
+    }
+
+    private void observeBarcodes() {
         historyViewModel.getBarcodes().observe(this, barcodes -> {
+
             adapter.setBarcodes(barcodes);
 
             boolean isEmpty = barcodes == null || barcodes.isEmpty();
 
-            textHistoryEmpty.setVisibility(
+            historyEmptyContainer.setVisibility(
                     isEmpty ? View.VISIBLE : View.GONE
             );
 
             recyclerHistory.setVisibility(
                     isEmpty ? View.GONE : View.VISIBLE
             );
+
+            int count = barcodes == null ? 0 : barcodes.size();
+            textHistoryCount.setText(String.valueOf(count));
         });
     }
 
@@ -84,23 +108,23 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void openBarcode(SavedBarcode barcode) {
         try {
-            com.google.zxing.BarcodeFormat format =
-                    com.google.zxing.BarcodeFormat.valueOf(barcode.format);
+            BarcodeFormat format = BarcodeFormat.valueOf(barcode.format);
 
-            android.graphics.Bitmap bitmap =
-                    CodeGenerator.generate(
-                            barcode.content,
-                            format,
-                            800,
-                            800
-                    );
+            android.graphics.Bitmap bitmap = CodeGenerator.generate(
+                    barcode.content,
+                    format,
+                    800,
+                    800
+            );
 
             android.widget.ImageView imageView =
                     new android.widget.ImageView(this);
 
             imageView.setImageBitmap(bitmap);
             imageView.setAdjustViewBounds(true);
-            imageView.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+            imageView.setScaleType(
+                    android.widget.ImageView.ScaleType.FIT_CENTER
+            );
             imageView.setPadding(24, 24, 24, 24);
 
             new androidx.appcompat.app.AlertDialog.Builder(this)
@@ -109,12 +133,11 @@ public class HistoryActivity extends AppCompatActivity {
                     .setPositiveButton("Close", null)
                     .show();
 
-        } catch (com.google.zxing.WriterException |
-                 IllegalArgumentException e) {
-            android.widget.Toast.makeText(
+        } catch (WriterException | IllegalArgumentException e) {
+            Toast.makeText(
                     this,
                     "Unable to display this barcode.",
-                    android.widget.Toast.LENGTH_SHORT
+                    Toast.LENGTH_SHORT
             ).show();
         }
     }
@@ -127,5 +150,40 @@ public class HistoryActivity extends AppCompatActivity {
                 "Barcode deleted",
                 Toast.LENGTH_SHORT
         ).show();
+    }
+
+    private void setupBottomNavigation() {
+
+        bottomNavigationView = findViewById(R.id.bottomNavigation);
+
+        BottomNavigationHelper.setup(
+                bottomNavigationView,
+                R.id.nav_history,
+                new BottomNavigationHelper.Listener() {
+
+                    @Override
+                    public void onCreateSelected() {
+                        navigateToMain(R.id.nav_create);
+                    }
+
+                    @Override
+                    public void onScanSelected() {
+                        navigateToMain(R.id.nav_scan);
+                    }
+
+                    @Override
+                    public void onHistorySelected() {
+                        // Already on History.
+                    }
+                }
+        );
+    }
+
+    private void navigateToMain(int selectedTab) {
+        Intent result = new Intent();
+        result.putExtra(MainActivity.EXTRA_SELECTED_TAB, selectedTab);
+
+        setResult(RESULT_OK, result);
+        finish();
     }
 }
