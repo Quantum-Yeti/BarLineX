@@ -1,4 +1,4 @@
-package me.theoria.barly;
+package me.theoria.barlinex;
 
 import org.junit.Test;
 
