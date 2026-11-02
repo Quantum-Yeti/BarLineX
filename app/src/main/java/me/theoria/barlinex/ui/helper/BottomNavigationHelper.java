@@ -16,7 +16,7 @@ public final class BottomNavigationHelper {
 
     public interface Listener {
         void onCreateSelected();
-        void onScanSelected();
+        void onDecodeSelected();
         void onHistorySelected();
     }
 
@@ -41,8 +41,8 @@ public final class BottomNavigationHelper {
                 return true;
             }
 
-            if (itemId == R.id.nav_scan) {
-                listener.onScanSelected();
+            if (itemId == R.id.nav_decode) {
+                listener.onDecodeSelected();
                 return true;
             }
 

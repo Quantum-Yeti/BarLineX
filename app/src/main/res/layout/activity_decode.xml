@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/decodeRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A1D">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/decodeHeader"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Decode Barcode"
+            android:textColor="#F5F5F5"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textDecodeStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="READY"
+            android:textColor="#A9BDFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08" />
+
+    </LinearLayout>
+
+    <!-- Main scanner workspace -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardScanner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#121212"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#303034"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/decodeHeader"
+        app:layout_constraintBottom_toTopOf="@id/decodeActions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Live camera preview -->
+        <androidx.camera.view.PreviewView
+            android:id="@+id/decodeCameraPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+
+        <!-- Initial scanner placeholder -->
+        <LinearLayout
+            android:id="@+id/scannerPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="28dp">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_scan_number"
+                app:tint="#8B9EFF"
+                android:contentDescription="Barcode scanner" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Ready to scan"
+                android:textColor="#F5F5F5"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Point your camera at a barcode or QR code."
+                android:textColor="#A1A1AA"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- Decoded result -->
+        <LinearLayout
+            android:id="@+id/decodeResultPanel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#121212"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BARCODE DETECTED"
+                android:textColor="#A9BDFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Decoded successfully"
+                android:textColor="#F5F5F5"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <!-- Format -->
+            <TextView
+                android:id="@+id/textDecodedFormat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="#232326"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="QR CODE"
+                android:textColor="#A9BDFF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Content label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="CONTENT"
+                android:textColor="#A1A1AA"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06" />
+
+            <!-- Decoded content surface -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="#1C1C1E"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#303034"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/textDecodedContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="64dp"
+                    android:padding="16dp"
+                    android:textColor="#F5F5F5"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"
+                    android:maxLines="5"
+                    android:ellipsize="end" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Copy and Share -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonCopyResult"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="Copy"
+                    android:textAllCaps="false"
+                    android:textColor="#F5F5F5"
+                    android:textSize="14sp"
+                    app:backgroundTint="#232326"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_copy"
+                    app:iconTint="#A9BDFF"
+                    app:strokeColor="#303034"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonShareResult"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:text="Share"
+                    android:textAllCaps="false"
+                    android:textColor="#F5F5F5"
+                    android:textSize="14sp"
+                    app:backgroundTint="#232326"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_share"
+                    app:iconTint="#A9BDFF"
+                    app:strokeColor="#303034"
+                    app:strokeWidth="1dp" />
+
+            </LinearLayout>
+
+            <!-- Scan again -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonScanAgain"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:text="Scan Again"
+                android:textAllCaps="false"
+                android:textColor="#121212"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:backgroundTint="#8B9EFF"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Bottom actions -->
+    <LinearLayout
+        android:id="@+id/decodeActions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/decodeBottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonGallery"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Choose from Gallery"
+            android:textAllCaps="false"
+            android:textColor="#F5F5F5"
+            android:textSize="15sp"
+            app:backgroundTint="#232326"
+            app:cornerRadius="14dp"
+            app:icon="@drawable/ic_history"
+            app:iconTint="#A9BDFF"
+            app:strokeColor="#303034"
+            app:strokeWidth="1dp" />
+
+    </LinearLayout>
+
+    <!-- Bottom navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/decodeBottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1D"
+        app:itemIconTint="@color/brand_primary"
+        app:itemTextColor="@color/brand_primary"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom_navigation"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

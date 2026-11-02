@@ -167,8 +167,8 @@ public class HistoryActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onScanSelected() {
-                        navigateToMain(R.id.nav_scan);
+                    public void onDecodeSelected() {
+                        navigateToMain(R.id.nav_decode);
                     }
 
                     @Override

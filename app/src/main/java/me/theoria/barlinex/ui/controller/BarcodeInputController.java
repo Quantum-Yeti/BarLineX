@@ -3,47 +3,34 @@ package me.theoria.barlinex.ui.controller;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.widget.EditText;
+import android.widget.TextView;
 
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.textview.MaterialTextView;
-
 import com.google.zxing.BarcodeFormat;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.adapter.BarcodeFormatAdapter;
 
 public class BarcodeInputController {
 
     private static final BarcodeFormat[] FORMATS = {
             BarcodeFormat.QR_CODE,
-            BarcodeFormat.CODE_128,
-            BarcodeFormat.CODE_39,
-            BarcodeFormat.EAN_13,
-            BarcodeFormat.EAN_8,
-            BarcodeFormat.UPC_A,
-            BarcodeFormat.UPC_E,
-            BarcodeFormat.ITF
+            BarcodeFormat.CODE_128
+            // BarcodeFormat.CODE_39,
+            // BarcodeFormat.EAN_13,
+            // BarcodeFormat.EAN_8,
+            // BarcodeFormat.UPC_A,
+            // BarcodeFormat.UPC_E,
+            // BarcodeFormat.ITF
     };
-
-    private static final int COLOR_PRIMARY = 0xFF8B9EFF;
-    private static final int COLOR_PRIMARY_SOFT = 0x268B9EFF;
-    private static final int COLOR_ON_PRIMARY_SOFT = 0xFFE4E8FF;
-    private static final int COLOR_SURFACE = 0xFF1C1C1E;
-    private static final int COLOR_OUTLINE = 0xFF303034;
-    private static final int COLOR_CHIP_TEXT = 0xFFD4D4D8;
 
     private final EditText inputContent;
     private final TextInputLayout contentInputLayout;
-    private final ChipGroup formatChips;
-
-    private final Map<BarcodeFormat, Integer> chipIds =
-            new EnumMap<>(BarcodeFormat.class);
+    private final MaterialAutoCompleteTextView formatDropdown;
 
     private BarcodeFormat selectedFormat = BarcodeFormat.QR_CODE;
 
@@ -56,102 +43,48 @@ public class BarcodeInputController {
     public BarcodeInputController(
             EditText inputContent,
             TextInputLayout contentInputLayout,
-            ChipGroup formatChips,
-            MaterialTextView textFormatCount
+            MaterialAutoCompleteTextView formatDropdown,
+            TextView textFormatCount
     ) {
         this.inputContent = inputContent;
         this.contentInputLayout = contentInputLayout;
-        this.formatChips = formatChips;
+        this.formatDropdown = formatDropdown;
 
-        setupFormatChips(textFormatCount);
+        setupFormatDropdown(textFormatCount);
     }
 
-    private void setupFormatChips(MaterialTextView textFormatCount) {
+    private void setupFormatDropdown(TextView textFormatCount) {
 
-        float density = inputContent.getResources()
-                .getDisplayMetrics().density;
+        BarcodeFormatAdapter adapter = new BarcodeFormatAdapter(
+                inputContent.getContext(),
+                Arrays.asList(FORMATS)
+        );
 
-        for (BarcodeFormat format : FORMATS) {
-
-            Chip chip = new Chip(inputContent.getContext());
-
-            chip.setId(android.view.View.generateViewId());
-            chip.setTag(format);
-            chip.setText(getFormatDisplayName(format));
-            chip.setTextSize(14);
-            chip.setCheckable(true);
-            chip.setCheckedIconVisible(false);
-            chip.setEnsureMinTouchTargetSize(false);
-
-            chip.setChipMinHeight(44 * density);
-            chip.setChipCornerRadius(22 * density);
-            chip.setChipStrokeWidth(1.5f * density);
-
-            chip.setChipBackgroundColor(
-                    createColorStateList(
-                            COLOR_PRIMARY_SOFT,
-                            COLOR_SURFACE
-                    )
-            );
-
-            chip.setChipStrokeColor(
-                    createColorStateList(
-                            COLOR_PRIMARY,
-                            COLOR_OUTLINE
-                    )
-            );
-
-            chip.setTextColor(
-                    createColorStateList(
-                            COLOR_ON_PRIMARY_SOFT,
-                            COLOR_CHIP_TEXT
-                    )
-            );
-
-            chipIds.put(format, chip.getId());
-            formatChips.addView(chip);
-        }
+        formatDropdown.setAdapter(adapter);
 
         textFormatCount.setText(FORMATS.length + " formats");
 
-        formatChips.setOnCheckedStateChangeListener(
-                (group, checkedIds) -> {
+        formatDropdown.setOnItemClickListener(
+                (parent, view, position, id) -> {
 
-                    if (checkedIds.isEmpty()) {
+                    BarcodeFormat format = adapter.getItem(position);
+
+                    if (format == null) {
                         return;
                     }
 
-                    Chip chip = group.findViewById(
-                            checkedIds.get(0)
-                    );
+                    selectedFormat = format;
+                    formatDropdown.setText(getFormatDisplayName(format), false);
 
-                    selectedFormat = (BarcodeFormat) chip.getTag();
-
-                    applyInputRules(selectedFormat);
+                    applyInputRules(format);
 
                     if (listener != null) {
-                        listener.onFormatChanged(selectedFormat);
+                        listener.onFormatChanged(format);
                     }
                 }
         );
 
         selectFormat(BarcodeFormat.QR_CODE);
-    }
-
-    private android.content.res.ColorStateList createColorStateList(
-            int checkedColor,
-            int uncheckedColor
-    ) {
-        return new android.content.res.ColorStateList(
-                new int[][]{
-                        {android.R.attr.state_checked},
-                        {}
-                },
-                new int[]{
-                        checkedColor,
-                        uncheckedColor
-                }
-        );
     }
 
     public void setOnFormatChangedListener(
@@ -162,15 +95,25 @@ public class BarcodeInputController {
 
     public void selectFormat(BarcodeFormat format) {
 
-        Integer chipId = chipIds.get(format);
+        boolean supported = false;
 
-        if (chipId == null) {
+        for (BarcodeFormat availableFormat : FORMATS) {
+            if (availableFormat == format) {
+                supported = true;
+                break;
+            }
+        }
+
+        if (!supported) {
             return;
         }
 
-        formatChips.check(chipId);
-
         selectedFormat = format;
+
+        formatDropdown.setText(
+                getFormatDisplayName(format),
+                false
+        );
 
         applyInputRules(format);
     }
@@ -406,4 +349,3 @@ public class BarcodeInputController {
         }
     }
 }
-

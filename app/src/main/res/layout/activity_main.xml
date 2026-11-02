@@ -130,7 +130,7 @@
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
                                 android:importantForAccessibility="no"
-                                android:src="@drawable/ic_qr_code"
+                                android:src="@drawable/ic_barcode"
                                  />
 
                             <TextView
@@ -139,7 +139,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:gravity="center"
-                                android:text="Your barcode appears here"
+                                android:text="@string/barcode_preview"
                                 android:textColor="#5B5B63"
                                 android:textSize="13sp" />
 
@@ -422,25 +422,36 @@
 
             </LinearLayout>
 
-            <HorizontalScrollView
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/formatDropdownLayout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="-16dp"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                android:paddingHorizontal="16dp"
-                android:scrollbars="none">
+                app:boxBackgroundColor="#1C1C1E"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxStrokeColor="#8B9EFF"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp"
+                app:endIconTint="#8B9EFF">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/formatChips"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/formatDropdown"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:chipSpacingHorizontal="8dp"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true" />
+                    android:inputType="none"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="16dp"
+                    android:popupBackground="#232326"
+                    android:text="QR Code"
+                    android:textColor="#F5F5F5"
+                    android:textColorHint="#A1A1AA"
+                    android:textSize="15sp"
+                    android:dropDownHeight="wrap_content" />
 
-            </HorizontalScrollView>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- APPEARANCE -->
             <com.google.android.material.card.MaterialCardView

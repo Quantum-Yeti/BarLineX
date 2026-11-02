@@ -3,10 +3,10 @@ package me.theoria.barlinex.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.splashscreen.SplashScreen;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,8 +23,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -113,6 +112,14 @@ public class MainActivity extends AppCompatActivity {
     // Activity lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashscreen = SplashScreen.installSplashScreen(this);
+
+        long splashScreenStartTime = SystemClock.elapsedRealtime();
+
+        splashscreen.setKeepOnScreenCondition(() ->
+            SystemClock.elapsedRealtime() - splashScreenStartTime < 2000
+        );
+
         super.onCreate(savedInstanceState);
 
         registerPermissionLauncher();
@@ -184,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         inputController = new BarcodeInputController(
                 inputContent,
                 contentInputLayout,
-                findViewById(R.id.formatChips),
+                findViewById(R.id.formatDropdown),
                 findViewById(R.id.textFormatCount)
         );
 
@@ -394,8 +401,12 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onScanSelected() {
-                        enterScanMode();
+                    public void onDecodeSelected() {
+                        exitScanMode();
+
+                        startActivity(
+                                new Intent(MainActivity.this, DecodeActivity.class)
+                        );
                     }
 
                     @Override
@@ -493,7 +504,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Scanner navigation
     private void startNumberScan() {
-        bottomNavigation.setSelectedItemId(R.id.nav_scan);
+        enterScanMode();
     }
 
     private void enterScanMode() {

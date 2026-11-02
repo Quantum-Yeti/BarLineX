@@ -72,4 +72,7 @@ dependencies {
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Splash Screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

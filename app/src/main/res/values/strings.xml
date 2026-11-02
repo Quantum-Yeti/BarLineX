@@ -26,4 +26,5 @@
     <string name="enter_text_or_value">Enter text or a value</string>
     <string name="scan_number_with_camera">Scan number with camera</string>
     <string name="barcode_format_section">BARCODE FORMAT</string>
+    <string name="barcode_preview">Barcode Preview</string>
 </resources>
