@@ -17,8 +17,10 @@ public final class DatabaseProvider {
                     INSTANCE = Room.databaseBuilder(
                             context.getApplicationContext(),
                             AppDatabase.class,
-                            "barly_database"
-                    ).build();
+                            "barlinex_database"
+                    )
+                            .fallbackToDestructiveMigration()
+                            .build();
                 }
             }
         }

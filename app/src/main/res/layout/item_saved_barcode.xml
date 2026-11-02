@@ -75,6 +75,16 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/buttonFavoriteBarcode"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Toggle favorite"
+                android:padding="10dp"
+                android:src="@drawable/ic_favorite"
+                app:tint="#FF0000" />
+
+            <ImageButton
                 android:id="@+id/buttonDeleteBarcode"
                 android:layout_width="40dp"
                 android:layout_height="40dp"

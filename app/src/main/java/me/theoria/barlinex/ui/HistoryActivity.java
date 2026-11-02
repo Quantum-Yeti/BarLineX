@@ -51,8 +51,6 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        ImageButton buttonBack = findViewById(R.id.buttonBack);
-        buttonBack.setOnClickListener(v -> finish());
 
         recyclerHistory = findViewById(R.id.recyclerHistory);
         historyEmptyContainer = findViewById(R.id.historyEmptyContainer);
@@ -65,7 +63,8 @@ public class HistoryActivity extends AppCompatActivity {
 
         adapter = new BarcodeHistoryAdapter(
                 this::openBarcode,
-                this::deleteBarcode
+                this::deleteBarcode,
+                this::toggleFavorite
         );
     }
 
@@ -140,6 +139,10 @@ public class HistoryActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
         }
+    }
+
+    private void toggleFavorite(SavedBarcode barcode) {
+        historyViewModel.toggleFavorite(barcode);
     }
 
     private void deleteBarcode(SavedBarcode barcode) {

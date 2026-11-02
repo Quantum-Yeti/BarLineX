@@ -30,7 +30,26 @@ public class HistoryViewModel extends AndroidViewModel {
     }
 
     public void loadBarcodes() {
-        repository.getAll(barcodes::postValue);
+        repository.getAll(loadedBarcodes -> {
+            android.util.Log.d("FavoriteDebug", "----- HISTORY ORDER -----");
+
+            for (SavedBarcode barcode : loadedBarcodes) {
+                android.util.Log.d("FavoriteDebug",
+                        "ID: " + barcode.id
+                                + " | Favorite: " + barcode.isFavorite
+                                + " | Content: " + barcode.content);
+            }
+
+            barcodes.setValue(loadedBarcodes);
+        });
+    }
+
+    public void toggleFavorite(SavedBarcode barcode) {
+        repository.updateFavorite(
+                barcode.id,
+                !barcode.isFavorite,
+                this::loadBarcodes
+        );
     }
 
     public void deleteBarcode(SavedBarcode barcode) {

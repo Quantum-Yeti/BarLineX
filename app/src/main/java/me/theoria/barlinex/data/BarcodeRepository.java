@@ -66,6 +66,20 @@ public class BarcodeRepository {
         });
     }
 
+    public void updateFavorite(int id, boolean isFavorite, Runnable callback) {
+        executor.execute(() -> {
+            barcodeDao.updateFavorite(id, isFavorite);
+
+            new android.os.Handler(
+                    android.os.Looper.getMainLooper()
+            ).post(() -> {
+                if (callback != null) {
+                    callback.run();
+                }
+            });
+        });
+    }
+
     public void deleteById(int id, DeleteCallback callback) {
         executor.execute(() -> {
             barcodeDao.deleteById(id);

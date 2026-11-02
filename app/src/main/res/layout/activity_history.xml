@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
     <!-- App Header -->
     <LinearLayout
@@ -34,17 +35,6 @@
             android:textColor="#F5F5F5"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/buttonBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Go back"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_back"
-            app:tint="#D4D4D8" />
 
     </LinearLayout>
 

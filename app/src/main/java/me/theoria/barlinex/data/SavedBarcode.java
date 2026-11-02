@@ -13,6 +13,8 @@ public class SavedBarcode {
     public String format;
     public long createdAt;
 
+    public boolean isFavorite = false;
+
     public SavedBarcode(String content, String format) {
         this.content = content;
         this.format = format;
