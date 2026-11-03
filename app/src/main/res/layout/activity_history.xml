@@ -52,10 +52,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Your Library"
+            android:text="@string/barcode_library"
             android:textColor="#F5F5F5"
             android:textSize="25sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textAlignment="center"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -63,7 +64,8 @@
             android:layout_marginTop="5dp"
             android:text="Your saved barcodes, all in one place."
             android:textColor="#A1A1AA"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textAlignment="center"/>
 
         <!-- Library Summary -->
         <com.google.android.material.card.MaterialCardView
@@ -139,11 +141,45 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutHistorySearch"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Search your library"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxStrokeColor="#303034"
+            app:hintTextColor="#A1A1AA"
+            app:startIconDrawable="@drawable/ic_search"
+            app:startIconTint="#92929B"
+            app:endIconMode="clear_text"
+            app:endIconTint="#92929B">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editHistorySearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#92929B"
+                android:textSize="14sp"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
         <!-- Section Heading -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="18dp"
             android:layout_marginBottom="12dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
