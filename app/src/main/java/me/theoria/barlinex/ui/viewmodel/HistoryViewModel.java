@@ -44,6 +44,10 @@ public class HistoryViewModel extends AndroidViewModel {
         });
     }
 
+    public void renameBarcode(SavedBarcode barcode, String name) {
+        repository.updateName(barcode.id, name, this::loadBarcodes);
+    }
+
     public void toggleFavorite(SavedBarcode barcode) {
         repository.updateFavorite(
                 barcode.id,

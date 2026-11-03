@@ -15,6 +15,9 @@ public interface BarcodeDao {
     @Query("SELECT * FROM saved_barcodes ORDER BY isFavorite DESC, createdAt DESC")
     List<SavedBarcode> getAll();
 
+    @Query("UPDATE saved_barcodes SET name = :name WHERE id = :id")
+    void updateName(int id, String name);
+
     @Query("UPDATE saved_barcodes SET isFavorite = :isFavorite WHERE id = :id")
     void updateFavorite(int id, boolean isFavorite);
 

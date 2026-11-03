@@ -26,6 +26,7 @@ public class BarcodeHistoryAdapter
     private final OnBarcodeClickListener clickListener;
     private final OnBarcodeDeleteListener deleteListener;
     private final OnFavoriteClickListener favoriteListener;
+    private final OnBarcodeRenameListener renameListener;
 
     public interface OnBarcodeClickListener {
         void onClick(SavedBarcode barcode);
@@ -39,14 +40,21 @@ public class BarcodeHistoryAdapter
         void onFavoriteClick(SavedBarcode barcode);
     }
 
+    public interface OnBarcodeRenameListener {
+        void onRename(SavedBarcode barcode);
+    }
+
     public BarcodeHistoryAdapter(
             OnBarcodeClickListener clickListener,
             OnBarcodeDeleteListener deleteListener,
-            OnFavoriteClickListener favoriteListener) {
+            OnFavoriteClickListener favoriteListener,
+            OnBarcodeRenameListener renameListener
+    ) {
 
         this.clickListener = clickListener;
         this.deleteListener = deleteListener;
         this.favoriteListener = favoriteListener;
+        this.renameListener = renameListener;
     }
 
     @NonNull
@@ -66,7 +74,11 @@ public class BarcodeHistoryAdapter
 
         SavedBarcode barcode = barcodes.get(position);
 
-        holder.textContent.setText(barcode.content);
+        String displayName = barcode.name == null || barcode.name.trim().isEmpty()
+                ? barcode.content
+                : barcode.name;
+        holder.textContent.setText(displayName);
+
         holder.textFormat.setText(barcode.format);
 
         String date = DateFormat.getDateTimeInstance(
@@ -103,6 +115,12 @@ public class BarcodeHistoryAdapter
         holder.buttonFavorite.setOnClickListener(v -> {
             if (favoriteListener != null) {
                 favoriteListener.onFavoriteClick(barcode);
+            }
+        });
+
+        holder.buttonRename.setOnClickListener(v -> {
+            if (renameListener != null) {
+                renameListener.onRename(barcode);
             }
         });
     }
@@ -143,6 +161,7 @@ public class BarcodeHistoryAdapter
                         SavedBarcode newItem = updatedList.get(newPosition);
 
                         return oldItem.isFavorite == newItem.isFavorite
+                                && java.util.Objects.equals(oldItem.name, newItem.name)
                                 && oldItem.content.equals(newItem.content)
                                 && oldItem.format.equals(newItem.format)
                                 && oldItem.createdAt == newItem.createdAt;
@@ -163,6 +182,8 @@ public class BarcodeHistoryAdapter
         TextView textDate;
         ImageButton buttonDelete;
         ImageButton buttonFavorite;
+        ImageButton buttonRename;
+
 
         BarcodeViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -172,6 +193,7 @@ public class BarcodeHistoryAdapter
             textDate = itemView.findViewById(R.id.textBarcodeDate);
             buttonDelete = itemView.findViewById(R.id.buttonDeleteBarcode);
             buttonFavorite = itemView.findViewById(R.id.buttonFavoriteBarcode);
+            buttonRename = itemView.findViewById(R.id.buttonRenameBarcode);
         }
     }
 }

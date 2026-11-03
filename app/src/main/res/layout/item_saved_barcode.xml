@@ -85,6 +85,16 @@
                 app:tint="#FF0000" />
 
             <ImageButton
+                android:id="@+id/buttonRenameBarcode"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Rename saved barcode"
+                android:padding="10dp"
+                android:src="@drawable/ic_edit"
+                app:tint="#92929B" />
+
+            <ImageButton
                 android:id="@+id/buttonDeleteBarcode"
                 android:layout_width="40dp"
                 android:layout_height="40dp"

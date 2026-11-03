@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
@@ -64,7 +66,8 @@ public class HistoryActivity extends AppCompatActivity {
         adapter = new BarcodeHistoryAdapter(
                 this::openBarcode,
                 this::deleteBarcode,
-                this::toggleFavorite
+                this::toggleFavorite,
+                this::renameBarcode
         );
     }
 
@@ -139,6 +142,56 @@ public class HistoryActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT
             ).show();
         }
+    }
+
+    private void renameBarcode(SavedBarcode barcode) {
+
+        TextInputLayout inputLayout = new TextInputLayout(this);
+        inputLayout.setHint("Barcode name");
+        inputLayout.setBoxBackgroundMode(
+                TextInputLayout.BOX_BACKGROUND_OUTLINE
+        );
+
+        TextInputEditText input = new TextInputEditText(inputLayout.getContext());
+        input.setSingleLine(true);
+
+        input.setText(
+                barcode.name == null ? "" : barcode.name
+        );
+
+        inputLayout.addView(input);
+
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        inputLayout.setPadding(padding, 8, padding, 0);
+
+        androidx.appcompat.app.AlertDialog dialog =
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Rename Barcode")
+                        .setView(inputLayout)
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("Save", null)
+                        .create();
+
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(
+                    androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
+            ).setOnClickListener(v -> {
+
+                String name = input.getText() == null
+                        ? ""
+                        : input.getText().toString().trim();
+
+                // An empty name resets the display to the barcode content.
+                historyViewModel.renameBarcode(
+                        barcode,
+                        name.isEmpty() ? null : name
+                );
+
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
     }
 
     private void toggleFavorite(SavedBarcode barcode) {
