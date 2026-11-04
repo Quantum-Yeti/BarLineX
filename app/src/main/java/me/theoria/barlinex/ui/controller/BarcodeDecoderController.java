@@ -1,13 +1,20 @@
 package me.theoria.barlinex.ui.controller;
 
 import android.util.Log;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraControl;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
+import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.Preview;
+import androidx.camera.core.resolutionselector.ResolutionSelector;
+import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
@@ -16,13 +23,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
-import com.google.zxing.FormatException;
+import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.Result;
+import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.common.HybridBinarizer;
 
 import java.nio.ByteBuffer;
@@ -32,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BarcodeDecoderController {
@@ -94,10 +102,7 @@ public class BarcodeDecoderController {
         reader.setHints(hints);
     }
 
-    // --------------------------------------------------
     // Camera
-    // --------------------------------------------------
-
     public void startCamera() {
 
         if (closed) {
@@ -123,10 +128,18 @@ public class BarcodeDecoderController {
                         previewView.getSurfaceProvider()
                 );
 
-                imageAnalysis = new ImageAnalysis.Builder()
-                        .setBackpressureStrategy(
-                                ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+                ResolutionSelector resolutionSelector = new ResolutionSelector.Builder()
+                        .setResolutionStrategy(
+                                new ResolutionStrategy(
+                                        new Size(1920, 1080),
+                                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                                )
                         )
+                        .build();
+
+                imageAnalysis = new ImageAnalysis.Builder()
+                        .setResolutionSelector(resolutionSelector)
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
                 imageAnalysis.setAnalyzer(
@@ -136,12 +149,14 @@ public class BarcodeDecoderController {
 
                 cameraProvider.unbindAll();
 
-                cameraProvider.bindToLifecycle(
+                Camera camera = cameraProvider.bindToLifecycle(
                         activity,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
                         imageAnalysis
                 );
+
+                focusCamera(camera);
 
             } catch (Exception e) {
 
@@ -154,6 +169,39 @@ public class BarcodeDecoderController {
             }
 
         }, ContextCompat.getMainExecutor(activity));
+    }
+
+    private void focusCamera(Camera camera) {
+
+        previewView.post(() -> {
+
+            if (closed || activity.isFinishing() || activity.isDestroyed()) {
+                return;
+            }
+
+            float centerX = previewView.getWidth() / 2f;
+            float centerY = previewView.getHeight() / 2f;
+
+            MeteringPoint point = previewView
+                    .getMeteringPointFactory()
+                    .createPoint(centerX, centerY);
+
+            FocusMeteringAction action = new FocusMeteringAction.Builder(
+                    point,
+                    FocusMeteringAction.FLAG_AF
+                            | FocusMeteringAction.FLAG_AE
+                            | FocusMeteringAction.FLAG_AWB
+            )
+                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                    .build();
+
+            CameraControl cameraControl = camera.getCameraControl();
+
+            cameraControl.startFocusAndMetering(action)
+                    .addListener(() -> {
+                        Log.d(TAG, "Camera focus operation completed.");
+                    }, ContextCompat.getMainExecutor(activity));
+        });
     }
 
     public void stopCamera() {
@@ -171,10 +219,7 @@ public class BarcodeDecoderController {
         preview = null;
     }
 
-    // --------------------------------------------------
     // Barcode analysis
-    // --------------------------------------------------
-
     private void analyzeImage(@NonNull ImageProxy image) {
 
         try {
@@ -209,25 +254,10 @@ public class BarcodeDecoderController {
                     rotation
             );
 
-            PlanarYUVLuminanceSource source =
-                    new PlanarYUVLuminanceSource(
-                            frame.data,
-                            frame.width,
-                            frame.height,
-                            0,
-                            0,
-                            frame.width,
-                            frame.height,
-                            false
-                    );
+            Result result = decodeFrame(frame);
 
-            BinaryBitmap bitmap = new BinaryBitmap(
-                    new HybridBinarizer(source)
-            );
-
-            Result result = reader.decodeWithState(bitmap);
-
-            if (result != null && result.getText() != null
+            if (result != null
+                    && result.getText() != null
                     && resultDelivered.compareAndSet(false, true)) {
 
                 String content = result.getText();
@@ -241,10 +271,6 @@ public class BarcodeDecoderController {
                 });
             }
 
-        } catch (NotFoundException ignored) {
-
-            // No readable barcode in this frame.
-
         } catch (Exception e) {
 
             Log.e(TAG, "Barcode analysis failed", e);
@@ -253,6 +279,98 @@ public class BarcodeDecoderController {
 
             reader.reset();
             image.close();
+        }
+    }
+
+    private Result decodeFrame(LuminanceFrame frame) {
+
+        PlanarYUVLuminanceSource fullSource =
+                new PlanarYUVLuminanceSource(
+                        frame.data,
+                        frame.width,
+                        frame.height,
+                        0,
+                        0,
+                        frame.width,
+                        frame.height,
+                        false
+                );
+
+        // Attempt 1: Full image using HybridBinarizer and fallbacks.
+        Result result = tryDecode(fullSource);
+
+        if (result != null) {
+            return result;
+        }
+
+        // Attempt 2: Focus on the central horizontal band.
+        int bandHeight = Math.max(1, frame.height * 2 / 3);
+        int top = (frame.height - bandHeight) / 2;
+
+        LuminanceSource centerBand = fullSource.crop(
+                0,
+                top,
+                frame.width,
+                bandHeight
+        );
+
+        return tryDecode(centerBand);
+    }
+
+
+    private Result tryDecode(LuminanceSource source) {
+
+        // Attempt 1: Hybrid binarization.
+        Result result = decodeWithHybrid(source);
+
+        if (result != null) {
+            return result;
+        }
+
+        // Attempt 2: Global histogram binarization.
+        result = decodeWithGlobal(source);
+
+        if (result != null) {
+            return result;
+        }
+
+        // Attempt 3: Try an inverted image.
+        return decodeWithHybrid(source.invert());
+    }
+
+
+    private Result decodeWithHybrid(LuminanceSource source) {
+
+        try {
+
+            BinaryBitmap bitmap = new BinaryBitmap(
+                    new HybridBinarizer(source)
+            );
+
+            return reader.decodeWithState(bitmap);
+
+        } catch (NotFoundException e) {
+
+            reader.reset();
+            return null;
+        }
+    }
+
+
+    private Result decodeWithGlobal(LuminanceSource source) {
+
+        try {
+
+            BinaryBitmap bitmap = new BinaryBitmap(
+                    new GlobalHistogramBinarizer(source)
+            );
+
+            return reader.decodeWithState(bitmap);
+
+        } catch (NotFoundException e) {
+
+            reader.reset();
+            return null;
         }
     }
 

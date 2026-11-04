@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true">
 
-    <!-- App Header -->
+    <!-- BarLineX Header -->
     <LinearLayout
         android:id="@+id/historyToolbar"
         android:layout_width="match_parent"
@@ -45,115 +45,52 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingTop="20dp"
+        android:paddingTop="14dp"
         android:paddingBottom="12dp">
 
-        <!-- Page Heading -->
-        <TextView
+        <!-- Library Header -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/barcode_library"
-            android:textColor="#F5F5F5"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:textAlignment="center"/>
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="Your saved barcodes, all in one place."
-            android:textColor="#A1A1AA"
-            android:textSize="14sp"
-            android:textAlignment="center"/>
-
-        <!-- Library Summary -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="#1C1C1E"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#303034"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
+                android:layout_weight="1"
+                android:text="@string/barcode_library"
+                android:textColor="#F5F5F5"
+                android:textSize="21sp"
+                android:textStyle="bold" />
 
-                <FrameLayout
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:background="#252B40">
+            <TextView
+                android:id="@+id/textHistoryCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_format_badge"
+                android:paddingHorizontal="11dp"
+                android:paddingVertical="6dp"
+                android:text="0 saved"
+                android:textColor="#A9BDFF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_qr_code"
-                        app:tint="#8B9EFF" />
+        </LinearLayout>
 
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Saved barcodes"
-                        android:textColor="#A1A1AA"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/textHistoryCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="0"
-                        android:textColor="#F5F5F5"
-                        android:textSize="25sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_format_badge"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="6dp"
-                    android:text="LIBRARY"
-                    android:textColor="#A9BDFF"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-
+        <!-- Search -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutHistorySearch"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:hint="Search your library"
             app:boxBackgroundColor="#1C1C1E"
-            app:boxCornerRadiusTopStart="14dp"
-            app:boxCornerRadiusTopEnd="14dp"
-            app:boxCornerRadiusBottomStart="14dp"
-            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
             app:boxStrokeColor="#303034"
             app:hintTextColor="#A1A1AA"
             app:startIconDrawable="@drawable/ic_search"
@@ -174,13 +111,12 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-
-        <!-- Section Heading -->
+        <!-- Recently Saved Heading -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -191,7 +127,7 @@
                 android:letterSpacing="0.08"
                 android:text="RECENTLY SAVED"
                 android:textColor="#A1A1AA"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <View
@@ -262,7 +198,7 @@
 
     </LinearLayout>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation - Preserved -->
     <LinearLayout
         android:id="@+id/bottomDock"
         android:layout_width="match_parent"

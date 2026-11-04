@@ -144,7 +144,7 @@ public class HistoryActivity extends AppCompatActivity {
             adapter.filter(query);
 
             int count = barcodes == null ? 0 : barcodes.size();
-            textHistoryCount.setText(String.valueOf(count));
+            textHistoryCount.setText(count + " saved");
 
             updateHistoryDisplay();
         });
