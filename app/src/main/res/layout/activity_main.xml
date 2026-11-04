@@ -373,7 +373,6 @@
                 app:errorEnabled="true"
                 app:errorIconDrawable="@null"
                 app:errorTextColor="#FF9A9A"
-                app:helperText="Any text or link"
                 app:helperTextEnabled="true"
                 app:helperTextTextColor="#A1A1AA"
                 app:hintEnabled="false">
@@ -382,7 +381,7 @@
                     android:id="@+id/inputContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter text or a value"
+                    android:hint="Enter text, value, or link..."
                     android:imeOptions="actionDone"
                     android:inputType="text"
                     android:minHeight="56dp"
@@ -537,6 +536,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:scaleType="fillCenter" />
+
+        <me.theoria.barlinex.ui.widget.ScannerOverlay
+            android:id="@+id/numberScannerOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"

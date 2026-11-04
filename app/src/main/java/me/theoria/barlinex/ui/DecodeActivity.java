@@ -18,6 +18,10 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.zxing.BarcodeFormat;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
@@ -31,8 +35,14 @@ public class DecodeActivity extends AppCompatActivity {
     private View scannerPlaceholder;
     private TextView textDecodeStatus;
     private View decodeResultPanel;
+    private View scannerOverlay;
+
     private TextView textDecodedFormat;
     private TextView textDecodedContent;
+    private TextView textDecodedType;
+    private TextView textDecodedLength;
+    private TextView textDecodedCheckDigit;
+    private TextView textDecodedTime;
 
     private String decodedContent;
 
@@ -66,8 +76,14 @@ public class DecodeActivity extends AppCompatActivity {
         scannerPlaceholder = findViewById(R.id.scannerPlaceholder);
         textDecodeStatus = findViewById(R.id.textDecodeStatus);
         decodeResultPanel = findViewById(R.id.decodeResultPanel);
+        scannerOverlay = findViewById(R.id.scannerOverlay);
+
         textDecodedFormat = findViewById(R.id.textDecodedFormat);
         textDecodedContent = findViewById(R.id.textDecodedContent);
+        textDecodedType = findViewById(R.id.textDecodedType);
+        textDecodedLength = findViewById(R.id.textDecodedLength);
+        textDecodedCheckDigit = findViewById(R.id.textDecodedCheckDigit);
+        textDecodedTime = findViewById(R.id.textDecodedTime);
     }
 
     private void registerCameraPermissionLauncher() {
@@ -81,6 +97,7 @@ public class DecodeActivity extends AppCompatActivity {
                                 startScanning();
                             } else {
                                 textDecodeStatus.setText("PERMISSION REQUIRED");
+
                                 Toast.makeText(
                                         this,
                                         "Camera permission is needed to scan barcodes.",
@@ -101,7 +118,7 @@ public class DecodeActivity extends AppCompatActivity {
                     @Override
                     public void onBarcodeDetected(
                             String content,
-                            com.google.zxing.BarcodeFormat format
+                            BarcodeFormat format
                     ) {
 
                         decodedContent = content;
@@ -114,8 +131,7 @@ public class DecodeActivity extends AppCompatActivity {
 
                         textDecodeStatus.setText("DETECTED");
 
-                        textDecodedFormat.setText(format.toString().replace("_", " "));
-                        textDecodedContent.setText(content);
+                        displayBarcodeDetails(content, format);
                     }
 
                     @Override
@@ -133,6 +149,171 @@ public class DecodeActivity extends AppCompatActivity {
         );
     }
 
+    private void displayBarcodeDetails(
+            String content,
+            BarcodeFormat format
+    ) {
+
+        textDecodedFormat.setText(
+                format.toString().replace("_", " ")
+        );
+
+        textDecodedContent.setText(content);
+
+        // Barcode category
+        textDecodedType.setText(
+                format == BarcodeFormat.QR_CODE ? "2D" : "Linear"
+        );
+
+        // Character count
+        int characterCount = content.codePointCount(
+                0,
+                content.length()
+        );
+
+        textDecodedLength.setText(
+                characterCount + (
+                        characterCount == 1
+                                ? " character"
+                                : " characters"
+                )
+        );
+
+        // Check digit validation
+        textDecodedCheckDigit.setText(
+                getCheckDigitStatus(content, format)
+        );
+
+        // Scan date and time
+        String scanTime = DateFormat.getDateTimeInstance(
+                DateFormat.MEDIUM,
+                DateFormat.SHORT
+        ).format(new Date());
+
+        textDecodedTime.setText(scanTime);
+    }
+
+    private String getCheckDigitStatus(
+            String content,
+            BarcodeFormat format
+    ) {
+
+        switch (format) {
+
+            case EAN_13:
+                return validateMod10(content, 13)
+                        ? "Valid"
+                        : "Invalid";
+
+            case EAN_8:
+                return validateMod10(content, 8)
+                        ? "Valid"
+                        : "Invalid";
+
+            case UPC_A:
+                return validateMod10(content, 12)
+                        ? "Valid"
+                        : "Invalid";
+
+            case UPC_E:
+                return validateUpcE(content)
+                        ? "Valid"
+                        : "Invalid";
+
+            default:
+                return "Not applicable";
+        }
+    }
+
+    private boolean validateMod10(String content, int expectedLength) {
+
+        if (content == null
+                || content.length() != expectedLength
+                || !content.matches("[0-9]+")) {
+            return false;
+        }
+
+        int sum = 0;
+        int weight = 3;
+
+        // Process all digits except the check digit.
+        for (int i = content.length() - 2; i >= 0; i--) {
+
+            int digit = content.charAt(i) - '0';
+
+            sum += digit * weight;
+
+            weight = (weight == 3) ? 1 : 3;
+        }
+
+        int expectedCheckDigit = (10 - (sum % 10)) % 10;
+        int actualCheckDigit =
+                content.charAt(content.length() - 1) - '0';
+
+        return expectedCheckDigit == actualCheckDigit;
+    }
+
+    private boolean validateUpcE(String content) {
+
+        if (content == null
+                || content.length() != 8
+                || !content.matches("[0-9]+")) {
+            return false;
+        }
+
+        String numberSystem = content.substring(0, 1);
+
+        if (!numberSystem.equals("0")
+                && !numberSystem.equals("1")) {
+            return false;
+        }
+
+        String compressed = content.substring(1, 7);
+
+        char lastDigit = compressed.charAt(5);
+
+        String manufacturer;
+        String product;
+
+        switch (lastDigit) {
+
+            case '0':
+            case '1':
+            case '2':
+                manufacturer =
+                        compressed.substring(0, 2) + lastDigit + "00";
+                product =
+                        "00" + compressed.substring(2, 5);
+                break;
+
+            case '3':
+                manufacturer =
+                        compressed.substring(0, 3) + "00";
+                product =
+                        "000" + compressed.substring(3, 5);
+                break;
+
+            case '4':
+                manufacturer =
+                        compressed.substring(0, 4) + "0";
+                product =
+                        "0000" + compressed.substring(4, 5);
+                break;
+
+            default:
+                manufacturer =
+                        compressed.substring(0, 5);
+                product =
+                        "0000" + lastDigit;
+                break;
+        }
+
+        String expandedUpcA =
+                numberSystem + manufacturer + product;
+
+        return validateMod10(expandedUpcA + content.charAt(7), 12);
+    }
+
     private void checkCameraPermission() {
 
         if (ContextCompat.checkSelfPermission(
@@ -144,7 +325,9 @@ public class DecodeActivity extends AppCompatActivity {
 
         } else {
 
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+            cameraPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
         }
     }
 
@@ -158,11 +341,13 @@ public class DecodeActivity extends AppCompatActivity {
         textDecodeStatus.setText("SCANNING");
 
         decodeController.startCamera();
+        scannerOverlay.setVisibility(View.VISIBLE);
     }
 
     private void setupGalleryButton() {
 
         findViewById(R.id.buttonGallery).setOnClickListener(view -> {
+
             Toast.makeText(
                     this,
                     "Gallery decoding is coming next.",
@@ -180,7 +365,9 @@ public class DecodeActivity extends AppCompatActivity {
             }
 
             ClipboardManager clipboard =
-                    (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    (ClipboardManager) getSystemService(
+                            Context.CLIPBOARD_SERVICE
+                    );
 
             ClipData clip = ClipData.newPlainText(
                     "Decoded barcode",
@@ -207,7 +394,10 @@ public class DecodeActivity extends AppCompatActivity {
             shareIntent.putExtra(Intent.EXTRA_TEXT, decodedContent);
 
             startActivity(
-                    Intent.createChooser(shareIntent, "Share decoded content")
+                    Intent.createChooser(
+                            shareIntent,
+                            "Share decoded content"
+                    )
             );
         });
 
@@ -243,12 +433,14 @@ public class DecodeActivity extends AppCompatActivity {
 
                     @Override
                     public void onHistorySelected() {
+
                         startActivity(
                                 new Intent(
                                         DecodeActivity.this,
                                         HistoryActivity.class
                                 )
                         );
+
                         finish();
                     }
                 }

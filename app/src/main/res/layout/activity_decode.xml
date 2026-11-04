@@ -67,6 +67,12 @@
             android:layout_height="match_parent"
             android:visibility="visible" />
 
+        <me.theoria.barlinex.ui.widget.ScannerOverlay
+            android:id="@+id/scannerOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
         <!-- Initial scanner placeholder -->
         <LinearLayout
             android:id="@+id/scannerPlaceholder"
@@ -103,69 +109,87 @@
 
         </LinearLayout>
 
+
         <!-- Decoded result -->
         <LinearLayout
             android:id="@+id/decodeResultPanel"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#121212"
-            android:gravity="center_vertical"
             android:orientation="vertical"
-            android:padding="24dp"
+            android:padding="20dp"
             android:visibility="gone">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Result heading -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="BARCODE DETECTED"
-                android:textColor="#A9BDFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Decoded successfully"
-                android:textColor="#F5F5F5"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_scan_number"
+                    app:tint="#8B9EFF"
+                    android:contentDescription="Successful scan" />
 
-            <!-- Format -->
-            <TextView
-                android:id="@+id/textDecodedFormat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="#232326"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="7dp"
-                android:text="QR CODE"
-                android:textColor="#A9BDFF"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            <!-- Content label -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Barcode detected"
+                        android:textColor="#F5F5F5"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Successfully decoded"
+                        android:textColor="#A1A1AA"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textDecodedFormat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#232B43"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="7dp"
+                    android:text="QR CODE"
+                    android:textColor="#A9BDFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Decoded content -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
-                android:text="CONTENT"
+                android:text="DECODED CONTENT"
                 android:textColor="#A1A1AA"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.06" />
+                android:letterSpacing="0.08" />
 
-            <!-- Decoded content surface -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="9dp"
                 app:cardBackgroundColor="#1C1C1E"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
                 app:strokeColor="#303034"
                 app:strokeWidth="1dp">
@@ -174,7 +198,7 @@
                     android:id="@+id/textDecodedContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="64dp"
+                    android:minHeight="76dp"
                     android:padding="16dp"
                     android:textColor="#F5F5F5"
                     android:textSize="15sp"
@@ -184,24 +208,24 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Copy and Share -->
+            <!-- Content actions -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonCopyResult"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
                     android:text="Copy"
                     android:textAllCaps="false"
                     android:textColor="#F5F5F5"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     app:backgroundTint="#232326"
-                    app:cornerRadius="12dp"
+                    app:cornerRadius="10dp"
                     app:icon="@drawable/ic_copy"
                     app:iconTint="#A9BDFF"
                     app:strokeColor="#303034"
@@ -210,15 +234,15 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonShareResult"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
                     android:text="Share"
                     android:textAllCaps="false"
                     android:textColor="#F5F5F5"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     app:backgroundTint="#232326"
-                    app:cornerRadius="12dp"
+                    app:cornerRadius="10dp"
                     app:icon="@drawable/ic_share"
                     app:iconTint="#A9BDFF"
                     app:strokeColor="#303034"
@@ -226,12 +250,166 @@
 
             </LinearLayout>
 
+            <!-- Barcode details -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:text="BARCODE DETAILS"
+                android:textColor="#A1A1AA"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                app:cardBackgroundColor="#1C1C1E"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#303034"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp">
+
+                    <!-- Barcode type -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Barcode type"
+                            android:textColor="#A1A1AA"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/textDecodedType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2D"
+                            android:textColor="#F5F5F5"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#303034" />
+
+                    <!-- Content length -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Content length"
+                            android:textColor="#A1A1AA"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/textDecodedLength"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 characters"
+                            android:textColor="#F5F5F5"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#303034" />
+
+                    <!-- Check digit -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Check digit"
+                            android:textColor="#A1A1AA"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/textDecodedCheckDigit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Not applicable"
+                            android:textColor="#F5F5F5"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#303034" />
+
+                    <!-- Scan time -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Scanned"
+                            android:textColor="#A1A1AA"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/textDecodedTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Just now"
+                            android:textColor="#F5F5F5"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
             <!-- Scan again -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonScanAgain"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:layout_marginTop="12dp"
                 android:text="Scan Again"
                 android:textAllCaps="false"
                 android:textColor="#121212"

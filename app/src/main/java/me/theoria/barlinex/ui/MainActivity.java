@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private View scanOverlay;
 
     private PreviewView cameraPreview;
+    private View numberScannerOverlay;
     private MaterialButton buttonCapture;
 
     // Controllers and ViewModel
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         scanOverlay = findViewById(R.id.scanOverlay);
 
         cameraPreview = findViewById(R.id.cameraPreview);
+        numberScannerOverlay = findViewById(R.id.numberScannerOverlay);
         buttonCapture = findViewById(R.id.buttonCapture);
     }
 
@@ -541,6 +543,7 @@ public class MainActivity extends AppCompatActivity {
         createContent.setVisibility(View.GONE);
         buttonGenerate.setVisibility(View.GONE);
         scanOverlay.setVisibility(View.VISIBLE);
+        numberScannerOverlay.setVisibility(View.VISIBLE);
 
         scanBackCallback.setEnabled(true);
 
@@ -555,6 +558,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         scanOverlay.setVisibility(View.GONE);
+        numberScannerOverlay.setVisibility(View.GONE);
         createContent.setVisibility(View.VISIBLE);
         buttonGenerate.setVisibility(View.VISIBLE);
     }
