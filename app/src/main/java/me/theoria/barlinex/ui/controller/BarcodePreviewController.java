@@ -46,6 +46,8 @@ public class BarcodePreviewController {
         this.textPreviewInfo = textPreviewInfo;
     }
 
+    // Observers
+
     public void observeBarcode(LifecycleOwner lifecycleOwner) {
 
         barcodeViewModel.getBarcodeImage().observe(
@@ -62,43 +64,35 @@ public class BarcodePreviewController {
         barcodeViewModel.getStatus().observe(
                 lifecycleOwner,
                 message -> {
-                    if ("Enter some text first".equals(message)) {
-                        inputController.setError(message);
+                    if (message == null || message.isEmpty()) {
+                        inputController.clearError();
+                        return;
                     }
+
+                    if (message.equals("Barcode saved to history!")
+                            || message.equals("Generated, but failed to save.")) {
+                        return;
+                    }
+
+                    inputController.setError(message);
                 }
         );
     }
+
+    // Preview
 
     public void updateLivePreview() {
 
         updatePreviewLabels();
 
-        String content = inputController.getCurrentContent();
-        BarcodeFormat format = inputController.getSelectedFormat();
+        String content = getCurrentContent();
+        BarcodeFormat format = getSelectedFormat();
 
         if (content.isEmpty()) {
-
             inputController.clearError();
             showPlaceholder("Your barcode appears here");
             return;
         }
-
-        String error = inputController.validate(format, content);
-
-        if (error != null) {
-
-            inputController.setError(error);
-
-            showPlaceholder(
-                    "Waiting for a valid "
-                            + BarcodeInputController.getFormatDisplayName(format)
-                            + " value"
-            );
-
-            return;
-        }
-
-        inputController.clearError();
 
         barcodeViewModel.generateBarcode(
                 content,
@@ -109,8 +103,8 @@ public class BarcodePreviewController {
 
     public void updatePreviewLabels() {
 
-        String content = inputController.getCurrentContent();
-        BarcodeFormat format = inputController.getSelectedFormat();
+        String content = getCurrentContent();
+        BarcodeFormat format = getSelectedFormat();
 
         String formatLabel =
                 BarcodeInputController.getFormatDisplayName(format);
@@ -130,6 +124,20 @@ public class BarcodePreviewController {
                         : " characters")
         );
     }
+
+    // State
+
+    private String getCurrentContent() {
+        String content = barcodeViewModel.getInputContent().getValue();
+        return content != null ? content.trim() : "";
+    }
+
+    private BarcodeFormat getSelectedFormat() {
+        BarcodeFormat format = barcodeViewModel.getSelectedFormat().getValue();
+        return format != null ? format : BarcodeFormat.QR_CODE;
+    }
+
+    // Display
 
     private void displayBarcodePreview(Bitmap bitmap) {
 

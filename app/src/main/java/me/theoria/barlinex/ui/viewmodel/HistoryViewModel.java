@@ -1,6 +1,7 @@
 package me.theoria.barlinex.ui.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -14,50 +15,112 @@ import me.theoria.barlinex.data.SavedBarcode;
 
 public class HistoryViewModel extends AndroidViewModel {
 
+    // Repository
     private final BarcodeRepository repository;
 
+    // History
     private final MutableLiveData<List<SavedBarcode>> barcodes =
             new MutableLiveData<>();
 
+    // Initialization
     public HistoryViewModel(@NonNull Application application) {
         super(application);
         repository = new BarcodeRepository(application);
         loadBarcodes();
     }
 
+    // LiveData
     public LiveData<List<SavedBarcode>> getBarcodes() {
         return barcodes;
     }
 
+    // Load
     public void loadBarcodes() {
-        repository.getAll(loadedBarcodes -> {
-            android.util.Log.d("FavoriteDebug", "----- HISTORY ORDER -----");
-
-            for (SavedBarcode barcode : loadedBarcodes) {
-                android.util.Log.d("FavoriteDebug",
-                        "ID: " + barcode.id
-                                + " | Favorite: " + barcode.isFavorite
-                                + " | Content: " + barcode.content);
+        repository.getAll(new BarcodeRepository.LoadCallback() {
+            @Override
+            public void onLoaded(List<SavedBarcode> loadedBarcodes) {
+                barcodes.setValue(loadedBarcodes);
             }
 
-            barcodes.setValue(loadedBarcodes);
+            @Override
+            public void onError(Exception error) {
+                Log.e("HistoryViewModel", "Failed to load history", error);
+            }
         });
     }
 
+    // Rename
     public void renameBarcode(SavedBarcode barcode, String name) {
-        repository.updateName(barcode.id, name, this::loadBarcodes);
+        repository.updateName(
+                barcode.id,
+                name,
+                new BarcodeRepository.OperationCallback() {
+                    @Override
+                    public void onComplete() {
+                        loadBarcodes();
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        Log.e("HistoryViewModel", "Failed to rename barcode", error);
+                    }
+                }
+        );
     }
 
+    // Favorite
     public void toggleFavorite(SavedBarcode barcode) {
         repository.updateFavorite(
                 barcode.id,
                 !barcode.isFavorite,
-                this::loadBarcodes
+                new BarcodeRepository.OperationCallback() {
+                    @Override
+                    public void onComplete() {
+                        loadBarcodes();
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        Log.e("HistoryViewModel", "Failed to update favorite", error);
+                    }
+                }
         );
     }
 
-    public void deleteBarcode(SavedBarcode barcode) {
-        repository.deleteById(barcode.id,
-                this::loadBarcodes);
+    // Delete
+
+    public void deleteBarcode(
+            SavedBarcode barcode,
+            Runnable onDeleted,
+            java.util.function.Consumer<Exception> onError
+    ) {
+        repository.deleteById(
+                barcode.id,
+                new BarcodeRepository.DeleteCallback() {
+                    @Override
+                    public void onDeleted() {
+                        loadBarcodes();
+
+                        if (onDeleted != null) {
+                            onDeleted.run();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        if (onError != null) {
+                            onError.accept(error);
+                        }
+                    }
+                }
+        );
+    }
+
+
+    // Cleanup
+    @Override
+    protected void onCleared() {
+        repository.shutdown();
+        super.onCleared();
     }
 }

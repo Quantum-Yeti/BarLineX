@@ -13,10 +13,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.theoria.barlinex.domain.rules.BarcodeFormatRules;
 import me.theoria.barlinex.ui.adapter.BarcodeFormatAdapter;
+import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodeInputController {
 
+    // Supported formats
     private static final BarcodeFormat[] FORMATS = {
             BarcodeFormat.QR_CODE,
             BarcodeFormat.CODE_128
@@ -28,12 +31,15 @@ public class BarcodeInputController {
             // BarcodeFormat.ITF
     };
 
+    // Views
     private final EditText inputContent;
     private final TextInputLayout contentInputLayout;
     private final MaterialAutoCompleteTextView formatDropdown;
 
-    private BarcodeFormat selectedFormat = BarcodeFormat.QR_CODE;
+    // ViewModel
+    private final BarcodeViewModel viewModel;
 
+    // Listener
     private OnFormatChangedListener listener;
 
     public interface OnFormatChangedListener {
@@ -41,17 +47,21 @@ public class BarcodeInputController {
     }
 
     public BarcodeInputController(
+            BarcodeViewModel viewModel,
             EditText inputContent,
             TextInputLayout contentInputLayout,
             MaterialAutoCompleteTextView formatDropdown,
             TextView textFormatCount
     ) {
+        this.viewModel = viewModel;
         this.inputContent = inputContent;
         this.contentInputLayout = contentInputLayout;
         this.formatDropdown = formatDropdown;
 
         setupFormatDropdown(textFormatCount);
     }
+
+    // Format dropdown
 
     private void setupFormatDropdown(TextView textFormatCount) {
 
@@ -73,10 +83,7 @@ public class BarcodeInputController {
                         return;
                     }
 
-                    selectedFormat = format;
-                    formatDropdown.setText(getFormatDisplayName(format), false);
-
-                    applyInputRules(format);
+                    selectFormat(format);
 
                     if (listener != null) {
                         listener.onFormatChanged(format);
@@ -84,8 +91,16 @@ public class BarcodeInputController {
                 }
         );
 
-        selectFormat(BarcodeFormat.QR_CODE);
+        BarcodeFormat currentFormat = getSelectedFormat();
+
+        if (isSupportedFormat(currentFormat)) {
+            selectFormat(currentFormat);
+        } else {
+            selectFormat(BarcodeFormat.QR_CODE);
+        }
     }
+
+    // Format selection
 
     public void setOnFormatChangedListener(
             OnFormatChangedListener listener
@@ -95,20 +110,11 @@ public class BarcodeInputController {
 
     public void selectFormat(BarcodeFormat format) {
 
-        boolean supported = false;
-
-        for (BarcodeFormat availableFormat : FORMATS) {
-            if (availableFormat == format) {
-                supported = true;
-                break;
-            }
-        }
-
-        if (!supported) {
+        if (!isSupportedFormat(format)) {
             return;
         }
 
-        selectedFormat = format;
+        viewModel.setSelectedFormat(format);
 
         formatDropdown.setText(
                 getFormatDisplayName(format),
@@ -118,22 +124,46 @@ public class BarcodeInputController {
         applyInputRules(format);
     }
 
-    public BarcodeFormat getSelectedFormat() {
-        return selectedFormat;
+    private boolean isSupportedFormat(BarcodeFormat format) {
+
+        if (format == null) {
+            return false;
+        }
+
+        for (BarcodeFormat availableFormat : FORMATS) {
+            if (availableFormat == format) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public String getCurrentContent() {
-        return inputContent.getText().toString().trim();
+    private BarcodeFormat getSelectedFormat() {
+        BarcodeFormat format = viewModel.getSelectedFormat().getValue();
+
+        return format != null ? format : BarcodeFormat.QR_CODE;
     }
+
+    // Content
 
     public void setContent(String content) {
-        inputContent.setText(content);
-        inputContent.setSelection(inputContent.length());
+
+        String value = content != null ? content : "";
+
+        viewModel.setInputContent(value);
+
+        if (!inputContent.getText().toString().equals(value)) {
+            inputContent.setText(value);
+            inputContent.setSelection(value.length());
+        }
     }
 
     public EditText getInputContent() {
         return inputContent;
     }
+
+    // Input feedback
 
     public void setError(String message) {
         contentInputLayout.setError(message);
@@ -143,15 +173,17 @@ public class BarcodeInputController {
         contentInputLayout.setError(null);
     }
 
+    // Input rules
+
     private void applyInputRules(BarcodeFormat format) {
 
         inputContent.setInputType(
-                isNumericOnly(format)
+                BarcodeFormatRules.isNumericOnly(format)
                         ? InputType.TYPE_CLASS_NUMBER
                         : InputType.TYPE_CLASS_TEXT
         );
 
-        int maxLength = maxLengthFor(format);
+        int maxLength = BarcodeFormatRules.maxLengthFor(format);
 
         List<InputFilter> filters = new ArrayList<>();
 
@@ -174,147 +206,10 @@ public class BarcodeInputController {
         }
 
         contentInputLayout.setError(null);
-        contentInputLayout.setHelperText(hintFor(format));
+        contentInputLayout.setHelperText(null);
     }
 
-    public String validate(String text) {
-        return validate(selectedFormat, text);
-    }
-
-    public static String validate(
-            BarcodeFormat format,
-            String text
-    ) {
-
-        if (text == null || text.isEmpty()) {
-            return "Enter some text first";
-        }
-
-        switch (format) {
-
-            case CODE_39:
-                return text.matches("[A-Z0-9 .$/+%-]+")
-                        ? null
-                        : "Use capitals, digits and - . $ / + % only";
-
-            case EAN_13:
-                return text.matches("\\d{12,13}")
-                        ? checkDigitError(text, 13)
-                        : "Needs 12 or 13 digits";
-
-            case EAN_8:
-                return text.matches("\\d{7,8}")
-                        ? checkDigitError(text, 8)
-                        : "Needs 7 or 8 digits";
-
-            case UPC_A:
-                return text.matches("\\d{11,12}")
-                        ? checkDigitError(text, 12)
-                        : "Needs 11 or 12 digits";
-
-            case UPC_E:
-                return text.matches("\\d{7,8}")
-                        ? null
-                        : "Needs 7 or 8 digits";
-
-            case ITF:
-                return text.matches("\\d+") && text.length() % 2 == 0
-                        ? null
-                        : "Needs an even number of digits";
-
-            default:
-                return null;
-        }
-    }
-
-    private static String checkDigitError(
-            String digits,
-            int fullLength
-    ) {
-
-        if (digits.length() != fullLength) {
-            return null;
-        }
-
-        int sum = 0;
-
-        for (int i = 0; i < fullLength - 1; i++) {
-
-            int digit = digits.charAt(fullLength - 2 - i) - '0';
-
-            sum += digit * (i % 2 == 0 ? 3 : 1);
-        }
-
-        int expected = (10 - (sum % 10)) % 10;
-        int actual = digits.charAt(fullLength - 1) - '0';
-
-        return expected == actual
-                ? null
-                : "Check digit doesn't match";
-    }
-
-    private static String hintFor(BarcodeFormat format) {
-
-        switch (format) {
-
-            case CODE_128:
-                return "Letters, numbers and symbols";
-
-            case CODE_39:
-                return "A–Z, 0–9 and - . $ / + %";
-
-            case EAN_13:
-                return "12 or 13 digits";
-
-            case EAN_8:
-            case UPC_E:
-                return "7 or 8 digits";
-
-            case UPC_A:
-                return "11 or 12 digits";
-
-            case ITF:
-                return "Digits only, even count";
-
-            default:
-                return "Any text or link";
-        }
-    }
-
-    private static int maxLengthFor(BarcodeFormat format) {
-
-        switch (format) {
-
-            case EAN_13:
-                return 13;
-
-            case EAN_8:
-            case UPC_E:
-                return 8;
-
-            case UPC_A:
-                return 12;
-
-            default:
-                return 0;
-        }
-    }
-
-    private static boolean isNumericOnly(BarcodeFormat format) {
-
-        switch (format) {
-
-            case EAN_13:
-            case EAN_8:
-            case UPC_A:
-            case UPC_E:
-            case ITF:
-                return true;
-
-            default:
-                return false;
-        }
-    }
+    // Format display
 
     public static String getFormatDisplayName(BarcodeFormat format) {
 

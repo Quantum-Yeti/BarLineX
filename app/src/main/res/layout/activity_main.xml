@@ -453,6 +453,17 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- APPEARANCE -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing="0.1"
+                android:text="APPEARANCE"
+                android:textColor="#A1A1AA"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/buttonAppearance"
                 android:layout_width="match_parent"
@@ -487,13 +498,7 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Appearance"
-                            android:textColor="#F5F5F5"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+
 
                         <TextView
                             android:layout_width="wrap_content"

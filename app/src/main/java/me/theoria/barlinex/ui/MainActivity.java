@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.core.splashscreen.SplashScreen;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -23,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,15 +50,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final long PREVIEW_DEBOUNCE_MS = 150L;
 
-    private static final int COLOR_PRIMARY_SOFT = 0x268B9EFF;
-
     // Views
     private EditText inputContent;
     private TextInputLayout contentInputLayout;
 
     private MaterialButton buttonGenerate;
+    private MaterialButton buttonCapture;
 
     private ImageView imagePreview;
+
     private View previewPlaceholder;
     private TextView textPlaceholder;
 
@@ -70,25 +70,23 @@ public class MainActivity extends AppCompatActivity {
 
     private View createContent;
     private View scanOverlay;
+    private View numberScannerOverlay;
 
     private PreviewView cameraPreview;
-    private View numberScannerOverlay;
-    private MaterialButton buttonCapture;
 
     // Controllers and ViewModel
+    private BarcodeViewModel barcodeViewModel;
+
     private BarcodeInputController inputController;
     private BarcodePreviewController previewController;
     private BarcodeActionController actionController;
-    private DetectedNumberDialogController detectedNumberDialogController;
 
-    private BarcodeViewModel barcodeViewModel;
+    private DetectedNumberDialogController detectedNumberDialogController;
+    private NumberScannerController scannerController;
 
     // Activity Result launchers
     private ActivityResultLauncher<String> cameraPermissionLauncher;
     private ActivityResultLauncher<Intent> historyLauncher;
-
-    // Scanner
-    private NumberScannerController scannerController;
 
     // State
     private boolean isOpeningSavedBarcode = false;
@@ -104,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final OnBackPressedCallback scanBackCallback =
             new OnBackPressedCallback(false) {
+
                 @Override
                 public void handleOnBackPressed() {
                     bottomNavigation.setSelectedItemId(R.id.nav_create);
@@ -111,20 +110,20 @@ public class MainActivity extends AppCompatActivity {
             };
 
     // Activity lifecycle
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SplashScreen splashscreen = SplashScreen.installSplashScreen(this);
+
+        SplashScreen splashScreen =
+                SplashScreen.installSplashScreen(this);
 
         long splashScreenStartTime = SystemClock.elapsedRealtime();
 
-        splashscreen.setKeepOnScreenCondition(() ->
-            SystemClock.elapsedRealtime() - splashScreenStartTime < 2000
+        splashScreen.setKeepOnScreenCondition(() ->
+                SystemClock.elapsedRealtime() - splashScreenStartTime < 2000
         );
 
         super.onCreate(savedInstanceState);
-
-        registerPermissionLauncher();
-        registerHistoryLauncher();
 
         setContentView(R.layout.activity_main);
 
@@ -132,13 +131,10 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.main)
         );
 
+        initializeLaunchers();
         initializeViews();
         initializeViewModel();
-
-        initializeInputController();
-        initializePreviewController();
-        initializeActionController();
-        initializeDetectedNumberDialogController();
+        initializeControllers();
 
         setupInputListeners();
         setupButtons();
@@ -152,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+
         uiHandler.removeCallbacks(previewRunnable);
 
         if (scannerController != null) {
@@ -162,13 +159,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Initialization
+
+    private void initializeLaunchers() {
+        registerPermissionLauncher();
+        registerHistoryLauncher();
+    }
+
     private void initializeViews() {
+
         inputContent = findViewById(R.id.inputContent);
         contentInputLayout = findViewById(R.id.contentInputLayout);
 
         buttonGenerate = findViewById(R.id.buttonGenerate);
+        buttonCapture = findViewById(R.id.buttonCapture);
 
         imagePreview = findViewById(R.id.imagePreview);
+
         previewPlaceholder = findViewById(R.id.previewPlaceholder);
         textPlaceholder = findViewById(R.id.textPlaceholder);
 
@@ -181,7 +187,8 @@ public class MainActivity extends AppCompatActivity {
 
         cameraPreview = findViewById(R.id.cameraPreview);
         numberScannerOverlay = findViewById(R.id.numberScannerOverlay);
-        buttonCapture = findViewById(R.id.buttonCapture);
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
     private void initializeViewModel() {
@@ -189,8 +196,20 @@ public class MainActivity extends AppCompatActivity {
                 .get(BarcodeViewModel.class);
     }
 
+    private void initializeControllers() {
+
+        initializeInputController();
+        initializePreviewController();
+        initializeActionController();
+
+        detectedNumberDialogController =
+                new DetectedNumberDialogController(this);
+    }
+
     private void initializeInputController() {
+
         inputController = new BarcodeInputController(
+                barcodeViewModel,
                 inputContent,
                 contentInputLayout,
                 findViewById(R.id.formatDropdown),
@@ -198,16 +217,15 @@ public class MainActivity extends AppCompatActivity {
         );
 
         inputController.setOnFormatChangedListener(format -> {
-            if (previewController == null) {
-                return;
-            }
 
             uiHandler.removeCallbacks(previewRunnable);
+
             previewController.updateLivePreview();
         });
     }
 
     private void initializePreviewController() {
+
         previewController = new BarcodePreviewController(
                 barcodeViewModel,
                 inputController,
@@ -223,21 +241,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeActionController() {
+
         actionController = new BarcodeActionController(
                 this,
-                inputController,
                 barcodeViewModel,
-                buttonGenerate
+                buttonGenerate,
+                this::openHistory
         );
     }
 
-    private void initializeDetectedNumberDialogController() {
-        detectedNumberDialogController =
-                new DetectedNumberDialogController(this);
-    }
-
     // Input
+
     private void setupInputListeners() {
+
         inputContent.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -247,7 +263,6 @@ public class MainActivity extends AppCompatActivity {
                     int count,
                     int after
             ) {
-                // No action needed.
             }
 
             @Override
@@ -257,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
                     int before,
                     int count
             ) {
+
+                barcodeViewModel.setInputContent(s.toString());
+
                 if (isOpeningSavedBarcode) {
                     return;
                 }
@@ -273,13 +291,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // No action needed.
             }
         });
     }
 
     // Barcode actions
+
     private void setupButtons() {
+
         buttonGenerate.setOnClickListener(
                 v -> actionController.saveBarcode()
         );
@@ -302,10 +321,12 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.buttonAppearance).setOnClickListener(
                 v -> Snackbar.make(
-                        findViewById(R.id.main),
-                        "Appearance options are coming soon",
-                        Snackbar.LENGTH_SHORT
-                ).setAnchorView(buttonGenerate).show()
+                                findViewById(R.id.main),
+                                "Appearance options are coming soon",
+                                Snackbar.LENGTH_SHORT
+                        )
+                        .setAnchorView(buttonGenerate)
+                        .show()
         );
 
         contentInputLayout.setEndIconOnClickListener(
@@ -314,10 +335,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // History navigation
+
     private void registerHistoryLauncher() {
+
         historyLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+
                     if (result.getResultCode() != RESULT_OK
                             || result.getData() == null) {
                         return;
@@ -334,13 +358,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openHistory() {
+
         historyLauncher.launch(
                 new Intent(this, HistoryActivity.class)
         );
     }
 
     // Saved barcode
+
     private void openSavedBarcode() {
+
         String content = getIntent().getStringExtra(
                 BarcodeActionController.EXTRA_BARCODE_CONTENT
         );
@@ -357,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             format = BarcodeFormat.valueOf(savedFormat);
+
         } catch (IllegalArgumentException e) {
             format = BarcodeFormat.QR_CODE;
         }
@@ -364,19 +392,24 @@ public class MainActivity extends AppCompatActivity {
         isOpeningSavedBarcode = true;
 
         try {
+
             inputController.selectFormat(format);
+
+            format = barcodeViewModel.getSelectedFormat().getValue();
+
+            if (format == null) {
+                format = BarcodeFormat.QR_CODE;
+            }
+
             inputController.setContent(content);
+
         } finally {
             isOpeningSavedBarcode = false;
         }
 
-        previewController.updatePreviewLabels();
+        uiHandler.removeCallbacks(previewRunnable);
 
-        barcodeViewModel.generateBarcode(
-                content,
-                format,
-                false
-        );
+        previewController.updateLivePreview();
 
         getIntent().removeExtra(
                 BarcodeActionController.EXTRA_BARCODE_CONTENT
@@ -388,9 +421,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Bottom navigation
-    private void setupBottomNavigation() {
 
-        bottomNavigation = findViewById(R.id.bottomNavigation);
+    private void setupBottomNavigation() {
 
         BottomNavigationHelper.setup(
                 bottomNavigation,
@@ -404,10 +436,14 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onDecodeSelected() {
+
                         exitScanMode();
 
                         startActivity(
-                                new Intent(MainActivity.this, DecodeActivity.class)
+                                new Intent(
+                                        MainActivity.this,
+                                        DecodeActivity.class
+                                )
                         );
                     }
 
@@ -420,7 +456,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Detected number
+
     private void handleConfirmedNumber(String confirmedNumber) {
+
         inputController.setContent(confirmedNumber);
 
         inputContent.setSelection(
@@ -439,13 +477,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Camera permissions
+
     private void registerPermissionLauncher() {
+
         cameraPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 granted -> {
+
                     if (granted) {
                         showScanner();
+
                     } else {
+
                         Toast.makeText(
                                 this,
                                 "Camera permission is needed to scan numbers.",
@@ -461,7 +504,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Scanner initialization
+
     private void setupScanner() {
+
         getOnBackPressedDispatcher().addCallback(
                 this,
                 scanBackCallback
@@ -475,6 +520,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNumberDetected(String number) {
+
                         detectedNumberDialogController.show(
                                 number,
                                 MainActivity.this::handleConfirmedNumber
@@ -486,6 +532,7 @@ public class MainActivity extends AppCompatActivity {
                             String message,
                             Exception error
                     ) {
+
                         if (error != null) {
                             android.util.Log.e(TAG, message, error);
                         }
@@ -505,11 +552,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Scanner navigation
+
     private void startNumberScan() {
         enterScanMode();
     }
 
     private void enterScanMode() {
+
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.CAMERA
@@ -518,19 +567,25 @@ public class MainActivity extends AppCompatActivity {
             showScanner();
 
         } else {
+
             cameraPermissionLauncher.launch(
                     Manifest.permission.CAMERA
             );
         }
     }
 
-    // Scanner visibility and camera lifecycle
+    // Scanner visibility
+
     private void showScanner() {
+
         View focused = getCurrentFocus();
 
         if (focused != null) {
-            InputMethodManager imm = (InputMethodManager)
-                    getSystemService(INPUT_METHOD_SERVICE);
+
+            InputMethodManager imm =
+                    (InputMethodManager) getSystemService(
+                            INPUT_METHOD_SERVICE
+                    );
 
             if (imm != null) {
                 imm.hideSoftInputFromWindow(
@@ -542,6 +597,7 @@ public class MainActivity extends AppCompatActivity {
 
         createContent.setVisibility(View.GONE);
         buttonGenerate.setVisibility(View.GONE);
+
         scanOverlay.setVisibility(View.VISIBLE);
         numberScannerOverlay.setVisibility(View.VISIBLE);
 
@@ -551,6 +607,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void exitScanMode() {
+
         scanBackCallback.setEnabled(false);
 
         if (scannerController != null) {
@@ -559,6 +616,7 @@ public class MainActivity extends AppCompatActivity {
 
         scanOverlay.setVisibility(View.GONE);
         numberScannerOverlay.setVisibility(View.GONE);
+
         createContent.setVisibility(View.VISIBLE);
         buttonGenerate.setVisibility(View.VISIBLE);
     }

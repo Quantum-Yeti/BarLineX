@@ -7,7 +7,9 @@ import com.google.zxing.BarcodeFormat;
 
 import org.junit.Test;
 
+import me.theoria.barlinex.domain.validator.BarcodeValidator;
 import me.theoria.barlinex.ui.controller.BarcodeInputController;
+import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodeValidatorTest {
 
@@ -15,22 +17,22 @@ public class BarcodeValidatorTest {
     public void emptyInputReturnsError() {
         assertEquals(
                 "Enter some text first",
-                BarcodeInputController.validate(BarcodeFormat.QR_CODE, "")
+                BarcodeValidator.validate(BarcodeFormat.QR_CODE, "")
         );
 
         assertEquals(
                 "Enter some text first",
-                BarcodeInputController.validate(BarcodeFormat.CODE_128, "")
+                BarcodeValidator.validate(BarcodeFormat.CODE_128, "")
         );
     }
 
     @Test
     public void qrCodeAcceptTextAndUrls() {
-        assertNull(BarcodeInputController.validate(
+        assertNull(BarcodeValidator.validate(
                 BarcodeFormat.QR_CODE, "https://google.com"
         ));
 
-        assertNull(BarcodeInputController.validate(
+        assertNull(BarcodeValidator.validate(
                 BarcodeFormat.QR_CODE, "Hello this is a test."
         ));
     }

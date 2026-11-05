@@ -1,6 +1,7 @@
 package me.theoria.barlinex.ui;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,9 +32,8 @@ import me.theoria.barlinex.utils.CodeGenerator;
 
 public class HistoryActivity extends AppCompatActivity {
 
+    // Views
     private BarcodeHistoryAdapter adapter;
-    private HistoryViewModel historyViewModel;
-
     private RecyclerView recyclerHistory;
     private View historyEmptyContainer;
 
@@ -41,8 +41,10 @@ public class HistoryActivity extends AppCompatActivity {
     private TextView textHistoryEmpty;
 
     private TextInputEditText editHistorySearch;
-
     private BottomNavigationView bottomNavigationView;
+
+    // ViewModel
+    private HistoryViewModel historyViewModel;
 
     // Lifecycle
     @Override
@@ -54,8 +56,8 @@ public class HistoryActivity extends AppCompatActivity {
                 findViewById(R.id.historyRoot)
         );
 
-        initializeHistory();
         initializeViews();
+        initializeViewModel();
         setupRecyclerView();
         setupSearch();
         observeBarcodes();
@@ -72,18 +74,6 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     // Initialization
-    private void initializeHistory() {
-        historyViewModel = new ViewModelProvider(this)
-                .get(HistoryViewModel.class);
-
-        adapter = new BarcodeHistoryAdapter(
-                this::openBarcode,
-                this::deleteBarcode,
-                this::toggleFavorite,
-                this::renameBarcode
-        );
-    }
-
     private void initializeViews() {
         recyclerHistory = findViewById(R.id.recyclerHistory);
         historyEmptyContainer = findViewById(R.id.historyEmptyContainer);
@@ -93,6 +83,18 @@ public class HistoryActivity extends AppCompatActivity {
 
         editHistorySearch = findViewById(R.id.editHistorySearch);
         bottomNavigationView = findViewById(R.id.bottomNavigation);
+    }
+
+    private void initializeViewModel() {
+        historyViewModel = new ViewModelProvider(this)
+                .get(HistoryViewModel.class);
+
+        adapter = new BarcodeHistoryAdapter(
+                this::openBarcode,
+                this::deleteBarcode,
+                this::toggleFavorite,
+                this::renameBarcode
+        );
     }
 
     private void setupRecyclerView() {
@@ -109,13 +111,20 @@ public class HistoryActivity extends AppCompatActivity {
 
             @Override
             public void beforeTextChanged(
-                    CharSequence s, int start, int count, int after) {
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+            ) {
             }
 
             @Override
             public void onTextChanged(
-                    CharSequence s, int start, int before, int count) {
-
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+            ) {
                 filterHistory(s.toString());
             }
 
@@ -130,17 +139,13 @@ public class HistoryActivity extends AppCompatActivity {
         updateHistoryDisplay();
     }
 
-    // History Data
+    // History
     private void observeBarcodes() {
         historyViewModel.getBarcodes().observe(this, barcodes -> {
 
             adapter.setBarcodes(barcodes);
 
-            // Preserve the current search after database updates.
-            String query = editHistorySearch.getText() == null
-                    ? ""
-                    : editHistorySearch.getText().toString();
-
+            String query = getSearchQuery();
             adapter.filter(query);
 
             int count = barcodes == null ? 0 : barcodes.size();
@@ -150,14 +155,15 @@ public class HistoryActivity extends AppCompatActivity {
         });
     }
 
-    private void updateHistoryDisplay() {
-        boolean hasResults = adapter.getItemCount() > 0;
-
-        String query = editHistorySearch.getText() == null
+    private String getSearchQuery() {
+        return editHistorySearch.getText() == null
                 ? ""
                 : editHistorySearch.getText().toString().trim();
+    }
 
-        boolean hasSearchQuery = !query.isEmpty();
+    private void updateHistoryDisplay() {
+        boolean hasResults = adapter.getItemCount() > 0;
+        boolean hasSearchQuery = !getSearchQuery().isEmpty();
 
         historyEmptyContainer.setVisibility(
                 hasResults ? View.GONE : View.VISIBLE
@@ -168,38 +174,47 @@ public class HistoryActivity extends AppCompatActivity {
         );
 
         if (!hasResults) {
-            if (hasSearchQuery) {
-                textHistoryEmpty.setText(
-                        "No barcodes match your search. Try a different name, value, or format."
-                );
-            } else {
-                textHistoryEmpty.setText(
-                        "Barcodes you save will appear here. Create your first barcode to get started."
-                );
-            }
+            textHistoryEmpty.setText(
+                    hasSearchQuery
+                            ? "No barcodes match your search. Try a different name, value, or format."
+                            : "Barcodes you save will appear here. Create your first barcode to get started."
+            );
         }
     }
 
-    // Barcode Actions
+    // Preview
     private void openBarcode(SavedBarcode barcode) {
         try {
             BarcodeFormat format = BarcodeFormat.valueOf(barcode.format);
 
-            android.graphics.Bitmap bitmap = CodeGenerator.generate(
+            int width = format == BarcodeFormat.QR_CODE ? 800 : 1000;
+            int height = format == BarcodeFormat.QR_CODE ? 800 : 400;
+
+            Bitmap bitmap = CodeGenerator.generate(
                     barcode.content,
                     format,
-                    800,
-                    800
+                    width,
+                    height
             );
 
             ImageView imageView = new ImageView(this);
-
             imageView.setImageBitmap(bitmap);
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setPadding(24, 24, 24, 24);
 
-            String title = barcode.name == null || barcode.name.trim().isEmpty()
+            int padding = (int) (
+                    24 * getResources().getDisplayMetrics().density
+            );
+
+            imageView.setPadding(
+                    padding,
+                    padding,
+                    padding,
+                    padding
+            );
+
+            String title = barcode.name == null
+                    || barcode.name.trim().isEmpty()
                     ? barcode.content
                     : barcode.name;
 
@@ -218,6 +233,7 @@ public class HistoryActivity extends AppCompatActivity {
         }
     }
 
+    // Rename
     private void renameBarcode(SavedBarcode barcode) {
         TextInputLayout inputLayout = new TextInputLayout(this);
 
@@ -226,9 +242,11 @@ public class HistoryActivity extends AppCompatActivity {
                 TextInputLayout.BOX_BACKGROUND_OUTLINE
         );
 
-        TextInputEditText input = new TextInputEditText(inputLayout.getContext());
-        input.setSingleLine(true);
+        TextInputEditText input = new TextInputEditText(
+                inputLayout.getContext()
+        );
 
+        input.setSingleLine(true);
         input.setText(
                 barcode.name == null ? "" : barcode.name
         );
@@ -256,7 +274,6 @@ public class HistoryActivity extends AppCompatActivity {
                                 ? ""
                                 : input.getText().toString().trim();
 
-                        // An empty name restores the barcode's original value.
                         historyViewModel.renameBarcode(
                                 barcode,
                                 name.isEmpty() ? null : name
@@ -269,21 +286,29 @@ public class HistoryActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // Favorite
     private void toggleFavorite(SavedBarcode barcode) {
         historyViewModel.toggleFavorite(barcode);
     }
 
+    // Delete
     private void deleteBarcode(SavedBarcode barcode) {
-        historyViewModel.deleteBarcode(barcode);
-
-        Toast.makeText(
-                this,
-                "Barcode deleted",
-                Toast.LENGTH_SHORT
-        ).show();
+        historyViewModel.deleteBarcode(
+                barcode,
+                () -> Toast.makeText(
+                        this,
+                        "Barcode deleted",
+                        Toast.LENGTH_SHORT
+                ).show(),
+                error -> Toast.makeText(
+                        this,
+                        "Unable to delete barcode",
+                        Toast.LENGTH_SHORT
+                ).show()
+        );
     }
 
-    // Bottom Navigation
+    // Navigation
     private void setupBottomNavigation() {
         BottomNavigationHelper.setup(
                 bottomNavigationView,

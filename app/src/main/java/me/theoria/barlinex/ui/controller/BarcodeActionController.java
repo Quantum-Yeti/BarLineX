@@ -3,6 +3,7 @@ package me.theoria.barlinex.ui.controller;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.widget.Toast;
 
@@ -15,66 +16,90 @@ import com.google.zxing.BarcodeFormat;
 import java.io.IOException;
 
 import me.theoria.barlinex.R;
+import me.theoria.barlinex.data.BarcodeRepository;
 import me.theoria.barlinex.ui.BarcodePreviewActivity;
-import me.theoria.barlinex.ui.HistoryActivity;
 import me.theoria.barlinex.ui.helper.BarcodeImageHelper;
 import me.theoria.barlinex.ui.helper.ClipboardHelper;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodeActionController {
 
+    // Intent extras
     public static final String EXTRA_BARCODE_CONTENT = "barcode_content";
     public static final String EXTRA_BARCODE_FORMAT = "barcode_format";
 
+    // Views
     private final AppCompatActivity activity;
-    private final BarcodeInputController inputController;
-    private final BarcodeViewModel barcodeViewModel;
     private final MaterialButton buttonGenerate;
+    private final Runnable onOpenHistory;
+
+    // ViewModel
+    private final BarcodeViewModel barcodeViewModel;
 
     public BarcodeActionController(
             AppCompatActivity activity,
-            BarcodeInputController inputController,
             BarcodeViewModel barcodeViewModel,
-            MaterialButton buttonGenerate
+            MaterialButton buttonGenerate,
+            Runnable onOpenHistory
     ) {
         this.activity = activity;
-        this.inputController = inputController;
         this.barcodeViewModel = barcodeViewModel;
         this.buttonGenerate = buttonGenerate;
+        this.onOpenHistory = onOpenHistory;
     }
 
+    // Save
     public void saveBarcode() {
 
         String content = getCurrentContent();
-        BarcodeFormat format = inputController.getSelectedFormat();
+        BarcodeFormat format = getSelectedFormat();
 
-        String error = BarcodeInputController.validate(format, content);
-
-        if (error != null) {
-            inputController.setError(error);
+        if (content.isEmpty()) {
+            showToast("Enter some text first");
             return;
         }
 
-        inputController.clearError();
+        boolean generated = barcodeViewModel.generateBarcode(
+                content,
+                format,
+                true,
+                new BarcodeRepository.SaveCallback() {
 
-        barcodeViewModel.generateBarcode(content, format, true);
+                    @Override
+                    public void onSaved(long id) {
+                        showSaveSuccess();
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+
+                        Log.e(
+                                "BarcodeActionController",
+                                "Failed to save barcode",
+                                error
+                        );
+
+                        Snackbar.make(
+                                activity.findViewById(R.id.main),
+                                "Barcode generated, but could not be saved",
+                                Snackbar.LENGTH_LONG
+                        ).setAnchorView(buttonGenerate).show();
+                    }
+                }
+        );
+
+        if (!generated) {
+            return;
+        }
 
         buttonGenerate.performHapticFeedback(
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
                         ? HapticFeedbackConstants.CONFIRM
                         : HapticFeedbackConstants.VIRTUAL_KEY
         );
-
-        Snackbar.make(
-                        activity.findViewById(R.id.main),
-                        "Barcode saved",
-                        Snackbar.LENGTH_LONG
-                )
-                .setAnchorView(buttonGenerate)
-                .setAction("View", v -> openHistory())
-                .show();
     }
 
+    // Share
     public void shareBarcode() {
 
         String content = getCurrentContent();
@@ -93,6 +118,7 @@ public class BarcodeActionController {
         );
     }
 
+    // Copy
     public void copyBarcodeContent() {
 
         String content = getCurrentContent();
@@ -111,6 +137,7 @@ public class BarcodeActionController {
         );
     }
 
+    // Export
     public void saveBarcodeImage() {
 
         Bitmap bitmap = barcodeViewModel
@@ -128,7 +155,7 @@ public class BarcodeActionController {
 
         } catch (IOException | SecurityException e) {
 
-            android.util.Log.e(
+            Log.e(
                     "BarcodeActionController",
                     "Failed to save barcode PNG",
                     e
@@ -138,15 +165,13 @@ public class BarcodeActionController {
         }
     }
 
+    // Enlarged preview
     public void openEnlargedPreview() {
 
         String content = getCurrentContent();
-        BarcodeFormat format = inputController.getSelectedFormat();
+        BarcodeFormat format = getSelectedFormat();
 
-        String error = BarcodeInputController.validate(format, content);
-
-        if (error != null) {
-            showToast("Enter a valid value to preview first");
+        if (!generateBarcode(content, format, false)) {
             return;
         }
 
@@ -161,22 +186,56 @@ public class BarcodeActionController {
         activity.startActivity(intent);
     }
 
-    private void openHistory() {
+    // Barcode generation
+    private boolean generateBarcode(
+            String content,
+            BarcodeFormat format,
+            boolean saveToHistory
+    ) {
 
-        activity.startActivity(
-                new Intent(activity, HistoryActivity.class)
+        if (content.isEmpty()) {
+            showToast("Enter some text first");
+            return false;
+        }
+
+        return barcodeViewModel.generateBarcode(
+                content,
+                format,
+                saveToHistory,
+                null
         );
     }
 
+    // State
     private String getCurrentContent() {
-        return inputController.getCurrentContent();
+        String content = barcodeViewModel.getInputContent().getValue();
+        return content != null ? content.trim() : "";
     }
 
+    private BarcodeFormat getSelectedFormat() {
+        BarcodeFormat format = barcodeViewModel.getSelectedFormat().getValue();
+        return format != null ? format : BarcodeFormat.QR_CODE;
+    }
+
+    // Feedback
     private void showToast(String message) {
         Toast.makeText(
                 activity,
                 message,
                 Toast.LENGTH_SHORT
         ).show();
+    }
+
+    // Save feedback
+    private void showSaveSuccess() {
+
+        Snackbar.make(
+                        activity.findViewById(R.id.main),
+                        "Barcode saved",
+                        Snackbar.LENGTH_LONG
+                )
+                .setAnchorView(buttonGenerate)
+                .setAction("View", v -> onOpenHistory.run())
+                .show();
     }
 }
