@@ -1,6 +1,7 @@
 package me.theoria.barlinex.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,36 +18,21 @@ import me.theoria.barlinex.ui.controller.BarcodeInputController;
 
 public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
 
-    public BarcodeFormatAdapter(
-            Context context,
-            List<BarcodeFormat> formats
-    ) {
+    public BarcodeFormatAdapter(Context context, List<BarcodeFormat> formats) {
         super(context, 0, formats);
     }
 
     @Override
-    public View getView(
-            int position,
-            View convertView,
-            ViewGroup parent
-    ) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         return createView(position, convertView, parent);
     }
 
     @Override
-    public View getDropDownView(
-            int position,
-            View convertView,
-            ViewGroup parent
-    ) {
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
         return createView(position, convertView, parent);
     }
 
-    private View createView(
-            int position,
-            View convertView,
-            ViewGroup parent
-    ) {
+    private View createView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
 
         if (view == null) {
@@ -61,9 +47,7 @@ public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
 
         ImageView icon = view.findViewById(R.id.imageFormatIcon);
         TextView name = view.findViewById(R.id.textFormatName);
-        TextView description = view.findViewById(
-                R.id.textFormatDescription
-        );
+        TextView description = view.findViewById(R.id.textFormatDescription);
 
         if (format != null) {
             name.setText(BarcodeInputController.getFormatDisplayName(format));
@@ -75,9 +59,7 @@ public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
                             : R.drawable.ic_barcode
             );
 
-            icon.setColorFilter(
-                    android.graphics.Color.parseColor("#8B9EFF")
-            );
+            icon.setColorFilter(Color.parseColor("#8B9EFF"));
         }
 
         return view;
@@ -86,23 +68,31 @@ public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
     private String getDescription(BarcodeFormat format) {
         switch (format) {
             case QR_CODE:
-                return "Links, text and contact information";
+                return "Websites, Wi-Fi, contacts, and general data";
+
             case CODE_128:
-                return "Shipping and inventory labels";
+                return "Shipping labels, inventory, and logistics";
+
             case CODE_39:
-                return "Industrial identification";
+                return "Industrial labels and asset tracking";
+
             case EAN_13:
-                return "Standard retail products";
+                return "Retail products and international trade";
+
             case EAN_8:
-                return "Compact retail products";
+                return "Small retail products and packaging";
+
             case UPC_A:
-                return "US and Canadian retail products";
+                return "Retail products in the US and Canada";
+
             case UPC_E:
-                return "Compact UPC for small packages";
+                return "Compact retail product packaging";
+
             case ITF:
-                return "Shipping cartons and cases";
+                return "Shipping cartons and warehouse cases";
+
             default:
-                return "";
+                return "General-purpose barcode";
         }
     }
 }
