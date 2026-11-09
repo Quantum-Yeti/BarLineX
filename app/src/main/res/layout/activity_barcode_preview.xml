@@ -137,17 +137,72 @@
 
     </LinearLayout>
 
-    <!-- Bottom Back Button -->
-    <Button
-        android:id="@+id/buttonBackBottom"
+    <!-- Barcode Actions -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
-        android:text="Back"
-        android:textAllCaps="false"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#31558A" />
+        android:orientation="vertical">
+
+        <!-- Primary Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonShareBarcode"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Share"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#31558A" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSaveImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="Save Image"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#31558A" />
+
+        </LinearLayout>
+
+        <!-- Secondary Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonCopyContent"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Copy Content"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#26344D" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonBackBottom"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="Back"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#26344D" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -185,53 +185,24 @@ public class HistoryActivity extends AppCompatActivity {
 
     // Preview
     private void openBarcode(BarcodeEntity barcode) {
-        try {
-            BarcodeFormat format = BarcodeFormat.valueOf(barcode.barcodeFormat);
+        Intent intent = new Intent(this, BarcodePreviewActivity.class);
 
-            int width = format == BarcodeFormat.QR_CODE ? 800 : 1000;
-            int height = format == BarcodeFormat.QR_CODE ? 800 : 400;
+        intent.putExtra(
+                "barcode_content",
+                barcode.barcodeContent
+        );
 
-            Bitmap bitmap = BarcodeGenerator.generate(
-                    barcode.barcodeContent,
-                    format,
-                    width,
-                    height
-            );
+        intent.putExtra(
+                "barcode_format",
+                barcode.barcodeFormat
+        );
 
-            ImageView imageView = new ImageView(this);
-            imageView.setImageBitmap(bitmap);
-            imageView.setAdjustViewBounds(true);
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        intent.putExtra(
+                "barcode_name",
+                barcode.barcodeName
+        );
 
-            int padding = (int) (
-                    24 * getResources().getDisplayMetrics().density
-            );
-
-            imageView.setPadding(
-                    padding,
-                    padding,
-                    padding,
-                    padding
-            );
-
-            String title = barcode.barcodeName == null
-                    || barcode.barcodeName.trim().isEmpty()
-                    ? barcode.barcodeContent
-                    : barcode.barcodeName;
-
-            new AlertDialog.Builder(this)
-                    .setTitle(title)
-                    .setView(imageView)
-                    .setPositiveButton("Close", null)
-                    .show();
-
-        } catch (WriterException | IllegalArgumentException e) {
-            Toast.makeText(
-                    this,
-                    "Unable to display this barcode.",
-                    Toast.LENGTH_SHORT
-            ).show();
-        }
+        startActivity(intent);
     }
 
     // Rename
