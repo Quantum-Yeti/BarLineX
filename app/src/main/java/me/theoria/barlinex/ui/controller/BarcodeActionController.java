@@ -239,7 +239,6 @@ public class BarcodeActionController {
                     StandardCharsets.UTF_8
             );
 
-            writer.write('\uFEFF');
             writer.write(csvContent);
             writer.flush();
 

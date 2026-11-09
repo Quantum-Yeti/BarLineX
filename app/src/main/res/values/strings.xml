@@ -28,6 +28,8 @@
     <string name="character_singular">character</string>
     <string name="character_plural">characters</string>
     <string name="your_barcode_appears_here">Your barcode appears here</string>
+    <string name="empty_barcode_history_message">Barcodes you save will appear here.
+        Create your first barcode to get started.</string>
 
     <!-- General Action Strings -->
     <string name="live_preview">Live Preview</string>

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
@@ -176,8 +177,8 @@ public class HistoryActivity extends AppCompatActivity {
         if (!hasResults) {
             textHistoryEmpty.setText(
                     hasSearchQuery
-                            ? "No barcodes match your search. Try a different barcodeName, value, or barcodeFormat."
-                            : "Barcodes you save will appear here. Create your first barcode to get started."
+                            ? "No barcodes match your search. \nTry a different name, value, or format."
+                            : "Barcodes you save will appear here. \nCreate your first barcode to get started."
             );
         }
     }
@@ -237,7 +238,7 @@ public class HistoryActivity extends AppCompatActivity {
     private void renameBarcode(BarcodeEntity barcode) {
         TextInputLayout inputLayout = new TextInputLayout(this);
 
-        inputLayout.setHint("Barcode barcodeName");
+        inputLayout.setHint("Choose a name...");
         inputLayout.setBoxBackgroundMode(
                 TextInputLayout.BOX_BACKGROUND_OUTLINE
         );
@@ -259,7 +260,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         inputLayout.setPadding(padding, 8, padding, 0);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                 .setTitle("Rename Barcode")
                 .setView(inputLayout)
                 .setNegativeButton("Cancel", null)
