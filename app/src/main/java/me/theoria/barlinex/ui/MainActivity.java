@@ -27,7 +27,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
 
@@ -54,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputContent;
     private TextInputLayout contentInputLayout;
 
-    private MaterialButton buttonGenerate;
+    private MaterialButton buttonSaveBarcode;
+    private MaterialButton buttonExportBarcode;
+
     private MaterialButton buttonCapture;
 
     private ImageView imagePreview;
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private View numberScannerOverlay;
 
     private PreviewView cameraPreview;
+
+    private ActivityResultLauncher<String> csvExportLauncher;
 
     // Controllers and ViewModel
     private BarcodeViewModel barcodeViewModel;
@@ -161,6 +164,15 @@ public class MainActivity extends AppCompatActivity {
     private void initializeLaunchers() {
         registerPermissionLauncher();
         registerHistoryLauncher();
+
+        csvExportLauncher = registerForActivityResult(
+                new ActivityResultContracts.CreateDocument("text/csv"),
+                uri -> {
+                    if (uri !=null && actionController !=null) {
+                        actionController.writeBarcodeCsv(uri);
+                    }
+                }
+        );
     }
 
     private void initializeViews() {
@@ -168,7 +180,9 @@ public class MainActivity extends AppCompatActivity {
         inputContent = findViewById(R.id.barcodeUserContent);
         contentInputLayout = findViewById(R.id.barcodeUserContentLayout);
 
-        buttonGenerate = findViewById(R.id.buttonGenerate);
+        buttonSaveBarcode = findViewById(R.id.buttonSaveBarcodeToDB);
+        buttonExportBarcode = findViewById(R.id.buttonExportBarcode);
+
         buttonCapture = findViewById(R.id.buttonCapture);
 
         imagePreview = findViewById(R.id.imagePreview);
@@ -243,8 +257,9 @@ public class MainActivity extends AppCompatActivity {
         actionController = new BarcodeActionController(
                 this,
                 barcodeViewModel,
-                buttonGenerate,
-                this::openHistory
+                buttonSaveBarcode,
+                this::openHistory,
+                csvExportLauncher
         );
     }
 
@@ -295,16 +310,20 @@ public class MainActivity extends AppCompatActivity {
     // Barcode actions
     private void setupButtons() {
 
-        buttonGenerate.setOnClickListener(
+        buttonSaveBarcode.setOnClickListener(
                 v -> actionController.saveBarcode()
+        );
+
+        /*findViewById(R.id.buttonCustomizeBarcode).setOnClickListener(
+                v -> actionController.customizeBarcode()
+        );*/
+
+        buttonExportBarcode.setOnClickListener(
+                v -> actionController.showExportMenu()
         );
 
         findViewById(R.id.buttonShare).setOnClickListener(
                 v -> actionController.shareBarcode()
-        );
-
-        findViewById(R.id.buttonSaveImage).setOnClickListener(
-                v -> actionController.saveBarcodeImage()
         );
 
         findViewById(R.id.buttonCopyText).setOnClickListener(
@@ -313,16 +332,6 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.buttonEnlarge).setOnClickListener(
                 v -> actionController.openEnlargedPreview()
-        );
-
-        findViewById(R.id.buttonAppearance).setOnClickListener(
-                v -> Snackbar.make(
-                                findViewById(R.id.main),
-                                "Appearance options are coming soon",
-                                Snackbar.LENGTH_SHORT
-                        )
-                        .setAnchorView(buttonGenerate)
-                        .show()
         );
 
         contentInputLayout.setEndIconOnClickListener(
@@ -360,7 +369,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Saved barcode
-
     private void openSavedBarcode() {
 
         String content = getIntent().getStringExtra(
@@ -417,7 +425,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Bottom navigation
-
     private void setupBottomNavigation() {
 
         BottomNavigationHelper.setup(
@@ -452,7 +459,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Detected number
-
     private void handleConfirmedNumber(String confirmedNumber) {
 
         inputController.setBarcodeContent(confirmedNumber);
@@ -473,7 +479,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Camera permissions
-
     private void registerPermissionLauncher() {
 
         cameraPermissionLauncher = registerForActivityResult(
@@ -500,7 +505,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Scanner initialization
-
     private void setupScanner() {
 
         getOnBackPressedDispatcher().addCallback(
@@ -548,7 +552,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Scanner navigation
-
     private void startNumberScan() {
         enterScanMode();
     }
@@ -571,7 +574,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Scanner visibility
-
     private void showScanner() {
 
         View focused = getCurrentFocus();
@@ -592,7 +594,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         createContent.setVisibility(View.GONE);
-        buttonGenerate.setVisibility(View.GONE);
+        buttonSaveBarcode.setVisibility(View.GONE);
+        buttonExportBarcode.setVisibility(View.GONE);
 
         scanOverlay.setVisibility(View.VISIBLE);
         numberScannerOverlay.setVisibility(View.VISIBLE);
@@ -614,6 +617,7 @@ public class MainActivity extends AppCompatActivity {
         numberScannerOverlay.setVisibility(View.GONE);
 
         createContent.setVisibility(View.VISIBLE);
-        buttonGenerate.setVisibility(View.VISIBLE);
+        buttonSaveBarcode.setVisibility(View.VISIBLE);
+        buttonExportBarcode.setVisibility(View.GONE);
     }
 }

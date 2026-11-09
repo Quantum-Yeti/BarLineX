@@ -24,6 +24,11 @@
     <string name="generated_barcode_preview">Generated barcode preview</string>
     <string name="barcode_placeholder">Your barcode will appear here</string>
 
+    <string name="barcode_preview_info">%1$s • %2$d %3$s</string>
+    <string name="character_singular">character</string>
+    <string name="character_plural">characters</string>
+    <string name="your_barcode_appears_here">Your barcode appears here</string>
+
     <!-- General Action Strings -->
     <string name="live_preview">Live Preview</string>
     <string name="copy_text">Copy Text</string>
@@ -32,4 +37,5 @@
     <string name="enter_text_or_value">Enter text or a value</string>
     <string name="scan_number_with_camera">Scan number with camera</string>
     <string name="barcode_library">Barcode Library</string>
+    <string name="customize">Customize</string>
 </resources>

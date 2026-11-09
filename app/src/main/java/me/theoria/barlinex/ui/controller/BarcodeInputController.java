@@ -160,7 +160,12 @@ public class BarcodeInputController {
                 numericOnly
                         ? InputType.TYPE_CLASS_NUMBER
                         : InputType.TYPE_CLASS_TEXT
+                        | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         );
+
+        barcodeContentInput.setSingleLine(false);
+        barcodeContentInput.setHorizontallyScrolling(false);
 
         int maximumLength =
                 BarcodeFormatRules.maxLengthFor(barcodeFormat);
@@ -189,9 +194,9 @@ public class BarcodeInputController {
         }
 
         // Format-specific guidance
-        barcodeContentInputLayout.setHelperText(
+        /*barcodeContentInputLayout.setHelperText(
                 BarcodeFormatRules.hintFor(barcodeFormat)
-        );
+        );*/
 
         barcodeContentInputLayout.setError(null);
     }

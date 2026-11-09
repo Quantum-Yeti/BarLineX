@@ -222,7 +222,7 @@
                         </com.google.android.material.card.MaterialCardView>
 
                         <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/buttonSaveImage"
+                            android:id="@+id/buttonCustomizeBarcode"
                             android:layout_width="0dp"
                             android:layout_height="60dp"
                             android:layout_marginHorizontal="4dp"
@@ -245,14 +245,14 @@
                                     android:layout_width="20dp"
                                     android:layout_height="20dp"
                                     android:importantForAccessibility="no"
-                                    android:src="@drawable/ic_save"
+                                    android:src="@drawable/ic_custom"
                                      />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="Save"
+                                    android:text="@string/customize"
                                     android:textColor="#D4D4D8"
                                     android:textSize="12sp" />
                             </LinearLayout>
@@ -381,12 +381,18 @@
                     android:id="@+id/barcodeUserContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter text, value, or link..."
+                    android:gravity="top|start"
+                    android:hint="Enter text, URL, or other content..."
                     android:imeOptions="actionDone"
-                    android:inputType="text"
-                    android:minHeight="56dp"
-                    android:paddingHorizontal="16dp"
-                    android:singleLine="true"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minHeight="80dp"
+                    android:maxHeight="200dp"
+                    android:minLines="4"
+                    android:maxLines="8"
+                    android:scrollHorizontally="false"
+                    android:scrollbars="vertical"
+                    android:padding="16dp"
+                    android:singleLine="false"
                     android:textColor="#F5F5F5"
                     android:textColorHint="#A1A1AA"
                     android:textSize="16sp" />
@@ -451,76 +457,6 @@
                     android:dropDownHeight="wrap_content" />
 
             </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- APPEARANCE -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:letterSpacing="0.1"
-                android:text="APPEARANCE"
-                android:textColor="#A1A1AA"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/buttonAppearance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="#1C1C1E"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#303034"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_qr_code"
-                         />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Classic • Black on white"
-                            android:textColor="#A1A1AA"
-                            android:textSize="12sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:importantForAccessibility="no"
-                        android:text="›"
-                        android:textColor="#A1A1AA"
-                        android:textSize="22sp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
 
@@ -596,25 +532,56 @@
             android:layout_height="1dp"
             android:background="#303034" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGenerate"
+        <!-- Save and Export Actions -->
+        <LinearLayout
+            android:id="@+id/barcodeActionBar"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="4dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="Save Barcode"
-            android:textAllCaps="false"
-            android:textColor="#121212"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="#8B9EFF"
-            app:cornerRadius="14dp"
-            app:icon="@drawable/ic_qr_code"
-            app:iconGravity="textStart"
-            app:iconTint="#121212" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSaveBarcodeToDB"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Save Barcode"
+                android:textAllCaps="false"
+                android:textColor="#121212"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="#8B9EFF"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_save"
+                app:iconGravity="textStart"
+                app:iconTint="#121212" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonExportBarcode"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Export"
+                android:textAllCaps="false"
+                android:textColor="#F5F5F5"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="14dp"
+                app:icon="@drawable/ic_download"
+                app:iconGravity="textStart"
+                app:iconTint="#F5F5F5"
+                app:strokeColor="#454550" />
+
+        </LinearLayout>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"

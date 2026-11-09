@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.zxing.BarcodeFormat;
 
+import me.theoria.barlinex.R;
 import me.theoria.barlinex.ui.formatter.BarcodeFormatDisplay;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
@@ -89,7 +90,7 @@ public class BarcodePreviewController {
 
         if (content.isEmpty()) {
             inputController.clearBarcodeInputError();
-            showPlaceholder("Your barcode appears here");
+            showPlaceholder();
             return;
         }
 
@@ -111,16 +112,17 @@ public class BarcodePreviewController {
         textPreviewFormat.setText(formatLabel.toUpperCase());
 
         textPreviewContent.setText(
-                content.isEmpty() ? "Enter text to begin" : content
+                content.isEmpty() ? "Enter content to begin" : content
         );
 
         textPreviewInfo.setText(
-                formatLabel
-                        + " • "
-                        + content.length()
-                        + (content.length() == 1
-                        ? " character"
-                        : " characters")
+                String.format(
+                        java.util.Locale.getDefault(),
+                        "%s • %d %s",
+                        formatLabel,
+                        content.length(),
+                        content.length() == 1 ? "character" : "characters"
+                )
         );
     }
 
@@ -163,9 +165,11 @@ public class BarcodePreviewController {
         previewPlaceholder.setVisibility(View.VISIBLE);
     }
 
-    private void showPlaceholder(String message) {
+    private void showPlaceholder() {
 
         clearBarcodePreview();
-        textPlaceholder.setText(message);
+        textPlaceholder.setText(
+                textPlaceholder.getContext().getString(R.string.your_barcode_appears_here)
+        );
     }
 }
