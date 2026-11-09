@@ -1,11 +1,10 @@
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     alias(libs.plugins.android.application)
 }
 
 android {
     namespace = "me.theoria.barlinex"
+
     compileSdk {
         version = release(37)
     }
@@ -14,8 +13,8 @@ android {
         applicationId = "me.theoria.barlinex"
         minSdk = 26
         targetSdk = 37
-        versionCode = 7
-        versionName = "1.7"
+        versionCode = 8
+        versionName = "1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,6 +26,7 @@ android {
             }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -34,45 +34,42 @@ android {
 }
 
 dependencies {
+    // AndroidX
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
+    implementation(libs.constraintlayout)
+    implementation(libs.recyclerview)
+
+    // Material Design
+    implementation(libs.material)
+
+    // CameraX
     implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
     implementation(libs.camera.view)
-    implementation(libs.constraintlayout)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(libs.ext.junit)
 
     // Room Database
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
 
-    // Barcode Library
-    implementation("com.google.zxing:core:3.5.4")
-
-    // Recycler
-    implementation("androidx.recyclerview:recyclerview:1.4.0")
-
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.11.0")
-    implementation("androidx.lifecycle:lifecycle-livedata:2.11.0")
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
 
-    // Material Design
-    implementation("com.google.android.material:material:1.12.0")
+    // Barcode Library
+    implementation(libs.zxing.core)
 
-    // Native Simple Text OCR
-    implementation("com.google.mlkit:text-recognition:16.0.1")
-
-    // Camera
-    val cameraxVersion = "1.4.2"
-
-    implementation("androidx.camera:camera-core:$cameraxVersion")
-    implementation("androidx.camera:camera-camera2:$cameraxVersion")
-    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-    implementation("androidx.camera:camera-view:$cameraxVersion")
+    // ML Kit Text Recognition
+    implementation(libs.mlkit.text.recognition)
 
     // Splash Screen
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.core.splashscreen)
+
+    // Unit Testing
+    testImplementation(libs.junit)
+
+    // Instrumentation Testing
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.ext.junit)
 }
