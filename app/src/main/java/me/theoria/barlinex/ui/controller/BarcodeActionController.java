@@ -1,5 +1,7 @@
 package me.theoria.barlinex.ui.controller;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -115,42 +117,100 @@ public class BarcodeActionController {
         );
     }
 
-    // Share
-    public void shareBarcode() {
+    // Share barcode image
+    public void shareBarcodeImage() {
 
-        String content = getCurrentContent();
+        Bitmap bitmap = barcodeViewModel
+                .getBarcodeImage()
+                .getValue();
 
-        if (content.isEmpty()) {
-            showToast("Enter text to share first");
+        if (bitmap == null) {
+            showToast("Generate a barcode first");
             return;
         }
 
-        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-        sendIntent.setType("text/plain");
-        sendIntent.putExtra(Intent.EXTRA_TEXT, content);
+        try {
+            Uri imageUri = BarcodeImageHelper.createShareableImageUri(
+                    activity,
+                    bitmap
+            );
 
-        activity.startActivity(
-                Intent.createChooser(sendIntent, "Share barcode")
-        );
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.setType("image/png");
+            sendIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
+            sendIntent.setClipData(
+                    ClipData.newUri(
+                            activity.getContentResolver(),
+                            "Barcode Image",
+                            imageUri
+                    )
+            );
+            sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            activity.startActivity(
+                    Intent.createChooser(sendIntent, "Share barcode image")
+            );
+
+        } catch (IOException | SecurityException e) {
+
+            Log.e(
+                    "BarcodeActionController",
+                    "Failed to share barcode image",
+                    e
+            );
+
+            showToast("Unable to share barcode image");
+        }
     }
 
-    // Copy
-    public void copyBarcodeContent() {
+    // Copy barcode image
+    public void copyBarcodeImage() {
 
-        String content = getCurrentContent();
+        Bitmap bitmap = barcodeViewModel
+                .getBarcodeImage()
+                .getValue();
 
-        if (content.isEmpty()) {
-            showToast("Enter text to copy first");
+        if (bitmap == null) {
+            showToast("Generate a barcode first");
             return;
         }
 
-        boolean copied = ClipboardHelper.copyText(activity, content);
+        try {
+            Uri imageUri = BarcodeImageHelper.createShareableImageUri(
+                    activity,
+                    bitmap
+            );
 
-        showToast(
-                copied
-                        ? "Barcode Content Copied"
-                        : "Clipboard is unavailable"
-        );
+            ClipboardManager clipboardManager =
+                    (ClipboardManager) activity.getSystemService(
+                            AppCompatActivity.CLIPBOARD_SERVICE
+                    );
+
+            if (clipboardManager == null) {
+                showToast("Clipboard is unavailable");
+                return;
+            }
+
+            ClipData clipData = ClipData.newUri(
+                    activity.getContentResolver(),
+                    "Barcode Image",
+                    imageUri
+            );
+
+            clipboardManager.setPrimaryClip(clipData);
+
+            showToast("Barcode Image Copied");
+
+        } catch (IOException | SecurityException e) {
+
+            Log.e(
+                    "BarcodeActionController",
+                    "Failed to copy barcode image",
+                    e
+            );
+
+            showToast("Unable to copy barcode image");
+        }
     }
 
     // Export

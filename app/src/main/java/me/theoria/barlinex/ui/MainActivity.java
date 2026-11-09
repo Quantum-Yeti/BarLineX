@@ -323,11 +323,11 @@ public class MainActivity extends AppCompatActivity {
         );
 
         findViewById(R.id.buttonShare).setOnClickListener(
-                v -> actionController.shareBarcode()
+                v -> actionController.shareBarcodeImage()
         );
 
         findViewById(R.id.buttonCopyText).setOnClickListener(
-                v -> actionController.copyBarcodeContent()
+                v -> actionController.copyBarcodeImage()
         );
 
         findViewById(R.id.buttonEnlarge).setOnClickListener(

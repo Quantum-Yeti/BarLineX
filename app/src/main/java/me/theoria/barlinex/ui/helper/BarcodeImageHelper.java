@@ -7,6 +7,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -89,5 +93,50 @@ public class BarcodeImageHelper {
             throw e;
         }
     }
-}
 
+    // Create temporary image URI for sharing and copying
+    public static Uri createShareableImageUri(
+            Context context,
+            Bitmap bitmap
+    ) throws IOException {
+
+        if (bitmap == null) {
+            throw new IllegalArgumentException("Barcode image cannot be null.");
+        }
+
+        File directory = new File(
+                context.getCacheDir(),
+                "shared_barcodes"
+        );
+
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IOException("Could not create image cache directory.");
+        }
+
+        File imageFile = new File(
+                directory,
+                "BarLineX_" + System.currentTimeMillis() + ".png"
+        );
+
+        try (FileOutputStream output = new FileOutputStream(imageFile)) {
+
+            boolean saved = bitmap.compress(
+                    Bitmap.CompressFormat.PNG,
+                    100,
+                    output
+            );
+
+            if (!saved) {
+                throw new IOException("PNG compression failed.");
+            }
+
+            output.flush();
+        }
+
+        return FileProvider.getUriForFile(
+                context,
+                context.getPackageName() + ".fileprovider",
+                imageFile
+        );
+    }
+}
