@@ -23,12 +23,12 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.data.SavedBarcode;
+import me.theoria.barlinex.data.BarcodeEntity;
 import me.theoria.barlinex.ui.adapter.BarcodeHistoryAdapter;
 import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
 import me.theoria.barlinex.ui.helper.WindowsInsetHelper;
 import me.theoria.barlinex.ui.viewmodel.HistoryViewModel;
-import me.theoria.barlinex.utils.CodeGenerator;
+import me.theoria.barlinex.utils.BarcodeGenerator;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -176,22 +176,22 @@ public class HistoryActivity extends AppCompatActivity {
         if (!hasResults) {
             textHistoryEmpty.setText(
                     hasSearchQuery
-                            ? "No barcodes match your search. Try a different name, value, or format."
+                            ? "No barcodes match your search. Try a different barcodeName, value, or barcodeFormat."
                             : "Barcodes you save will appear here. Create your first barcode to get started."
             );
         }
     }
 
     // Preview
-    private void openBarcode(SavedBarcode barcode) {
+    private void openBarcode(BarcodeEntity barcode) {
         try {
-            BarcodeFormat format = BarcodeFormat.valueOf(barcode.format);
+            BarcodeFormat format = BarcodeFormat.valueOf(barcode.barcodeFormat);
 
             int width = format == BarcodeFormat.QR_CODE ? 800 : 1000;
             int height = format == BarcodeFormat.QR_CODE ? 800 : 400;
 
-            Bitmap bitmap = CodeGenerator.generate(
-                    barcode.content,
+            Bitmap bitmap = BarcodeGenerator.generate(
+                    barcode.barcodeContent,
                     format,
                     width,
                     height
@@ -213,10 +213,10 @@ public class HistoryActivity extends AppCompatActivity {
                     padding
             );
 
-            String title = barcode.name == null
-                    || barcode.name.trim().isEmpty()
-                    ? barcode.content
-                    : barcode.name;
+            String title = barcode.barcodeName == null
+                    || barcode.barcodeName.trim().isEmpty()
+                    ? barcode.barcodeContent
+                    : barcode.barcodeName;
 
             new AlertDialog.Builder(this)
                     .setTitle(title)
@@ -234,10 +234,10 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     // Rename
-    private void renameBarcode(SavedBarcode barcode) {
+    private void renameBarcode(BarcodeEntity barcode) {
         TextInputLayout inputLayout = new TextInputLayout(this);
 
-        inputLayout.setHint("Barcode name");
+        inputLayout.setHint("Barcode barcodeName");
         inputLayout.setBoxBackgroundMode(
                 TextInputLayout.BOX_BACKGROUND_OUTLINE
         );
@@ -248,7 +248,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         input.setSingleLine(true);
         input.setText(
-                barcode.name == null ? "" : barcode.name
+                barcode.barcodeName == null ? "" : barcode.barcodeName
         );
 
         inputLayout.addView(input);
@@ -287,12 +287,12 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     // Favorite
-    private void toggleFavorite(SavedBarcode barcode) {
+    private void toggleFavorite(BarcodeEntity barcode) {
         historyViewModel.toggleFavorite(barcode);
     }
 
     // Delete
-    private void deleteBarcode(SavedBarcode barcode) {
+    private void deleteBarcode(BarcodeEntity barcode) {
         historyViewModel.deleteBarcode(
                 barcode,
                 () -> Toast.makeText(

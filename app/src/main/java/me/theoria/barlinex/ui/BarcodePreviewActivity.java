@@ -41,7 +41,7 @@ public class BarcodePreviewActivity extends AppCompatActivity {
 
         textBarcodeContent.setText(
                 content == null || content.isEmpty()
-                        ? "No content"
+                        ? "No barcodeContent"
                         : content
         );
 

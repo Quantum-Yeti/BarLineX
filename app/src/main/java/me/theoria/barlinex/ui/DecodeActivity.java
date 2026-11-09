@@ -396,7 +396,7 @@ public class DecodeActivity extends AppCompatActivity {
             startActivity(
                     Intent.createChooser(
                             shareIntent,
-                            "Share decoded content"
+                            "Share decoded barcodeContent"
                     )
             );
         });

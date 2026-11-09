@@ -10,8 +10,8 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
+import me.theoria.barlinex.data.BarcodeEntity;
 import me.theoria.barlinex.data.BarcodeRepository;
-import me.theoria.barlinex.data.SavedBarcode;
 
 public class HistoryViewModel extends AndroidViewModel {
 
@@ -19,7 +19,7 @@ public class HistoryViewModel extends AndroidViewModel {
     private final BarcodeRepository repository;
 
     // History
-    private final MutableLiveData<List<SavedBarcode>> barcodes =
+    private final MutableLiveData<List<BarcodeEntity>> barcodes =
             new MutableLiveData<>();
 
     // Initialization
@@ -30,7 +30,7 @@ public class HistoryViewModel extends AndroidViewModel {
     }
 
     // LiveData
-    public LiveData<List<SavedBarcode>> getBarcodes() {
+    public LiveData<List<BarcodeEntity>> getBarcodes() {
         return barcodes;
     }
 
@@ -38,7 +38,7 @@ public class HistoryViewModel extends AndroidViewModel {
     public void loadBarcodes() {
         repository.getAll(new BarcodeRepository.LoadCallback() {
             @Override
-            public void onLoaded(List<SavedBarcode> loadedBarcodes) {
+            public void onLoaded(List<BarcodeEntity> loadedBarcodes) {
                 barcodes.setValue(loadedBarcodes);
             }
 
@@ -50,7 +50,7 @@ public class HistoryViewModel extends AndroidViewModel {
     }
 
     // Rename
-    public void renameBarcode(SavedBarcode barcode, String name) {
+    public void renameBarcode(BarcodeEntity barcode, String name) {
         repository.updateName(
                 barcode.id,
                 name,
@@ -69,7 +69,7 @@ public class HistoryViewModel extends AndroidViewModel {
     }
 
     // Favorite
-    public void toggleFavorite(SavedBarcode barcode) {
+    public void toggleFavorite(BarcodeEntity barcode) {
         repository.updateFavorite(
                 barcode.id,
                 !barcode.isFavorite,
@@ -90,7 +90,7 @@ public class HistoryViewModel extends AndroidViewModel {
     // Delete
 
     public void deleteBarcode(
-            SavedBarcode barcode,
+            BarcodeEntity barcode,
             Runnable onDeleted,
             java.util.function.Consumer<Exception> onError
     ) {

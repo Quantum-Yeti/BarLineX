@@ -351,7 +351,7 @@
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/contentInputLayout"
+                android:id="@+id/barcodeUserContentLayout"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -378,7 +378,7 @@
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputContent"
+                    android:id="@+id/barcodeUserContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter text, value, or link..."
@@ -437,7 +437,7 @@
                 app:endIconTint="#8B9EFF">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/formatDropdown"
+                    android:id="@+id/barcodeFormatDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="none"

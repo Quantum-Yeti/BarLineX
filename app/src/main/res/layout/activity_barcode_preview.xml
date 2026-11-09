@@ -130,7 +130,7 @@
             android:layout_marginTop="6dp"
             android:maxLines="3"
             android:ellipsize="end"
-            android:text="Barcode content"
+            android:text="Barcode barcodeContent"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:gravity="center" />

@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="Example barcode content"
+                    android:text="Example barcode barcodeContent"
                     android:textColor="#F5F5F5"
                     android:textSize="15sp"
                     android:textStyle="bold" />

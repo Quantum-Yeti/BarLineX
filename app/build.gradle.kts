@@ -49,15 +49,15 @@ dependencies {
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
 
-    // Barcode Generator Library
+    // Barcode Library
     implementation("com.google.zxing:core:3.5.4")
 
     // Recycler
     implementation("androidx.recyclerview:recyclerview:1.4.0")
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.11.0")
 
     // Material Design
     implementation("com.google.android.material:material:1.12.0")

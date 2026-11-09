@@ -10,12 +10,12 @@ import java.util.List;
 public interface BarcodeDao {
 
     @Insert
-    long insert(SavedBarcode savedBarcode);
+    long insert(BarcodeEntity barcodeEntity);
 
-    @Query("SELECT * FROM saved_barcodes ORDER BY isFavorite DESC, createdAt DESC")
-    List<SavedBarcode> getAll();
+    @Query("SELECT * FROM saved_barcodes ORDER BY isFavorite DESC, barcodeCreatedAt DESC")
+    List<BarcodeEntity> getAll();
 
-    @Query("UPDATE saved_barcodes SET name = :name WHERE id = :id")
+    @Query("UPDATE saved_barcodes SET barcodeName = :name WHERE id = :id")
     void updateName(int id, String name);
 
     @Query("UPDATE saved_barcodes SET isFavorite = :isFavorite WHERE id = :id")

@@ -11,168 +11,208 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 
+import me.theoria.barlinex.data.BarcodeEntity;
 import me.theoria.barlinex.data.BarcodeRepository;
-import me.theoria.barlinex.data.SavedBarcode;
 import me.theoria.barlinex.domain.validator.BarcodeValidator;
-import me.theoria.barlinex.utils.CodeGenerator;
+import me.theoria.barlinex.utils.BarcodeGenerator;
 
 public class BarcodeViewModel extends AndroidViewModel {
 
     // Repository
-    private final BarcodeRepository repository;
+    private final BarcodeRepository barcodeRepository;
 
     // Barcode preview
     private final MutableLiveData<Bitmap> barcodeImage =
             new MutableLiveData<>();
 
     // Status
-    private final MutableLiveData<String> status =
+    private final MutableLiveData<String> barcodeStatus =
             new MutableLiveData<>("");
 
-    // Input state
-    private final MutableLiveData<BarcodeFormat> selectedFormat =
+    // Barcode input state
+    private final MutableLiveData<BarcodeFormat> selectedBarcodeFormat =
             new MutableLiveData<>(BarcodeFormat.QR_CODE);
 
-    private final MutableLiveData<String> inputContent =
+    private final MutableLiveData<String> barcodeContent =
+            new MutableLiveData<>("");
+
+    // Barcode note
+    private final MutableLiveData<String> barcodeNote =
             new MutableLiveData<>("");
 
     public BarcodeViewModel(@NonNull Application application) {
         super(application);
-        repository = new BarcodeRepository(application);
+        barcodeRepository = new BarcodeRepository(application);
     }
 
     // LiveData
+
     public LiveData<Bitmap> getBarcodeImage() {
         return barcodeImage;
     }
 
-    public LiveData<String> getStatus() {
-        return status;
+    public LiveData<String> getBarcodeStatus() {
+        return barcodeStatus;
     }
 
-    public LiveData<BarcodeFormat> getSelectedFormat() {
-        return selectedFormat;
+    public LiveData<BarcodeFormat> getSelectedBarcodeFormat() {
+        return selectedBarcodeFormat;
     }
 
-    public LiveData<String> getInputContent() {
-        return inputContent;
+    public LiveData<String> getBarcodeContent() {
+        return barcodeContent;
     }
 
-    // Input state
-    public void setSelectedFormat(BarcodeFormat format) {
-        if (format != null) {
-            selectedFormat.setValue(format);
+    public LiveData<String> getBarcodeNote() {
+        return barcodeNote;
+    }
+
+    // Barcode input state
+
+    public void setSelectedBarcodeFormat(BarcodeFormat barcodeFormat) {
+        if (barcodeFormat != null) {
+            selectedBarcodeFormat.setValue(barcodeFormat);
         }
     }
 
-    public void setInputContent(String content) {
-        inputContent.setValue(content != null ? content : "");
+    public void setBarcodeContent(String barcodeContent) {
+        this.barcodeContent.setValue(
+                barcodeContent != null ? barcodeContent : ""
+        );
+    }
+
+    public void setBarcodeNote(String barcodeNote) {
+        this.barcodeNote.setValue(
+                barcodeNote != null ? barcodeNote : ""
+        );
     }
 
     // Barcode generation
+
     public void generateBarcode(boolean saveToHistory) {
         generateBarcode(
-                inputContent.getValue(),
-                selectedFormat.getValue(),
+                barcodeContent.getValue(),
+                selectedBarcodeFormat.getValue(),
                 saveToHistory
         );
     }
 
     public void generateBarcode(
-            String content,
-            BarcodeFormat format,
+            String barcodeContent,
+            BarcodeFormat barcodeFormat,
             boolean saveToHistory
     ) {
-        generateBarcode(content, format, saveToHistory, null);
+        generateBarcode(
+                barcodeContent,
+                barcodeFormat,
+                saveToHistory,
+                null
+        );
     }
 
     public boolean generateBarcode(
-            String content,
-            BarcodeFormat format,
+            String barcodeContent,
+            BarcodeFormat barcodeFormat,
             boolean saveToHistory,
-            BarcodeRepository.SaveCallback callback
+            BarcodeRepository.SaveCallback saveCallback
     ) {
 
-        if (content == null || content.trim().isEmpty()) {
+        if (barcodeContent == null || barcodeContent.trim().isEmpty()) {
             barcodeImage.setValue(null);
-            status.setValue("");
+            barcodeStatus.setValue("");
             return false;
         }
 
-        if (format == null) {
+        if (barcodeFormat == null) {
             barcodeImage.setValue(null);
-            status.setValue("Select a barcode format");
+            barcodeStatus.setValue("Select a barcode format");
             return false;
         }
 
-        content = content.trim();
+        String validationError =
+                BarcodeValidator.validate(barcodeFormat, barcodeContent);
 
-        String error = BarcodeValidator.validate(format, content);
-
-        if (error != null) {
+        if (validationError != null) {
             barcodeImage.setValue(null);
-            status.setValue(error);
+            barcodeStatus.setValue(validationError);
             return false;
         }
 
-        int width = format == BarcodeFormat.QR_CODE ? 500 : 800;
-        int height = format == BarcodeFormat.QR_CODE ? 500 : 300;
+        int barcodeWidth =
+                barcodeFormat == BarcodeFormat.QR_CODE ? 500 : 800;
+
+        int barcodeHeight =
+                barcodeFormat == BarcodeFormat.QR_CODE ? 500 : 300;
 
         try {
-            Bitmap bitmap = CodeGenerator.generate(
-                    content,
-                    format,
-                    width,
-                    height
+
+            Bitmap generatedBarcode = BarcodeGenerator.generate(
+                    barcodeContent,
+                    barcodeFormat,
+                    barcodeWidth,
+                    barcodeHeight
             );
 
-            barcodeImage.setValue(bitmap);
-            status.setValue("");
+            barcodeImage.setValue(generatedBarcode);
+            barcodeStatus.setValue("");
 
             if (saveToHistory) {
-                saveBarcode(content, format, callback);
+                saveBarcodeToHistory(
+                        barcodeContent,
+                        barcodeFormat,
+                        barcodeNote.getValue(),
+                        saveCallback
+                );
             }
 
             return true;
 
         } catch (WriterException | IllegalArgumentException e) {
+
             barcodeImage.setValue(null);
-            status.setValue(
+
+            barcodeStatus.setValue(
                     "Could not generate code: " + e.getMessage()
             );
+
             return false;
         }
     }
 
     // History
-    private void saveBarcode(
-            String content,
-            BarcodeFormat format,
-            BarcodeRepository.SaveCallback callback
+
+    private void saveBarcodeToHistory(
+            String barcodeContent,
+            BarcodeFormat barcodeFormat,
+            String barcodeNote,
+            BarcodeRepository.SaveCallback saveCallback
     ) {
 
-        SavedBarcode barcode = new SavedBarcode(
-                content,
-                format.name()
+        BarcodeEntity barcodeEntity = new BarcodeEntity(
+                barcodeContent,
+                barcodeFormat.name(),
+                barcodeNote
         );
 
-        repository.save(barcode, callback);
+        barcodeRepository.save(barcodeEntity, saveCallback);
     }
 
     // Status
-    public void clearStatus() {
-        status.setValue("");
+
+    public void clearBarcodeStatus() {
+        barcodeStatus.setValue("");
     }
 
-    public void clearBarcode() {
+    public void clearBarcodeImage() {
         barcodeImage.setValue(null);
-        clearStatus();
+        clearBarcodeStatus();
     }
 
     // Cleanup
+
     @Override
     protected void onCleared() {
-        repository.shutdown();
+        barcodeRepository.shutdown();
         super.onCleared();
     }
 }

@@ -132,7 +132,7 @@ public class BarcodeActionController {
 
         showToast(
                 copied
-                        ? "Barcode content copied"
+                        ? "Barcode barcodeContent copied"
                         : "Clipboard is unavailable"
         );
     }
@@ -208,12 +208,12 @@ public class BarcodeActionController {
 
     // State
     private String getCurrentContent() {
-        String content = barcodeViewModel.getInputContent().getValue();
+        String content = barcodeViewModel.getBarcodeContent().getValue();
         return content != null ? content.trim() : "";
     }
 
     private BarcodeFormat getSelectedFormat() {
-        BarcodeFormat format = barcodeViewModel.getSelectedFormat().getValue();
+        BarcodeFormat format = barcodeViewModel.getSelectedBarcodeFormat().getValue();
         return format != null ? format : BarcodeFormat.QR_CODE;
     }
 

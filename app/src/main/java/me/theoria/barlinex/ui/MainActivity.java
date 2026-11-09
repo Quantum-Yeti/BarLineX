@@ -110,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
             };
 
     // Activity lifecycle
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -159,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Initialization
-
     private void initializeLaunchers() {
         registerPermissionLauncher();
         registerHistoryLauncher();
@@ -167,8 +165,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeViews() {
 
-        inputContent = findViewById(R.id.inputContent);
-        contentInputLayout = findViewById(R.id.contentInputLayout);
+        inputContent = findViewById(R.id.barcodeUserContent);
+        contentInputLayout = findViewById(R.id.barcodeUserContentLayout);
 
         buttonGenerate = findViewById(R.id.buttonGenerate);
         buttonCapture = findViewById(R.id.buttonCapture);
@@ -212,11 +210,11 @@ public class MainActivity extends AppCompatActivity {
                 barcodeViewModel,
                 inputContent,
                 contentInputLayout,
-                findViewById(R.id.formatDropdown),
+                findViewById(R.id.barcodeFormatDropdown),
                 findViewById(R.id.textFormatCount)
         );
 
-        inputController.setOnFormatChangedListener(format -> {
+        inputController.setOnBarcodeFormatChangedListener(format -> {
 
             uiHandler.removeCallbacks(previewRunnable);
 
@@ -251,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Input
-
     private void setupInputListeners() {
 
         inputContent.addTextChangedListener(new TextWatcher() {
@@ -273,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
                     int count
             ) {
 
-                barcodeViewModel.setInputContent(s.toString());
+                barcodeViewModel.setBarcodeContent(s.toString());
 
                 if (isOpeningSavedBarcode) {
                     return;
@@ -296,7 +293,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Barcode actions
-
     private void setupButtons() {
 
         buttonGenerate.setOnClickListener(
@@ -335,7 +331,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // History navigation
-
     private void registerHistoryLauncher() {
 
         historyLauncher = registerForActivityResult(
@@ -393,15 +388,16 @@ public class MainActivity extends AppCompatActivity {
 
         try {
 
-            inputController.selectFormat(format);
+            inputController.selectBarcodeFormat(format);
 
-            format = barcodeViewModel.getSelectedFormat().getValue();
+            format = barcodeViewModel.getSelectedBarcodeFormat().getValue();
 
             if (format == null) {
                 format = BarcodeFormat.QR_CODE;
+                inputController.selectBarcodeFormat(format);
             }
 
-            inputController.setContent(content);
+            inputController.setBarcodeContent(content);
 
         } finally {
             isOpeningSavedBarcode = false;
@@ -459,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleConfirmedNumber(String confirmedNumber) {
 
-        inputController.setContent(confirmedNumber);
+        inputController.setBarcodeContent(confirmedNumber);
 
         inputContent.setSelection(
                 inputContent.getText().length()

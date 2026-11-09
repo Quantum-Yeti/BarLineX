@@ -15,7 +15,7 @@
     <string name="save_barcode_image">Save Barcode Image</string>
     <string name="barcode_format">Barcode Format</string>
     <string name="enlarge_barcode">Enlarge Barcode</string>
-    <string name="copy_barcode_content">Copy barcode content</string>
+    <string name="copy_barcode_content">Copy barcode barcodeContent</string>
     <string name="barcode_content">Barcode Content</string>
     <string name="barcode_information">Barcode Information</string>
     <string name="default_barcode_info">Code 128 • 0 characters</string>

@@ -1,6 +1,9 @@
+
 package me.theoria.barlinex.domain.validator;
 
 import com.google.zxing.BarcodeFormat;
+
+import me.theoria.barlinex.domain.rules.BarcodeFormatRules;
 
 public final class BarcodeValidator {
 
@@ -10,8 +13,28 @@ public final class BarcodeValidator {
 
     public static String validate(BarcodeFormat format, String text) {
 
-        if (text == null || text.isEmpty()) {
+        if (!BarcodeFormatRules.isSupported(format)) {
+            return "Unsupported barcode format";
+        }
+
+        if (text == null || text.trim().isEmpty()) {
             return "Enter some text first";
+        }
+
+        if (BarcodeFormatRules.isNumericOnly(format)
+                && !text.matches("\\d+")) {
+            return "Digits only";
+        }
+
+        int minLength = BarcodeFormatRules.minLengthFor(format);
+        int maxLength = BarcodeFormatRules.maxLengthFor(format);
+
+        if (minLength > 0 && text.length() < minLength) {
+            return "Minimum " + minLength + " characters required";
+        }
+
+        if (maxLength > 0 && text.length() > maxLength) {
+            return "Maximum " + maxLength + " characters allowed";
         }
 
         switch (format) {
@@ -22,54 +45,64 @@ public final class BarcodeValidator {
                         : "Use capitals, digits and - . $ / + % only";
 
             case EAN_13:
-                return text.matches("\\d{12,13}")
-                        ? checkDigitError(text, 13)
-                        : "Needs 12 or 13 digits";
+                return validateCheckDigitFormat(text, 13);
 
             case EAN_8:
-                return text.matches("\\d{7,8}")
-                        ? checkDigitError(text, 8)
-                        : "Needs 7 or 8 digits";
+                return validateCheckDigitFormat(text, 8);
 
             case UPC_A:
-                return text.matches("\\d{11,12}")
-                        ? checkDigitError(text, 12)
-                        : "Needs 11 or 12 digits";
+                return validateCheckDigitFormat(text, 12);
 
             case UPC_E:
-                return text.matches("\\d{7,8}")
-                        ? null
-                        : "Needs 7 or 8 digits";
+                return validateUpcE(text);
 
             case ITF:
-                return text.matches("\\d+") && text.length() % 2 == 0
-                        ? null
-                        : "Needs an even number of digits";
+                return BarcodeFormatRules.requiresEvenLength(format)
+                        && text.length() % 2 != 0
+                        ? "Needs an even number of digits"
+                        : null;
 
             default:
                 return null;
         }
     }
 
-    private static String checkDigitError(String digits, int fullLength) {
+    private static String validateCheckDigitFormat(
+            String text,
+            int fullLength
+    ) {
 
-        if (digits.length() != fullLength) {
-            return null;
+        if (text.length() == fullLength
+                && !hasValidCheckDigit(text)) {
+            return "Check digit doesn't match";
         }
+
+        return null;
+    }
+
+    private static boolean hasValidCheckDigit(String digits) {
 
         int sum = 0;
 
-        for (int i = 0; i < fullLength - 1; i++) {
-            int digit = digits.charAt(fullLength - 2 - i) - '0';
-            sum += digit * (i % 2 == 0 ? 3 : 1);
+        for (int i = digits.length() - 2; i >= 0; i--) {
+
+            int digit = digits.charAt(i) - '0';
+            int positionFromRight = digits.length() - 2 - i;
+
+            sum += digit * (positionFromRight % 2 == 0 ? 3 : 1);
         }
 
         int expected = (10 - (sum % 10)) % 10;
-        int actual = digits.charAt(fullLength - 1) - '0';
+        int actual = digits.charAt(digits.length() - 1) - '0';
 
-        return expected == actual
-                ? null
-                : "Check digit doesn't match";
+        return expected == actual;
+    }
+
+    private static String validateUpcE(String text) {
+
+        //TODO: Full UPC-E number-system, expansion and checksum
+        // validation still needs to be implemented.
+
+        return null;
     }
 }
-

@@ -7,7 +7,7 @@ A lightweight Android app for generating QR codes and Code 128 barcodes from tex
 - Generate QR codes and Code 128 barcodes.
 - Live barcode preview as you type.
 - Save generated barcodes to your device.
-- Copy barcode content to your clipboard.
+- Copy barcode barcodeContent to your clipboard.
 - Share and view barcodes in an enlarged preview.
 - Save and reopen previously generated barcodes.
 - Scan numbers using your device's camera and text recognition.

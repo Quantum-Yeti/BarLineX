@@ -28,7 +28,7 @@ public class BarcodeRepository {
     }
 
     public interface LoadCallback {
-        void onLoaded(List<SavedBarcode> barcodes);
+        void onLoaded(List<BarcodeEntity> barcodes);
         void onError(Exception error);
     }
 
@@ -51,7 +51,7 @@ public class BarcodeRepository {
     }
 
     // Save
-    public void save(SavedBarcode barcode, SaveCallback callback) {
+    public void save(BarcodeEntity barcode, SaveCallback callback) {
         executor.execute(() -> {
             try {
                 long id = barcodeDao.insert(barcode);
@@ -71,7 +71,7 @@ public class BarcodeRepository {
     public void getAll(LoadCallback callback) {
         executor.execute(() -> {
             try {
-                List<SavedBarcode> barcodes = barcodeDao.getAll();
+                List<BarcodeEntity> barcodes = barcodeDao.getAll();
 
                 if (callback != null) {
                     mainHandler.post(() -> callback.onLoaded(barcodes));
@@ -84,7 +84,7 @@ public class BarcodeRepository {
         });
     }
 
-    // Update name
+    // Update barcodeName
     public void updateName(int id, String name, OperationCallback callback) {
         executor.execute(() -> {
             try {

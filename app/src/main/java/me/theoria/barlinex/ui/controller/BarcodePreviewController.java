@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.zxing.BarcodeFormat;
 
+import me.theoria.barlinex.ui.formatter.BarcodeFormatDisplay;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodePreviewController {
@@ -47,7 +48,6 @@ public class BarcodePreviewController {
     }
 
     // Observers
-
     public void observeBarcode(LifecycleOwner lifecycleOwner) {
 
         barcodeViewModel.getBarcodeImage().observe(
@@ -61,11 +61,11 @@ public class BarcodePreviewController {
                 }
         );
 
-        barcodeViewModel.getStatus().observe(
+        barcodeViewModel.getBarcodeStatus().observe(
                 lifecycleOwner,
                 message -> {
                     if (message == null || message.isEmpty()) {
-                        inputController.clearError();
+                        inputController.clearBarcodeInputError();
                         return;
                     }
 
@@ -74,13 +74,12 @@ public class BarcodePreviewController {
                         return;
                     }
 
-                    inputController.setError(message);
+                    inputController.setBarcodeInputError(message);
                 }
         );
     }
 
     // Preview
-
     public void updateLivePreview() {
 
         updatePreviewLabels();
@@ -89,7 +88,7 @@ public class BarcodePreviewController {
         BarcodeFormat format = getSelectedFormat();
 
         if (content.isEmpty()) {
-            inputController.clearError();
+            inputController.clearBarcodeInputError();
             showPlaceholder("Your barcode appears here");
             return;
         }
@@ -107,7 +106,7 @@ public class BarcodePreviewController {
         BarcodeFormat format = getSelectedFormat();
 
         String formatLabel =
-                BarcodeInputController.getFormatDisplayName(format);
+                BarcodeFormatDisplay.getFormatDisplayName(format);
 
         textPreviewFormat.setText(formatLabel.toUpperCase());
 
@@ -126,19 +125,17 @@ public class BarcodePreviewController {
     }
 
     // State
-
     private String getCurrentContent() {
-        String content = barcodeViewModel.getInputContent().getValue();
+        String content = barcodeViewModel.getBarcodeContent().getValue();
         return content != null ? content.trim() : "";
     }
 
     private BarcodeFormat getSelectedFormat() {
-        BarcodeFormat format = barcodeViewModel.getSelectedFormat().getValue();
+        BarcodeFormat format = barcodeViewModel.getSelectedBarcodeFormat().getValue();
         return format != null ? format : BarcodeFormat.QR_CODE;
     }
 
     // Display
-
     private void displayBarcodePreview(Bitmap bitmap) {
 
         imagePreview.setImageBitmap(bitmap);

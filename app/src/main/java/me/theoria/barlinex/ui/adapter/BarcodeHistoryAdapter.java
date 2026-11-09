@@ -18,13 +18,13 @@ import java.util.Locale;
 import java.util.Objects;
 
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.data.SavedBarcode;
+import me.theoria.barlinex.data.BarcodeEntity;
 
 public class BarcodeHistoryAdapter
         extends RecyclerView.Adapter<BarcodeHistoryAdapter.BarcodeViewHolder> {
 
-    private final List<SavedBarcode> barcodes = new ArrayList<>();
-    private final List<SavedBarcode> filteredBarcodes = new ArrayList<>();
+    private final List<BarcodeEntity> barcodes = new ArrayList<>();
+    private final List<BarcodeEntity> filteredBarcodes = new ArrayList<>();
 
     private final OnBarcodeClickListener clickListener;
     private final OnBarcodeDeleteListener deleteListener;
@@ -32,19 +32,19 @@ public class BarcodeHistoryAdapter
     private final OnBarcodeRenameListener renameListener;
 
     public interface OnBarcodeClickListener {
-        void onClick(SavedBarcode barcode);
+        void onClick(BarcodeEntity barcode);
     }
 
     public interface OnBarcodeDeleteListener {
-        void onDelete(SavedBarcode barcode);
+        void onDelete(BarcodeEntity barcode);
     }
 
     public interface OnFavoriteClickListener {
-        void onFavoriteClick(SavedBarcode barcode);
+        void onFavoriteClick(BarcodeEntity barcode);
     }
 
     public interface OnBarcodeRenameListener {
-        void onRename(SavedBarcode barcode);
+        void onRename(BarcodeEntity barcode);
     }
 
     public BarcodeHistoryAdapter(
@@ -74,19 +74,19 @@ public class BarcodeHistoryAdapter
     public void onBindViewHolder(
             @NonNull BarcodeViewHolder holder, int position) {
 
-        SavedBarcode barcode = filteredBarcodes.get(position);
+        BarcodeEntity barcode = filteredBarcodes.get(position);
 
-        String displayName = barcode.name == null || barcode.name.trim().isEmpty()
-                ? barcode.content
-                : barcode.name;
+        String displayName = barcode.barcodeName == null || barcode.barcodeName.trim().isEmpty()
+                ? barcode.barcodeContent
+                : barcode.barcodeName;
 
         holder.textContent.setText(displayName);
-        holder.textFormat.setText(barcode.format);
+        holder.textFormat.setText(barcode.barcodeFormat);
 
         String date = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM,
                 DateFormat.SHORT
-        ).format(new Date(barcode.createdAt));
+        ).format(new Date(barcode.barcodeCreatedAt));
 
         holder.textDate.setText(date);
 
@@ -132,7 +132,7 @@ public class BarcodeHistoryAdapter
         return filteredBarcodes.size();
     }
 
-    public void setBarcodes(List<SavedBarcode> newBarcodes) {
+    public void setBarcodes(List<BarcodeEntity> newBarcodes) {
         barcodes.clear();
 
         if (newBarcodes != null) {
@@ -147,13 +147,13 @@ public class BarcodeHistoryAdapter
                 ? ""
                 : query.trim().toLowerCase(Locale.ROOT);
 
-        List<SavedBarcode> updatedList = new ArrayList<>();
+        List<BarcodeEntity> updatedList = new ArrayList<>();
 
-        for (SavedBarcode barcode : barcodes) {
+        for (BarcodeEntity barcode : barcodes) {
 
-            String name = barcode.name == null ? "" : barcode.name;
-            String content = barcode.content == null ? "" : barcode.content;
-            String format = barcode.format == null ? "" : barcode.format;
+            String name = barcode.barcodeName == null ? "" : barcode.barcodeName;
+            String content = barcode.barcodeContent == null ? "" : barcode.barcodeContent;
+            String format = barcode.barcodeFormat == null ? "" : barcode.barcodeFormat;
 
             if (name.toLowerCase(Locale.ROOT).contains(searchQuery)
                     || content.toLowerCase(Locale.ROOT).contains(searchQuery)
@@ -187,14 +187,14 @@ public class BarcodeHistoryAdapter
                     public boolean areContentsTheSame(
                             int oldPosition, int newPosition) {
 
-                        SavedBarcode oldItem = filteredBarcodes.get(oldPosition);
-                        SavedBarcode newItem = updatedList.get(newPosition);
+                        BarcodeEntity oldItem = filteredBarcodes.get(oldPosition);
+                        BarcodeEntity newItem = updatedList.get(newPosition);
 
                         return oldItem.isFavorite == newItem.isFavorite
-                                && Objects.equals(oldItem.name, newItem.name)
-                                && Objects.equals(oldItem.content, newItem.content)
-                                && Objects.equals(oldItem.format, newItem.format)
-                                && oldItem.createdAt == newItem.createdAt;
+                                && Objects.equals(oldItem.barcodeName, newItem.barcodeName)
+                                && Objects.equals(oldItem.barcodeContent, newItem.barcodeContent)
+                                && Objects.equals(oldItem.barcodeFormat, newItem.barcodeFormat)
+                                && oldItem.barcodeCreatedAt == newItem.barcodeCreatedAt;
                     }
                 }
         );

@@ -19,7 +19,7 @@ public final class DatabaseProvider {
                             AppDatabase.class,
                             "barlinex_database"
                     )
-                            .fallbackToDestructiveMigration()
+                            .fallbackToDestructiveMigration(true)
                             .build();
                 }
             }

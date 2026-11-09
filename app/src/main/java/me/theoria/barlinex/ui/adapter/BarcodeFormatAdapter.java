@@ -14,7 +14,7 @@ import com.google.zxing.BarcodeFormat;
 import java.util.List;
 
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.ui.controller.BarcodeInputController;
+import me.theoria.barlinex.ui.formatter.BarcodeFormatDisplay;
 
 public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
 
@@ -50,7 +50,7 @@ public class BarcodeFormatAdapter extends ArrayAdapter<BarcodeFormat> {
         TextView description = view.findViewById(R.id.textFormatDescription);
 
         if (format != null) {
-            name.setText(BarcodeInputController.getFormatDisplayName(format));
+            name.setText(BarcodeFormatDisplay.getFormatDisplayName(format));
             description.setText(getDescription(format));
 
             icon.setImageResource(

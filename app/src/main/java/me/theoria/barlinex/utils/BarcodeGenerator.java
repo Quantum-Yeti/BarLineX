@@ -11,9 +11,9 @@ import com.google.zxing.MultiFormatWriter;
 import java.util.EnumMap;
 import java.util.Map;
 
-public final class CodeGenerator {
+public final class BarcodeGenerator {
 
-    private CodeGenerator() {
+    private BarcodeGenerator() {
         // Utility class; no instances needed.
     }
 
