@@ -29,7 +29,7 @@ public class BarcodeHistoryAdapter
     private final OnBarcodeClickListener clickListener;
     private final OnBarcodeDeleteListener deleteListener;
     private final OnFavoriteClickListener favoriteListener;
-    private final OnBarcodeRenameListener renameListener;
+    private final OnBarcodeEditListener editListener;
 
     public interface OnBarcodeClickListener {
         void onClick(BarcodeEntity barcode);
@@ -43,7 +43,7 @@ public class BarcodeHistoryAdapter
         void onFavoriteClick(BarcodeEntity barcode);
     }
 
-    public interface OnBarcodeRenameListener {
+    public interface OnBarcodeEditListener {
         void onRename(BarcodeEntity barcode);
     }
 
@@ -51,12 +51,12 @@ public class BarcodeHistoryAdapter
             OnBarcodeClickListener clickListener,
             OnBarcodeDeleteListener deleteListener,
             OnFavoriteClickListener favoriteListener,
-            OnBarcodeRenameListener renameListener
+            OnBarcodeEditListener editListener
     ) {
         this.clickListener = clickListener;
         this.deleteListener = deleteListener;
         this.favoriteListener = favoriteListener;
-        this.renameListener = renameListener;
+        this.editListener = editListener;
     }
 
     @NonNull
@@ -76,11 +76,16 @@ public class BarcodeHistoryAdapter
 
         BarcodeEntity barcode = filteredBarcodes.get(position);
 
-        String displayName = barcode.barcodeName == null || barcode.barcodeName.trim().isEmpty()
-                ? barcode.barcodeContent
-                : barcode.barcodeName;
+        String barcodeName = barcode.barcodeName == null
+                ? ""
+                : barcode.barcodeName.trim();
 
-        holder.textContent.setText(displayName);
+        holder.textName.setText(barcodeName);
+        holder.textName.setVisibility(
+                barcodeName.isEmpty() ? View.GONE : View.VISIBLE
+        );
+
+        holder.textContent.setText(barcode.barcodeContent);
         holder.textFormat.setText(barcode.barcodeFormat);
 
         String date = DateFormat.getDateTimeInstance(
@@ -120,9 +125,9 @@ public class BarcodeHistoryAdapter
             }
         });
 
-        holder.buttonRename.setOnClickListener(v -> {
-            if (renameListener != null) {
-                renameListener.onRename(barcode);
+        holder.buttonEdit.setOnClickListener(v -> {
+            if (editListener != null) {
+                editListener.onRename(barcode);
             }
         });
     }
@@ -207,22 +212,24 @@ public class BarcodeHistoryAdapter
 
     static class BarcodeViewHolder extends RecyclerView.ViewHolder {
 
+        TextView textName;
         TextView textContent;
         TextView textFormat;
         TextView textDate;
         ImageButton buttonDelete;
         ImageButton buttonFavorite;
-        ImageButton buttonRename;
+        ImageButton buttonEdit;
 
         BarcodeViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            textName = itemView.findViewById(R.id.textBarcodeName);
             textContent = itemView.findViewById(R.id.textBarcodeContent);
             textFormat = itemView.findViewById(R.id.textBarcodeFormat);
             textDate = itemView.findViewById(R.id.textBarcodeDate);
             buttonDelete = itemView.findViewById(R.id.buttonDeleteBarcode);
             buttonFavorite = itemView.findViewById(R.id.buttonFavoriteBarcode);
-            buttonRename = itemView.findViewById(R.id.buttonRenameBarcode);
+            buttonEdit = itemView.findViewById(R.id.buttonRenameBarcode);
         }
     }
 }

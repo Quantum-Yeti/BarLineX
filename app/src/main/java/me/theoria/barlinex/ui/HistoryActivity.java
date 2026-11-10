@@ -1,12 +1,10 @@
 package me.theoria.barlinex.ui;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,16 +18,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.data.BarcodeEntity;
 import me.theoria.barlinex.ui.adapter.BarcodeHistoryAdapter;
+import me.theoria.barlinex.ui.controller.BarcodeActionController;
 import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
 import me.theoria.barlinex.ui.helper.WindowsInsetHelper;
 import me.theoria.barlinex.ui.viewmodel.HistoryViewModel;
-import me.theoria.barlinex.utils.BarcodeGenerator;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -94,7 +90,7 @@ public class HistoryActivity extends AppCompatActivity {
                 this::openBarcode,
                 this::deleteBarcode,
                 this::toggleFavorite,
-                this::renameBarcode
+                this::editBarcode
         );
     }
 
@@ -188,74 +184,21 @@ public class HistoryActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BarcodePreviewActivity.class);
 
         intent.putExtra(
-                "barcode_content",
+                BarcodeActionController.EXTRA_BARCODE_NAME,
+                barcode.barcodeName
+        );
+
+        intent.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_CONTENT,
                 barcode.barcodeContent
         );
 
         intent.putExtra(
-                "barcode_format",
+                BarcodeActionController.EXTRA_BARCODE_FORMAT,
                 barcode.barcodeFormat
         );
 
-        intent.putExtra(
-                "barcode_name",
-                barcode.barcodeName
-        );
-
         startActivity(intent);
-    }
-
-    // Rename
-    private void renameBarcode(BarcodeEntity barcode) {
-        TextInputLayout inputLayout = new TextInputLayout(this);
-
-        inputLayout.setHint("Choose a name...");
-        inputLayout.setBoxBackgroundMode(
-                TextInputLayout.BOX_BACKGROUND_OUTLINE
-        );
-
-        TextInputEditText input = new TextInputEditText(
-                inputLayout.getContext()
-        );
-
-        input.setSingleLine(true);
-        input.setText(
-                barcode.barcodeName == null ? "" : barcode.barcodeName
-        );
-
-        inputLayout.addView(input);
-
-        int padding = (int) (
-                24 * getResources().getDisplayMetrics().density
-        );
-
-        inputLayout.setPadding(padding, 8, padding, 0);
-
-        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                .setTitle("Rename Barcode")
-                .setView(inputLayout)
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Save", null)
-                .create();
-
-        dialog.setOnShowListener(ignored -> {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setOnClickListener(v -> {
-
-                        String name = input.getText() == null
-                                ? ""
-                                : input.getText().toString().trim();
-
-                        historyViewModel.renameBarcode(
-                                barcode,
-                                name.isEmpty() ? null : name
-                        );
-
-                        dialog.dismiss();
-                    });
-        });
-
-        dialog.show();
     }
 
     // Favorite
@@ -278,6 +221,34 @@ public class HistoryActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                 ).show()
         );
+    }
+
+    // Edit Barcode
+    private void editBarcode(BarcodeEntity barcode) {
+        Intent result = new Intent();
+
+        result.putExtra(
+                MainActivity.EXTRA_SELECTED_TAB,
+                R.id.nav_create
+        );
+
+        result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_NAME,
+                barcode.barcodeName
+        );
+
+        result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_CONTENT,
+                barcode.barcodeContent
+        );
+
+        result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_FORMAT,
+                barcode.barcodeFormat
+        );
+
+        setResult(RESULT_OK, result);
+        finish();
     }
 
     // Navigation

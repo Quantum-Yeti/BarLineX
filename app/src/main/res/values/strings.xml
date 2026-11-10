@@ -40,4 +40,6 @@
     <string name="scan_number_with_camera">Scan number with camera</string>
     <string name="barcode_library">Barcode Library</string>
     <string name="customize">Customize</string>
+    <string name="copy">Copy</string>
+    <string name="print">Print</string>
 </resources>

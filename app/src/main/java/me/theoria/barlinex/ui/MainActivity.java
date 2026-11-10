@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private static final long PREVIEW_DEBOUNCE_MS = 150L;
 
     // Views
+    private EditText inputName;
     private EditText inputContent;
     private TextInputLayout contentInputLayout;
 
@@ -177,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeViews() {
 
+        inputName = findViewById(R.id.barcodeUserName);
         inputContent = findViewById(R.id.barcodeUserContent);
         contentInputLayout = findViewById(R.id.barcodeUserContentLayout);
 
@@ -266,6 +268,32 @@ public class MainActivity extends AppCompatActivity {
     // Input
     private void setupInputListeners() {
 
+        inputName.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+            ) {
+            }
+
+            @Override
+            public void onTextChanged(
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+            ) {
+                barcodeViewModel.setBarcodeName(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         inputContent.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -314,9 +342,9 @@ public class MainActivity extends AppCompatActivity {
                 v -> actionController.saveBarcode()
         );
 
-        /*findViewById(R.id.buttonCustomizeBarcode).setOnClickListener(
+        findViewById(R.id.buttonCustomizeBarcode).setOnClickListener(
                 v -> actionController.customizeBarcode()
-        );*/
+        );
 
         buttonExportBarcode.setOnClickListener(
                 v -> actionController.showExportMenu()
@@ -326,8 +354,8 @@ public class MainActivity extends AppCompatActivity {
                 v -> actionController.shareBarcodeImage()
         );
 
-        findViewById(R.id.buttonCopyText).setOnClickListener(
-                v -> actionController.copyBarcodeImage()
+        findViewById(R.id.buttonPrintText).setOnClickListener(
+                v -> actionController.printBarcodeImage()
         );
 
         findViewById(R.id.buttonEnlarge).setOnClickListener(
@@ -618,6 +646,6 @@ public class MainActivity extends AppCompatActivity {
 
         createContent.setVisibility(View.VISIBLE);
         buttonSaveBarcode.setVisibility(View.VISIBLE);
-        buttonExportBarcode.setVisibility(View.GONE);
+        buttonExportBarcode.setVisibility(View.VISIBLE);
     }
 }

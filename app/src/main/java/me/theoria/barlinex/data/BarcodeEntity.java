@@ -14,15 +14,20 @@ public class BarcodeEntity {
     public String barcodeFormat;
     public String barcodeNote;
     public long barcodeCreatedAt;
+    public String barcodeCategory;
 
     public boolean isFavorite = false;
 
-    public BarcodeEntity(String barcodeContent, String barcodeFormat, String barcodeNote) {
+    public BarcodeEntity(String barcodeContent,
+                         String barcodeFormat,
+                         String barcodeNote,
+                         String barcodeCategory) {
         this.barcodeName = null;
         this.barcodeContent = barcodeContent;
         this.barcodeFormat = barcodeFormat;
         this.barcodeNote = barcodeNote;
         this.barcodeCreatedAt = System.currentTimeMillis();
+        this.barcodeCategory = barcodeCategory;
     }
 }
     

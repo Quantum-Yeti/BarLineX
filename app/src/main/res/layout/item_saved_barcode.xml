@@ -49,15 +49,24 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/textBarcodeName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:textColor="#F5F5F5"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/textBarcodeContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="Example barcode barcodeContent"
-                    android:textColor="#F5F5F5"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:text="Example barcode content"
+                    android:textColor="#B8B8C0"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/textBarcodeFormat"

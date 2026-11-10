@@ -12,11 +12,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.controller.BarcodeActionController;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodePreviewActivity extends AppCompatActivity {
 
     private ImageView imageBarcode;
+    private TextView textBarcodeName;
     private TextView textBarcodeContent;
     private TextView textBarcodeFormat;
 
@@ -30,12 +32,22 @@ public class BarcodePreviewActivity extends AppCompatActivity {
         applyWindowInsets();
 
         imageBarcode = findViewById(R.id.imageBarcode);
+        textBarcodeName = findViewById(R.id.textBarcodeName);
         textBarcodeContent = findViewById(R.id.textBarcodeContent);
         textBarcodeFormat = findViewById(R.id.textBarcodeFormat);
 
         Button buttonBackBottom = findViewById(R.id.buttonBackBottom);
         buttonBackBottom.setOnClickListener(v -> finish());
 
+        String name = getIntent().getStringExtra(
+                BarcodeActionController.EXTRA_BARCODE_NAME
+        );
+
+        textBarcodeName.setText(
+                name == null || name.trim().isEmpty()
+                        ? "Untitled Barcode"
+                        : name.trim()
+        );
         String content = getIntent().getStringExtra("barcode_content");
         String format = getIntent().getStringExtra("barcode_format");
 

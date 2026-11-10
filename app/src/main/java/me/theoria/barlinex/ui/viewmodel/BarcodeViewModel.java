@@ -33,6 +33,9 @@ public class BarcodeViewModel extends AndroidViewModel {
     private final MutableLiveData<BarcodeFormat> selectedBarcodeFormat =
             new MutableLiveData<>(BarcodeFormat.QR_CODE);
 
+    private final MutableLiveData<String> barcodeName =
+            new MutableLiveData<>("");
+
     private final MutableLiveData<String> barcodeContent =
             new MutableLiveData<>("");
 
@@ -40,13 +43,16 @@ public class BarcodeViewModel extends AndroidViewModel {
     private final MutableLiveData<String> barcodeNote =
             new MutableLiveData<>("");
 
+    // Barcode category
+    private final MutableLiveData<String> barcodeCategory =
+            new MutableLiveData<>("");
+
     public BarcodeViewModel(@NonNull Application application) {
         super(application);
         barcodeRepository = new BarcodeRepository(application);
     }
 
-    // LiveData
-
+    // LiveData Getters
     public LiveData<Bitmap> getBarcodeImage() {
         return barcodeImage;
     }
@@ -59,6 +65,8 @@ public class BarcodeViewModel extends AndroidViewModel {
         return selectedBarcodeFormat;
     }
 
+    public LiveData<String> getBarcodeName() { return barcodeName; }
+
     public LiveData<String> getBarcodeContent() {
         return barcodeContent;
     }
@@ -67,12 +75,19 @@ public class BarcodeViewModel extends AndroidViewModel {
         return barcodeNote;
     }
 
-    // Barcode input state
+    public LiveData<String> getBarcodeCategory() { return barcodeCategory; }
 
+    // Barcode input state
     public void setSelectedBarcodeFormat(BarcodeFormat barcodeFormat) {
         if (barcodeFormat != null) {
             selectedBarcodeFormat.setValue(barcodeFormat);
         }
+    }
+
+    public void setBarcodeName(String barcodeName) {
+        this.barcodeName.setValue(
+                barcodeName != null ? barcodeName : ""
+        );
     }
 
     public void setBarcodeContent(String barcodeContent) {
@@ -87,8 +102,13 @@ public class BarcodeViewModel extends AndroidViewModel {
         );
     }
 
-    // Barcode generation
+    public void setBarcodeCategory(String barcodeCategory) {
+        this.barcodeCategory.setValue(
+                barcodeCategory != null ? barcodeCategory : ""
+        );
+    }
 
+    // Barcode generation
     public void generateBarcode(boolean saveToHistory) {
         generateBarcode(
                 barcodeContent.getValue(),
@@ -191,8 +211,14 @@ public class BarcodeViewModel extends AndroidViewModel {
         BarcodeEntity barcodeEntity = new BarcodeEntity(
                 barcodeContent,
                 barcodeFormat.name(),
-                barcodeNote
+                barcodeNote,
+                barcodeCategory.getValue()
         );
+
+        String name = barcodeName.getValue();
+        barcodeEntity.barcodeName = name != null && !name.trim().isEmpty()
+                ? name.trim()
+                : null;
 
         barcodeRepository.save(barcodeEntity, saveCallback);
     }

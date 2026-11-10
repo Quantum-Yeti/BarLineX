@@ -2,10 +2,23 @@ package me.theoria.barlinex.ui.controller;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.ParcelFileDescriptor;
+import android.print.PageRange;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintDocumentInfo;
+import android.print.PrintManager;
+import android.print.pdf.PrintedPdfDocument;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.widget.Toast;
@@ -18,6 +31,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.BarcodeFormat;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -30,12 +44,12 @@ import me.theoria.barlinex.R;
 import me.theoria.barlinex.data.BarcodeRepository;
 import me.theoria.barlinex.ui.BarcodePreviewActivity;
 import me.theoria.barlinex.ui.helper.BarcodeImageHelper;
-import me.theoria.barlinex.ui.helper.ClipboardHelper;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
 
 public class BarcodeActionController {
 
     // Intent extras
+    public static final String EXTRA_BARCODE_NAME = "barcode_name";
     public static final String EXTRA_BARCODE_CONTENT = "barcode_content";
     public static final String EXTRA_BARCODE_FORMAT = "barcode_format";
 
@@ -322,6 +336,38 @@ public class BarcodeActionController {
         }
     }
 
+    // Print barcode image
+    public void printBarcodeImage() {
+
+        Bitmap bitmap = barcodeViewModel
+                .getBarcodeImage()
+                .getValue();
+
+        if (bitmap == null) {
+            showToast("Generate a barcode first");
+            return;
+        }
+
+        PrintManager printManager =
+                (PrintManager) activity.getSystemService(Context.PRINT_SERVICE);
+
+        if (printManager == null) {
+            showToast("Printing is unavailable");
+            return;
+        }
+
+        String jobName = "BarLineX Barcode";
+
+        printManager.print(
+                jobName,
+                new BarcodePrintAdapter(bitmap),
+                new PrintAttributes.Builder()
+                        .setMediaSize(PrintAttributes.MediaSize.ISO_A4)
+                        .setColorMode(PrintAttributes.COLOR_MODE_COLOR)
+                        .build()
+        );
+    }
+
     // Enlarged preview
     public void openEnlargedPreview() {
 
@@ -337,10 +383,20 @@ public class BarcodeActionController {
                 BarcodePreviewActivity.class
         );
 
+        intent.putExtra(
+                EXTRA_BARCODE_NAME,
+                barcodeViewModel.getBarcodeName().getValue()
+        );
+
         intent.putExtra(EXTRA_BARCODE_CONTENT, content);
         intent.putExtra(EXTRA_BARCODE_FORMAT, format.name());
 
         activity.startActivity(intent);
+    }
+
+    // Customize barcode
+    public void customizeBarcode() {
+        showToast("Customization options coming soon.");
     }
 
     // Barcode generation
@@ -398,5 +454,98 @@ public class BarcodeActionController {
     // Helpers
     private String escapeCsv(String value) {
         return "\"" + value.replace("\"", "\"\"") + "\"";
+    }
+
+    // Printing
+    private class BarcodePrintAdapter extends PrintDocumentAdapter {
+
+        private final Bitmap bitmap;
+        private PrintedPdfDocument pdfDocument;
+
+        BarcodePrintAdapter(Bitmap bitmap) {
+            this.bitmap = bitmap;
+        }
+
+        @Override
+        public void onLayout(
+                PrintAttributes oldAttributes,
+                PrintAttributes newAttributes,
+                CancellationSignal cancellationSignal,
+                LayoutResultCallback callback,
+                Bundle extras
+        ) {
+
+            if (cancellationSignal.isCanceled()) {
+                callback.onLayoutCancelled();
+                return;
+            }
+
+            pdfDocument = new PrintedPdfDocument(
+                    activity,
+                    newAttributes
+            );
+
+            PrintDocumentInfo info = new PrintDocumentInfo.Builder(
+                    "BarLineX_Barcode.pdf"
+            )
+                    .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                    .setPageCount(1)
+                    .build();
+
+            callback.onLayoutFinished(info, true);
+        }
+
+        @Override
+        public void onWrite(
+                PageRange[] pages,
+                ParcelFileDescriptor destination,
+                CancellationSignal cancellationSignal,
+                PrintDocumentAdapter.WriteResultCallback callback
+        ) {
+
+            PdfDocument.Page page = pdfDocument.startPage(0);
+
+            Canvas canvas = page.getCanvas();
+
+            Rect contentRect = new Rect(
+                    40,
+                    40,
+                    canvas.getWidth() - 40,
+                    canvas.getHeight() - 40
+            );
+
+            Rect destinationRect = new Rect(
+                    contentRect.left,
+                    contentRect.top,
+                    contentRect.right,
+                    contentRect.bottom
+            );
+
+            canvas.drawBitmap(
+                    bitmap,
+                    null,
+                    destinationRect,
+                    null
+            );
+
+            pdfDocument.finishPage(page);
+
+            try (FileOutputStream outputStream =
+                         new FileOutputStream(destination.getFileDescriptor())) {
+
+                pdfDocument.writeTo(outputStream);
+
+                callback.onWriteFinished(
+                        new PageRange[]{PageRange.ALL_PAGES}
+                );
+
+            } catch (IOException e) {
+                callback.onWriteFailed(e.getMessage());
+
+            } finally {
+                pdfDocument.close();
+                pdfDocument = null;
+            }
+        }
     }
 }
