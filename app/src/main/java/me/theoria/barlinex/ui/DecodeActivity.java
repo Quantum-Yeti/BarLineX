@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import me.theoria.barlinex.R;
+import me.theoria.barlinex.domain.validator.BarcodeValidator;
 import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
 import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
 import me.theoria.barlinex.ui.helper.DecodeResult;
@@ -83,7 +84,6 @@ public class DecodeActivity extends AppCompatActivity {
         );
 
         initializeViews();
-
         initializeViewModel();
         registerCameraPermissionLauncher();
         initializeDecoder();
@@ -345,7 +345,10 @@ public class DecodeActivity extends AppCompatActivity {
         );
 
         textDecodedCheckDigit.setText(
-                getCheckDigitStatus(content, format)
+                BarcodeValidator.getCheckDigitStatus(
+                        content,
+                        format
+                )
         );
 
         String scanTime = DateFormat.getDateTimeInstance(
@@ -354,151 +357,6 @@ public class DecodeActivity extends AppCompatActivity {
         ).format(new Date(result.getScannedAt()));
 
         textDecodedTime.setText(scanTime);
-    }
-
-
-    // Check digit validation
-
-    private String getCheckDigitStatus(
-            String content,
-            BarcodeFormat format
-    ) {
-
-        switch (format) {
-
-            case EAN_13:
-                return validateMod10(content, 13)
-                        ? "Valid"
-                        : "Invalid";
-
-            case EAN_8:
-                return validateMod10(content, 8)
-                        ? "Valid"
-                        : "Invalid";
-
-            case UPC_A:
-                return validateMod10(content, 12)
-                        ? "Valid"
-                        : "Invalid";
-
-            case UPC_E:
-                return validateUpcE(content)
-                        ? "Valid"
-                        : "Invalid";
-
-            default:
-                return "Not applicable";
-        }
-    }
-
-    private boolean validateMod10(
-            String content,
-            int expectedLength
-    ) {
-
-        if (content == null
-                || content.length() != expectedLength
-                || !content.matches("[0-9]+")) {
-
-            return false;
-        }
-
-        int sum = 0;
-        int weight = 3;
-
-        for (int i = content.length() - 2; i >= 0; i--) {
-
-            int digit = content.charAt(i) - '0';
-
-            sum += digit * weight;
-
-            weight = (weight == 3) ? 1 : 3;
-        }
-
-        int expectedCheckDigit = (10 - (sum % 10)) % 10;
-
-        int actualCheckDigit =
-                content.charAt(content.length() - 1) - '0';
-
-        return expectedCheckDigit == actualCheckDigit;
-    }
-
-    private boolean validateUpcE(String content) {
-
-        if (content == null
-                || content.length() != 8
-                || !content.matches("[0-9]+")) {
-
-            return false;
-        }
-
-        String numberSystem = content.substring(0, 1);
-
-        if (!numberSystem.equals("0")
-                && !numberSystem.equals("1")) {
-
-            return false;
-        }
-
-        String compressed = content.substring(1, 7);
-
-        char lastDigit = compressed.charAt(5);
-
-        String manufacturer;
-        String product;
-
-        switch (lastDigit) {
-
-            case '0':
-            case '1':
-            case '2':
-
-                manufacturer =
-                        compressed.substring(0, 2) + lastDigit + "00";
-
-                product =
-                        "00" + compressed.substring(2, 5);
-
-                break;
-
-            case '3':
-
-                manufacturer =
-                        compressed.substring(0, 3) + "00";
-
-                product =
-                        "000" + compressed.substring(3, 5);
-
-                break;
-
-            case '4':
-
-                manufacturer =
-                        compressed.substring(0, 4) + "0";
-
-                product =
-                        "0000" + compressed.substring(4, 5);
-
-                break;
-
-            default:
-
-                manufacturer =
-                        compressed.substring(0, 5);
-
-                product =
-                        "0000" + lastDigit;
-
-                break;
-        }
-
-        String expandedUpcA =
-                numberSystem + manufacturer + product;
-
-        return validateMod10(
-                expandedUpcA + content.charAt(7),
-                12
-        );
     }
 
 
