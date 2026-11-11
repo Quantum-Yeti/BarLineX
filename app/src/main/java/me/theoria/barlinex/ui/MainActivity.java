@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
 
@@ -69,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView textPreviewInfo;
 
     private BottomNavigationView bottomNavigation;
+
+    private View qrContentTypeSection;
+    private MaterialAutoCompleteTextView qrContentTypeDropdown;
 
     private View createContent;
     private View scanOverlay;
@@ -202,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
         cameraPreview = findViewById(R.id.cameraPreview);
         numberScannerOverlay = findViewById(R.id.numberScannerOverlay);
 
+        qrContentTypeSection = findViewById(R.id.qrContentTypeSection);
+        qrContentTypeDropdown = findViewById(R.id.qrContentTypeDropdown);
+
         bottomNavigation = findViewById(R.id.bottomNavigation);
     }
 
@@ -227,7 +234,9 @@ public class MainActivity extends AppCompatActivity {
                 inputContent,
                 contentInputLayout,
                 findViewById(R.id.barcodeFormatDropdown),
-                findViewById(R.id.textFormatCount)
+                findViewById(R.id.textFormatCount),
+                qrContentTypeSection,
+                qrContentTypeDropdown
         );
 
         inputController.setOnBarcodeFormatChangedListener(format -> {

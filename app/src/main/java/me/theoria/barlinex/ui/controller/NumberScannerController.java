@@ -56,10 +56,7 @@ public class NumberScannerController {
         this.numberScanner = new NumberScanner();
     }
 
-    // --------------------------------------------------
     // Camera
-    // --------------------------------------------------
-
     public void startCamera() {
 
         ListenableFuture<ProcessCameraProvider> future =
@@ -123,10 +120,7 @@ public class NumberScannerController {
         }
     }
 
-    // --------------------------------------------------
     // Image capture
-    // --------------------------------------------------
-
     public void capturePhoto() {
 
         if (imageCapture == null) {
@@ -212,10 +206,7 @@ public class NumberScannerController {
         );
     }
 
-    // --------------------------------------------------
     // Number recognition
-    // --------------------------------------------------
-
     private void processImage(Uri imageUri) {
 
         numberScanner.scan(
@@ -262,10 +253,7 @@ public class NumberScannerController {
         );
     }
 
-    // --------------------------------------------------
     // Cleanup
-    // --------------------------------------------------
-
     private void deleteImage(Uri imageUri) {
 
         try {

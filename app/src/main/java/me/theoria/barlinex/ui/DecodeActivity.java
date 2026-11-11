@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
@@ -26,16 +28,23 @@ import java.util.Date;
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
 import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
+import me.theoria.barlinex.ui.helper.DecodeResult;
 import me.theoria.barlinex.ui.helper.WindowsInsetHelper;
+import me.theoria.barlinex.ui.helper.ZoomControlsController;
+import me.theoria.barlinex.ui.viewmodel.DecoderViewModel;
+import me.theoria.barlinex.ui.widget.ScannerOverlay;
 
 public class DecodeActivity extends AppCompatActivity {
 
+    // Views
+
     private BottomNavigationView bottomNavigation;
     private PreviewView cameraPreview;
+
     private View scannerPlaceholder;
     private TextView textDecodeStatus;
     private View decodeResultPanel;
-    private View scannerOverlay;
+    private ScannerOverlay scannerOverlay;
 
     private TextView textDecodedFormat;
     private TextView textDecodedContent;
@@ -44,11 +53,25 @@ public class DecodeActivity extends AppCompatActivity {
     private TextView textDecodedCheckDigit;
     private TextView textDecodedTime;
 
-    private String decodedContent;
+    // ViewModel
+
+    private DecoderViewModel decodeViewModel;
+
+    // Controllers
 
     private BarcodeDecoderController decodeController;
+    private ZoomControlsController zoomControlsController;
+
+    // Camera state
+
+    private boolean isScanning = false;
+
+    // Permissions
 
     private ActivityResultLauncher<String> cameraPermissionLauncher;
+
+
+    // Activity initialization
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,59 +83,168 @@ public class DecodeActivity extends AppCompatActivity {
         );
 
         initializeViews();
+
+        initializeViewModel();
         registerCameraPermissionLauncher();
         initializeDecoder();
+
+        zoomControlsController = new ZoomControlsController(
+                this,
+                decodeController
+        );
+
         setupBottomNavigation();
         setupGalleryButton();
+        setupResultActions();
 
         checkCameraPermission();
-        setupResultActions();
     }
+
+
+    // View initialization
 
     private void initializeViews() {
 
-        bottomNavigation = findViewById(R.id.decodeBottomNavigation);
-        cameraPreview = findViewById(R.id.decodeCameraPreview);
-        scannerPlaceholder = findViewById(R.id.scannerPlaceholder);
-        textDecodeStatus = findViewById(R.id.textDecodeStatus);
-        decodeResultPanel = findViewById(R.id.decodeResultPanel);
-        scannerOverlay = findViewById(R.id.scannerOverlay);
+        bottomNavigation = findViewById(
+                R.id.decodeBottomNavigation
+        );
 
-        textDecodedFormat = findViewById(R.id.textDecodedFormat);
-        textDecodedContent = findViewById(R.id.textDecodedContent);
-        textDecodedType = findViewById(R.id.textDecodedType);
-        textDecodedLength = findViewById(R.id.textDecodedLength);
-        textDecodedCheckDigit = findViewById(R.id.textDecodedCheckDigit);
-        textDecodedTime = findViewById(R.id.textDecodedTime);
+        cameraPreview = findViewById(
+                R.id.decodeCameraPreview
+        );
+
+        scannerPlaceholder = findViewById(
+                R.id.scannerPlaceholder
+        );
+
+        textDecodeStatus = findViewById(
+                R.id.textDecodeStatus
+        );
+
+        decodeResultPanel = findViewById(
+                R.id.decodeResultPanel
+        );
+
+        scannerOverlay = findViewById(
+                R.id.scannerOverlay
+        );
+
+        textDecodedFormat = findViewById(
+                R.id.textDecodedFormat
+        );
+
+        textDecodedContent = findViewById(
+                R.id.textDecodedContent
+        );
+
+        textDecodedType = findViewById(
+                R.id.textDecodedType
+        );
+
+        textDecodedLength = findViewById(
+                R.id.textDecodedLength
+        );
+
+        textDecodedCheckDigit = findViewById(
+                R.id.textDecodedCheckDigit
+        );
+
+        textDecodedTime = findViewById(
+                R.id.textDecodedTime
+        );
     }
+
+
+    // ViewModel
+
+    private void initializeViewModel() {
+
+        decodeViewModel = new ViewModelProvider(this)
+                .get(DecoderViewModel.class);
+
+        observeDecodedResult();
+    }
+
+    private void observeDecodedResult() {
+
+        decodeViewModel.getDecodedResult().observe(
+                this,
+                result -> {
+
+                    if (result == null) {
+                        return;
+                    }
+
+                    isScanning = false;
+
+                    cameraPreview.setVisibility(View.GONE);
+                    scannerPlaceholder.setVisibility(View.GONE);
+                    decodeResultPanel.setVisibility(View.VISIBLE);
+
+                    if (zoomControlsController != null) {
+                        zoomControlsController.hide();
+                    }
+
+                    textDecodeStatus.setText("DETECTED");
+
+                    displayBarcodeDetails(result);
+                }
+        );
+    }
+
+
+    // Camera permissions
 
     private void registerCameraPermissionLauncher() {
 
-        cameraPermissionLauncher =
-                registerForActivityResult(
-                        new ActivityResultContracts.RequestPermission(),
-                        granted -> {
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
 
-                            if (granted) {
-                                startScanning();
-                            } else {
-                                textDecodeStatus.setText("PERMISSION REQUIRED");
+                    if (granted) {
 
-                                Toast.makeText(
-                                        this,
-                                        "Camera permission is needed to scan barcodes.",
-                                        Toast.LENGTH_LONG
-                                ).show();
-                            }
-                        }
-                );
+                        startScanning();
+
+                    } else {
+
+                        textDecodeStatus.setText("PERMISSION REQUIRED");
+
+                        Toast.makeText(
+                                this,
+                                "Camera permission is needed to scan barcodes.",
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                }
+        );
     }
+
+    private void checkCameraPermission() {
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED) {
+
+            startScanning();
+
+        } else {
+
+            cameraPermissionLauncher.launch(
+                    Manifest.permission.CAMERA
+            );
+        }
+    }
+
+
+    // Barcode decoder
 
     private void initializeDecoder() {
 
         decodeController = new BarcodeDecoderController(
                 this,
                 cameraPreview,
+                scannerOverlay,
                 new BarcodeDecoderController.Listener() {
 
                     @Override
@@ -121,38 +253,74 @@ public class DecodeActivity extends AppCompatActivity {
                             BarcodeFormat format
                     ) {
 
-                        decodedContent = content;
+                        runOnUiThread(() -> {
 
-                        decodeController.stopCamera();
+                            if (isFinishing() || isDestroyed()) {
+                                return;
+                            }
 
-                        cameraPreview.setVisibility(View.GONE);
-                        scannerPlaceholder.setVisibility(View.GONE);
-                        decodeResultPanel.setVisibility(View.VISIBLE);
+                            isScanning = false;
 
-                        textDecodeStatus.setText("DETECTED");
+                            decodeController.stopCamera();
 
-                        displayBarcodeDetails(content, format);
+                            decodeViewModel.onBarcodeDetected(
+                                    content,
+                                    format
+                            );
+                        });
                     }
 
                     @Override
-                    public void onScanError(String message, Exception error) {
+                    public void onZoomCapabilitiesChanged(
+                            float maxZoomRatio
+                    ) {
 
-                        textDecodeStatus.setText("CAMERA ERROR");
+                        runOnUiThread(() -> {
 
-                        Toast.makeText(
-                                DecodeActivity.this,
-                                message,
-                                Toast.LENGTH_LONG
-                        ).show();
+                            if (zoomControlsController != null) {
+
+                                zoomControlsController
+                                        .onZoomCapabilitiesChanged(
+                                                maxZoomRatio
+                                        );
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onScanError(
+                            String message,
+                            Exception error
+                    ) {
+
+                        runOnUiThread(() -> {
+
+                            if (isFinishing() || isDestroyed()) {
+                                return;
+                            }
+
+                            isScanning = false;
+
+                            textDecodeStatus.setText("CAMERA ERROR");
+
+                            Toast.makeText(
+                                    DecodeActivity.this,
+                                    message,
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        });
                     }
                 }
         );
     }
 
-    private void displayBarcodeDetails(
-            String content,
-            BarcodeFormat format
-    ) {
+
+    // Barcode result
+
+    private void displayBarcodeDetails(DecodeResult result) {
+
+        String content = result.getContent();
+        BarcodeFormat format = result.getFormat();
 
         textDecodedFormat.setText(
                 format.toString().replace("_", " ")
@@ -160,16 +328,13 @@ public class DecodeActivity extends AppCompatActivity {
 
         textDecodedContent.setText(content);
 
-        // Barcode category
         textDecodedType.setText(
-                format == BarcodeFormat.QR_CODE ? "2D" : "Linear"
+                result.isTwoDimensional()
+                        ? "2D"
+                        : "Linear"
         );
 
-        // Character count
-        int characterCount = content.codePointCount(
-                0,
-                content.length()
-        );
+        int characterCount = result.getCharacterCount();
 
         textDecodedLength.setText(
                 characterCount + (
@@ -179,19 +344,20 @@ public class DecodeActivity extends AppCompatActivity {
                 )
         );
 
-        // Check digit validation
         textDecodedCheckDigit.setText(
                 getCheckDigitStatus(content, format)
         );
 
-        // Scan date and time
         String scanTime = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM,
                 DateFormat.SHORT
-        ).format(new Date());
+        ).format(new Date(result.getScannedAt()));
 
         textDecodedTime.setText(scanTime);
     }
+
+
+    // Check digit validation
 
     private String getCheckDigitStatus(
             String content,
@@ -225,18 +391,21 @@ public class DecodeActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validateMod10(String content, int expectedLength) {
+    private boolean validateMod10(
+            String content,
+            int expectedLength
+    ) {
 
         if (content == null
                 || content.length() != expectedLength
                 || !content.matches("[0-9]+")) {
+
             return false;
         }
 
         int sum = 0;
         int weight = 3;
 
-        // Process all digits except the check digit.
         for (int i = content.length() - 2; i >= 0; i--) {
 
             int digit = content.charAt(i) - '0';
@@ -247,6 +416,7 @@ public class DecodeActivity extends AppCompatActivity {
         }
 
         int expectedCheckDigit = (10 - (sum % 10)) % 10;
+
         int actualCheckDigit =
                 content.charAt(content.length() - 1) - '0';
 
@@ -258,6 +428,7 @@ public class DecodeActivity extends AppCompatActivity {
         if (content == null
                 || content.length() != 8
                 || !content.matches("[0-9]+")) {
+
             return false;
         }
 
@@ -265,6 +436,7 @@ public class DecodeActivity extends AppCompatActivity {
 
         if (!numberSystem.equals("0")
                 && !numberSystem.equals("1")) {
+
             return false;
         }
 
@@ -280,69 +452,82 @@ public class DecodeActivity extends AppCompatActivity {
             case '0':
             case '1':
             case '2':
+
                 manufacturer =
                         compressed.substring(0, 2) + lastDigit + "00";
+
                 product =
                         "00" + compressed.substring(2, 5);
+
                 break;
 
             case '3':
+
                 manufacturer =
                         compressed.substring(0, 3) + "00";
+
                 product =
                         "000" + compressed.substring(3, 5);
+
                 break;
 
             case '4':
+
                 manufacturer =
                         compressed.substring(0, 4) + "0";
+
                 product =
                         "0000" + compressed.substring(4, 5);
+
                 break;
 
             default:
+
                 manufacturer =
                         compressed.substring(0, 5);
+
                 product =
                         "0000" + lastDigit;
+
                 break;
         }
 
         String expandedUpcA =
                 numberSystem + manufacturer + product;
 
-        return validateMod10(expandedUpcA + content.charAt(7), 12);
+        return validateMod10(
+                expandedUpcA + content.charAt(7),
+                12
+        );
     }
 
-    private void checkCameraPermission() {
 
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED) {
-
-            startScanning();
-
-        } else {
-
-            cameraPermissionLauncher.launch(
-                    Manifest.permission.CAMERA
-            );
-        }
-    }
+    // Scanning
 
     private void startScanning() {
 
-        if (decodeController == null) {
+        if (decodeController == null
+                || isScanning
+                || decodeViewModel.hasResult()) {
+
             return;
         }
 
+        isScanning = true;
+
         scannerPlaceholder.setVisibility(View.GONE);
+        decodeResultPanel.setVisibility(View.GONE);
+        cameraPreview.setVisibility(View.VISIBLE);
+
         textDecodeStatus.setText("SCANNING");
 
-        decodeController.startCamera();
         scannerOverlay.setVisibility(View.VISIBLE);
+
+        decodeController.startCamera();
     }
+
+
+    // Gallery
 
     private void setupGalleryButton() {
 
@@ -356,11 +541,17 @@ public class DecodeActivity extends AppCompatActivity {
         });
     }
 
+
+    // Result actions
+
     private void setupResultActions() {
 
         findViewById(R.id.buttonCopyResult).setOnClickListener(view -> {
 
-            if (decodedContent == null) {
+            DecodeResult result =
+                    decodeViewModel.getDecodedResult().getValue();
+
+            if (result == null) {
                 return;
             }
 
@@ -371,7 +562,7 @@ public class DecodeActivity extends AppCompatActivity {
 
             ClipData clip = ClipData.newPlainText(
                     "Decoded barcode",
-                    decodedContent
+                    result.getContent()
             );
 
             clipboard.setPrimaryClip(clip);
@@ -383,36 +574,50 @@ public class DecodeActivity extends AppCompatActivity {
             ).show();
         });
 
+
         findViewById(R.id.buttonShareResult).setOnClickListener(view -> {
 
-            if (decodedContent == null) {
+            DecodeResult result =
+                    decodeViewModel.getDecodedResult().getValue();
+
+            if (result == null) {
                 return;
             }
 
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
+
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, decodedContent);
+
+            shareIntent.putExtra(
+                    Intent.EXTRA_TEXT,
+                    result.getContent()
+            );
 
             startActivity(
                     Intent.createChooser(
                             shareIntent,
-                            "Share decoded barcodeContent"
+                            "Share decoded barcode content"
                     )
             );
         });
 
+
         findViewById(R.id.buttonScanAgain).setOnClickListener(view -> {
 
-            decodedContent = null;
+            decodeViewModel.clearResult();
 
             decodeResultPanel.setVisibility(View.GONE);
             cameraPreview.setVisibility(View.VISIBLE);
+            scannerOverlay.setVisibility(View.VISIBLE);
 
             decodeController.resetScanning();
 
             startScanning();
         });
     }
+
+
+    // Bottom navigation
 
     private void setupBottomNavigation() {
 
@@ -447,6 +652,22 @@ public class DecodeActivity extends AppCompatActivity {
         );
     }
 
+
+    // Zoom touch events
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+
+        if (zoomControlsController != null) {
+            zoomControlsController.onTouchEvent(event);
+        }
+
+        return super.dispatchTouchEvent(event);
+    }
+
+
+    // Activity lifecycle
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -464,6 +685,8 @@ public class DecodeActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
+        isScanning = false;
 
         if (decodeController != null) {
             decodeController.stopCamera();

@@ -73,6 +73,54 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
+        <!-- Camera zoom controls -->
+        <LinearLayout
+            android:id="@+id/zoomControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:background="#CC121212"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textZoomLevel"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="1.0×"
+                android:textColor="#F5F5F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderZoom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:value="1.0"
+                android:valueFrom="1.0"
+                android:valueTo="5.0"
+                android:stepSize="0.1"
+                app:haloColor="#33527AFF"
+                app:thumbColor="#8B9EFF"
+                 />
+
+            <ImageButton
+                android:id="@+id/buttonResetZoom"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Reset zoom"
+                android:padding="9dp"
+                android:src="@drawable/ic_refresh"
+                app:tint="#A9BDFF" />
+
+        </LinearLayout>
+
         <!-- Initial scanner placeholder -->
         <LinearLayout
             android:id="@+id/scannerPlaceholder"

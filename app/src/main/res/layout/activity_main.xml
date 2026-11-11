@@ -397,6 +397,9 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <include
+                layout="@layout/layout_qr_content_type" />
+
             <!-- NAME -->
             <TextView
                 android:layout_width="match_parent"

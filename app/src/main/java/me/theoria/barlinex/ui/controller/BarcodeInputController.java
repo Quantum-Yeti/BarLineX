@@ -2,6 +2,7 @@ package me.theoria.barlinex.ui.controller;
 
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -23,6 +24,8 @@ public class BarcodeInputController {
     private final EditText barcodeContentInput;
     private final TextInputLayout barcodeContentInputLayout;
     private final MaterialAutoCompleteTextView barcodeFormatDropdown;
+    private final View qrContentTypeSection;
+    private final MaterialAutoCompleteTextView qrContentTypeDropdown;
 
     // ViewModel
     private final BarcodeViewModel barcodeViewModel;
@@ -39,12 +42,16 @@ public class BarcodeInputController {
             EditText barcodeContentInput,
             TextInputLayout barcodeContentInputLayout,
             MaterialAutoCompleteTextView barcodeFormatDropdown,
-            TextView barcodeFormatCount
+            TextView barcodeFormatCount,
+            View qrContentTypeSection,
+            MaterialAutoCompleteTextView qrContentTypeDropdown
     ) {
         this.barcodeViewModel = barcodeViewModel;
         this.barcodeContentInput = barcodeContentInput;
         this.barcodeContentInputLayout = barcodeContentInputLayout;
         this.barcodeFormatDropdown = barcodeFormatDropdown;
+        this.qrContentTypeSection = qrContentTypeSection;
+        this.qrContentTypeDropdown = qrContentTypeDropdown;
 
         setupBarcodeFormatDropdown(barcodeFormatCount);
     }
@@ -119,10 +126,21 @@ public class BarcodeInputController {
         );
 
         applyBarcodeInputRules(barcodeFormat);
+
+        updateQrContentTypeVisibility(barcodeFormat);
+    }
+
+    // Qr Selected
+    private void updateQrContentTypeVisibility(BarcodeFormat barcodeFormat) {
+
+        qrContentTypeSection.setVisibility(
+                barcodeFormat == BarcodeFormat.QR_CODE
+                        ? View.VISIBLE
+                        : View.GONE
+        );
     }
 
     // Barcode content
-
     public void setBarcodeContent(String barcodeContent) {
 
         String content = barcodeContent != null ? barcodeContent : "";
@@ -140,17 +158,14 @@ public class BarcodeInputController {
     }
 
     // Input feedback
-
     public void setBarcodeInputError(String errorMessage) {
         barcodeContentInputLayout.setError(errorMessage);
     }
-
     public void clearBarcodeInputError() {
         barcodeContentInputLayout.setError(null);
     }
 
     // Input rules
-
     private void applyBarcodeInputRules(BarcodeFormat barcodeFormat) {
 
         boolean numericOnly =

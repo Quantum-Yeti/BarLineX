@@ -1,5 +1,6 @@
 package me.theoria.barlinex.ui.controller;
 
+import android.graphics.RectF;
 import android.util.Log;
 import android.util.Size;
 
@@ -13,6 +14,7 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ZoomState;
 import androidx.camera.core.resolutionselector.ResolutionSelector;
 import androidx.camera.core.resolutionselector.ResolutionStrategy;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -20,7 +22,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
@@ -42,43 +43,58 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import me.theoria.barlinex.ui.widget.ScannerOverlay;
+
 public class BarcodeDecoderController {
 
     private static final String TAG = "BarcodeDecodeController";
 
     public interface Listener {
         void onBarcodeDetected(String content, BarcodeFormat format);
+
         void onScanError(String message, Exception error);
+
+        void onZoomCapabilitiesChanged(float maxZoomRatio);
     }
 
     private final AppCompatActivity activity;
     private final PreviewView previewView;
+    private final ScannerOverlay scannerOverlay;
     private final Listener listener;
 
     private final ExecutorService analysisExecutor =
             Executors.newSingleThreadExecutor();
 
-    private final AtomicBoolean resultDelivered = new AtomicBoolean(false);
+    private final AtomicBoolean resultDelivered =
+            new AtomicBoolean(false);
 
-    private final MultiFormatReader reader = new MultiFormatReader();
+    private final MultiFormatReader reader =
+            new MultiFormatReader();
 
     private ProcessCameraProvider cameraProvider;
     private Preview preview;
     private ImageAnalysis imageAnalysis;
+    private Camera camera;
+
+    private float zoomRatio = 1.0f;
 
     private boolean closed;
 
     public BarcodeDecoderController(
             AppCompatActivity activity,
             PreviewView previewView,
+            ScannerOverlay scannerOverlay,
             Listener listener
     ) {
         this.activity = activity;
         this.previewView = previewView;
+        this.scannerOverlay = scannerOverlay;
         this.listener = listener;
 
         configureReader();
     }
+
+    // Barcode reader configuration
 
     private void configureReader() {
 
@@ -102,7 +118,8 @@ public class BarcodeDecoderController {
         reader.setHints(hints);
     }
 
-    // Camera
+    // Camera lifecycle
+
     public void startCamera() {
 
         if (closed) {
@@ -116,7 +133,9 @@ public class BarcodeDecoderController {
 
             try {
 
-                if (closed || activity.isFinishing() || activity.isDestroyed()) {
+                if (closed
+                        || activity.isFinishing()
+                        || activity.isDestroyed()) {
                     return;
                 }
 
@@ -128,18 +147,22 @@ public class BarcodeDecoderController {
                         previewView.getSurfaceProvider()
                 );
 
-                ResolutionSelector resolutionSelector = new ResolutionSelector.Builder()
-                        .setResolutionStrategy(
-                                new ResolutionStrategy(
-                                        new Size(1920, 1080),
-                                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                ResolutionSelector resolutionSelector =
+                        new ResolutionSelector.Builder()
+                                .setResolutionStrategy(
+                                        new ResolutionStrategy(
+                                                new Size(1920, 1080),
+                                                ResolutionStrategy
+                                                        .FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                                        )
                                 )
-                        )
-                        .build();
+                                .build();
 
                 imageAnalysis = new ImageAnalysis.Builder()
                         .setResolutionSelector(resolutionSelector)
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setBackpressureStrategy(
+                                ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+                        )
                         .build();
 
                 imageAnalysis.setAnalyzer(
@@ -149,7 +172,7 @@ public class BarcodeDecoderController {
 
                 cameraProvider.unbindAll();
 
-                Camera camera = cameraProvider.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                         activity,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
@@ -157,6 +180,7 @@ public class BarcodeDecoderController {
                 );
 
                 focusCamera(camera);
+                initializeZoom();
 
             } catch (Exception e) {
 
@@ -171,11 +195,39 @@ public class BarcodeDecoderController {
         }, ContextCompat.getMainExecutor(activity));
     }
 
+    private void initializeZoom() {
+
+        if (camera == null) {
+            return;
+        }
+
+        ZoomState zoomState = camera.getCameraInfo()
+                .getZoomState()
+                .getValue();
+
+        if (zoomState == null) {
+            return;
+        }
+
+        float maxZoom = zoomState.getMaxZoomRatio();
+
+        zoomRatio = Math.max(
+                zoomState.getMinZoomRatio(),
+                Math.min(zoomRatio, maxZoom)
+        );
+
+        camera.getCameraControl().setZoomRatio(zoomRatio);
+
+        listener.onZoomCapabilitiesChanged(maxZoom);
+    }
+
     private void focusCamera(Camera camera) {
 
         previewView.post(() -> {
 
-            if (closed || activity.isFinishing() || activity.isDestroyed()) {
+            if (closed
+                    || activity.isFinishing()
+                    || activity.isDestroyed()) {
                 return;
             }
 
@@ -186,21 +238,27 @@ public class BarcodeDecoderController {
                     .getMeteringPointFactory()
                     .createPoint(centerX, centerY);
 
-            FocusMeteringAction action = new FocusMeteringAction.Builder(
-                    point,
-                    FocusMeteringAction.FLAG_AF
-                            | FocusMeteringAction.FLAG_AE
-                            | FocusMeteringAction.FLAG_AWB
-            )
-                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
-                    .build();
+            FocusMeteringAction action =
+                    new FocusMeteringAction.Builder(
+                            point,
+                            FocusMeteringAction.FLAG_AF
+                                    | FocusMeteringAction.FLAG_AE
+                                    | FocusMeteringAction.FLAG_AWB
+                    )
+                            .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                            .build();
 
-            CameraControl cameraControl = camera.getCameraControl();
+            CameraControl cameraControl =
+                    camera.getCameraControl();
 
             cameraControl.startFocusAndMetering(action)
-                    .addListener(() -> {
-                        Log.d(TAG, "Camera focus operation completed.");
-                    }, ContextCompat.getMainExecutor(activity));
+                    .addListener(
+                            () -> Log.d(
+                                    TAG,
+                                    "Camera focus operation completed."
+                            ),
+                            ContextCompat.getMainExecutor(activity)
+                    );
         });
     }
 
@@ -216,10 +274,12 @@ public class BarcodeDecoderController {
             cameraProvider = null;
         }
 
+        camera = null;
         preview = null;
     }
 
-    // Barcode analysis
+    // Barcode image analysis
+
     private void analyzeImage(@NonNull ImageProxy image) {
 
         try {
@@ -228,11 +288,13 @@ public class BarcodeDecoderController {
                 return;
             }
 
-            if (image.getFormat() != android.graphics.ImageFormat.YUV_420_888) {
+            if (image.getFormat()
+                    != android.graphics.ImageFormat.YUV_420_888) {
                 return;
             }
 
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            ByteBuffer buffer =
+                    image.getPlanes()[0].getBuffer();
 
             int width = image.getWidth();
             int height = image.getHeight();
@@ -245,7 +307,8 @@ public class BarcodeDecoderController {
                     image.getPlanes()[0].getPixelStride()
             );
 
-            int rotation = image.getImageInfo().getRotationDegrees();
+            int rotation =
+                    image.getImageInfo().getRotationDegrees();
 
             LuminanceFrame frame = rotateLuminance(
                     luminance,
@@ -265,8 +328,13 @@ public class BarcodeDecoderController {
 
                 activity.runOnUiThread(() -> {
 
-                    if (!activity.isFinishing() && !activity.isDestroyed()) {
-                        listener.onBarcodeDetected(content, format);
+                    if (!activity.isFinishing()
+                            && !activity.isDestroyed()) {
+
+                        listener.onBarcodeDetected(
+                                content,
+                                format
+                        );
                     }
                 });
             }
@@ -284,43 +352,103 @@ public class BarcodeDecoderController {
 
     private Result decodeFrame(LuminanceFrame frame) {
 
-        PlanarYUVLuminanceSource fullSource =
+        RectF guideRect = scannerOverlay.getGuideRect();
+
+        int overlayWidth = scannerOverlay.getWidth();
+        int overlayHeight = scannerOverlay.getHeight();
+
+        if (overlayWidth <= 0
+                || overlayHeight <= 0
+                || guideRect.isEmpty()) {
+            return null;
+        }
+
+        // Convert overlay coordinates into image coordinates.
+
+        int left = Math.round(
+                guideRect.left / overlayWidth * frame.width
+        );
+
+        int top = Math.round(
+                guideRect.top / overlayHeight * frame.height
+        );
+
+        int right = Math.round(
+                guideRect.right / overlayWidth * frame.width
+        );
+
+        int bottom = Math.round(
+                guideRect.bottom / overlayHeight * frame.height
+        );
+
+        // Keep the scanning area inside the image boundaries.
+
+        left = Math.max(
+                0,
+                Math.min(left, frame.width - 1)
+        );
+
+        top = Math.max(
+                0,
+                Math.min(top, frame.height - 1)
+        );
+
+        right = Math.max(
+                left + 1,
+                Math.min(right, frame.width)
+        );
+
+        bottom = Math.max(
+                top + 1,
+                Math.min(bottom, frame.height)
+        );
+
+        int cropWidth = right - left;
+        int cropHeight = bottom - top;
+
+        LuminanceSource scanArea =
                 new PlanarYUVLuminanceSource(
                         frame.data,
                         frame.width,
                         frame.height,
-                        0,
-                        0,
-                        frame.width,
-                        frame.height,
+                        left,
+                        top,
+                        cropWidth,
+                        cropHeight,
                         false
                 );
 
-        // Attempt 1: Full image using HybridBinarizer and fallbacks.
-        Result result = tryDecode(fullSource);
+        // Attempt 1: Decode the complete scanning area.
+
+        Result result = tryDecode(scanArea);
 
         if (result != null) {
             return result;
         }
 
         // Attempt 2: Focus on the central horizontal band.
-        int bandHeight = Math.max(1, frame.height * 2 / 3);
-        int top = (frame.height - bandHeight) / 2;
 
-        LuminanceSource centerBand = fullSource.crop(
+        int bandHeight = Math.max(
+                1,
+                cropHeight * 2 / 3
+        );
+
+        int bandTop = (cropHeight - bandHeight) / 2;
+
+        LuminanceSource centerBand = scanArea.crop(
                 0,
-                top,
-                frame.width,
+                bandTop,
+                cropWidth,
                 bandHeight
         );
 
         return tryDecode(centerBand);
     }
 
-
     private Result tryDecode(LuminanceSource source) {
 
         // Attempt 1: Hybrid binarization.
+
         Result result = decodeWithHybrid(source);
 
         if (result != null) {
@@ -328,6 +456,7 @@ public class BarcodeDecoderController {
         }
 
         // Attempt 2: Global histogram binarization.
+
         result = decodeWithGlobal(source);
 
         if (result != null) {
@@ -335,9 +464,9 @@ public class BarcodeDecoderController {
         }
 
         // Attempt 3: Try an inverted image.
+
         return decodeWithHybrid(source.invert());
     }
-
 
     private Result decodeWithHybrid(LuminanceSource source) {
 
@@ -356,7 +485,6 @@ public class BarcodeDecoderController {
         }
     }
 
-
     private Result decodeWithGlobal(LuminanceSource source) {
 
         try {
@@ -373,6 +501,8 @@ public class BarcodeDecoderController {
             return null;
         }
     }
+
+    // Image conversion
 
     private byte[] copyLuminance(
             ByteBuffer buffer,
@@ -399,10 +529,6 @@ public class BarcodeDecoderController {
         return data;
     }
 
-    // --------------------------------------------------
-    // Image rotation
-    // --------------------------------------------------
-
     private LuminanceFrame rotateLuminance(
             byte[] source,
             int width,
@@ -414,14 +540,25 @@ public class BarcodeDecoderController {
             return new LuminanceFrame(source, width, height);
         }
 
-        if (rotation != 90 && rotation != 180 && rotation != 270) {
-            return new LuminanceFrame(source, width, height);
+        if (rotation != 90
+                && rotation != 180
+                && rotation != 270) {
+
+            return new LuminanceFrame(
+                    source,
+                    width,
+                    height
+            );
         }
 
-        int rotatedWidth = (rotation == 180) ? width : height;
-        int rotatedHeight = (rotation == 180) ? height : width;
+        int rotatedWidth =
+                (rotation == 180) ? width : height;
 
-        byte[] rotated = new byte[rotatedWidth * rotatedHeight];
+        int rotatedHeight =
+                (rotation == 180) ? height : width;
+
+        byte[] rotated =
+                new byte[rotatedWidth * rotatedHeight];
 
         for (int y = 0; y < height; y++) {
 
@@ -446,8 +583,9 @@ public class BarcodeDecoderController {
                     destinationY = width - 1 - x;
                 }
 
-                rotated[destinationY * rotatedWidth + destinationX] =
-                        source[y * width + x];
+                rotated[
+                        destinationY * rotatedWidth + destinationX
+                        ] = source[y * width + x];
             }
         }
 
@@ -464,30 +602,75 @@ public class BarcodeDecoderController {
         final int width;
         final int height;
 
-        LuminanceFrame(byte[] data, int width, int height) {
+        LuminanceFrame(
+                byte[] data,
+                int width,
+                int height
+        ) {
             this.data = data;
             this.width = width;
             this.height = height;
         }
     }
 
-    // --------------------------------------------------
     // Scan controls
-    // --------------------------------------------------
 
     public void resetScanning() {
         resultDelivered.set(false);
     }
 
-    private void notifyError(String message, Exception error) {
+    private void notifyError(
+            String message,
+            Exception error
+    ) {
 
         activity.runOnUiThread(() -> {
 
-            if (!activity.isFinishing() && !activity.isDestroyed()) {
-                listener.onScanError(message, error);
+            if (!activity.isFinishing()
+                    && !activity.isDestroyed()) {
+
+                listener.onScanError(
+                        message,
+                        error
+                );
             }
         });
     }
+
+    // Camera zoom
+
+    public float setZoomRatio(float requestedZoom) {
+
+        if (camera == null) {
+            return zoomRatio;
+        }
+
+        ZoomState zoomState = camera.getCameraInfo()
+                .getZoomState()
+                .getValue();
+
+        if (zoomState == null) {
+            return zoomRatio;
+        }
+
+        float minZoom = zoomState.getMinZoomRatio();
+        float maxZoom = zoomState.getMaxZoomRatio();
+
+        zoomRatio = Math.max(
+                minZoom,
+                Math.min(requestedZoom, maxZoom)
+        );
+
+        camera.getCameraControl().setZoomRatio(zoomRatio);
+
+        return zoomRatio;
+    }
+
+    public float getZoomRatio() {
+        return zoomRatio;
+    }
+
+    // Cleanup
 
     public void close() {
 
@@ -497,4 +680,3 @@ public class BarcodeDecoderController {
         analysisExecutor.shutdown();
     }
 }
-
