@@ -40,6 +40,7 @@ import me.theoria.barlinex.ui.controller.NumberScannerController;
 import me.theoria.barlinex.ui.helper.BottomNavigationHelper;
 import me.theoria.barlinex.ui.helper.WindowsInsetHelper;
 import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.ui.widget.ScannerOverlay;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View createContent;
     private View scanOverlay;
-    private View numberScannerOverlay;
+    private ScannerOverlay numberScannerOverlay;
 
     private PreviewView cameraPreview;
 
@@ -202,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
         createContent = findViewById(R.id.createContent);
         scanOverlay = findViewById(R.id.scanOverlay);
+        numberScannerOverlay = findViewById(R.id.numberScannerOverlay);
 
         cameraPreview = findViewById(R.id.cameraPreview);
         numberScannerOverlay = findViewById(R.id.numberScannerOverlay);
@@ -496,9 +498,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Detected number
-    private void handleConfirmedNumber(String confirmedNumber) {
+    private void handleConfirmedText(String confirmedText) {
 
-        inputController.setBarcodeContent(confirmedNumber);
+        inputController.setBarcodeContent(confirmedText);
 
         inputContent.setSelection(
                 inputContent.getText().length()
@@ -510,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(
                 this,
-                "Number added to barcode",
+                "Text added to barcode",
                 Toast.LENGTH_SHORT
         ).show();
     }
@@ -552,15 +554,28 @@ public class MainActivity extends AppCompatActivity {
         scannerController = new NumberScannerController(
                 this,
                 cameraPreview,
+                (me.theoria.barlinex.ui.widget.ScannerOverlay)
+                        numberScannerOverlay,
                 buttonCapture,
                 new NumberScannerController.Listener() {
 
                     @Override
-                    public void onNumberDetected(String number) {
+                    public void onTextDetected(String text) {
 
                         detectedNumberDialogController.show(
-                                number,
-                                MainActivity.this::handleConfirmedNumber
+                                text,
+                                new DetectedNumberDialogController.Listener() {
+
+                                    @Override
+                                    public void onTextConfirmed(String confirmedText) {
+                                        handleConfirmedText(confirmedText);
+                                    }
+
+                                    @Override
+                                    public void onDialogDismissed() {
+                                        scannerController.resumeScanning();
+                                    }
+                                }
                         );
                     }
 
@@ -584,7 +599,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         buttonCapture.setOnClickListener(
-                v -> scannerController.capturePhoto()
+                v -> scannerController.confirmCurrentText()
         );
     }
 

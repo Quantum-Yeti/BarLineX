@@ -543,24 +543,27 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonCapture"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
+            android:layout_width="160dp"
+            android:layout_height="56dp"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="24dp"
-            android:contentDescription="Take photo"
+            android:contentDescription="Use detected text"
+            android:enabled="false"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            android:padding="0dp"
-            android:text=""
+            android:paddingHorizontal="16dp"
+            android:text="Use Text"
+            android:textAllCaps="false"
+            android:textColor="#121212"
+            android:textSize="14sp"
+            android:textStyle="bold"
             app:backgroundTint="#8B9EFF"
-            app:cornerRadius="36dp"
+            app:cornerRadius="28dp"
             app:icon="@drawable/ic_scan_number"
             app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="28dp"
-            app:iconTint="#121212"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="3dp" />
+            app:iconPadding="8dp"
+            app:iconSize="22dp"
+            app:iconTint="#121212" />
 
     </FrameLayout>
 

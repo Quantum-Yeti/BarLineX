@@ -2,6 +2,7 @@ package me.theoria.barlinex.ui.controller;
 
 import android.app.AlertDialog;
 import android.text.InputType;
+import android.view.Gravity;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,45 +10,61 @@ import androidx.appcompat.app.AppCompatActivity;
 public class DetectedNumberDialogController {
 
     public interface Listener {
-        void onNumberConfirmed(String number);
+
+        void onTextConfirmed(String text);
+
+        default void onDialogDismissed() {
+            // Optional dismissal callback.
+        }
     }
 
     private final AppCompatActivity activity;
 
-    public DetectedNumberDialogController(AppCompatActivity activity) {
+    public DetectedNumberDialogController(
+            AppCompatActivity activity
+    ) {
         this.activity = activity;
     }
 
-    public void show(String detectedNumber, Listener listener) {
+    public void show(String detectedText, Listener listener) {
 
-        EditText numberInput = new EditText(activity);
+        EditText textInput = new EditText(activity);
 
-        numberInput.setSingleLine(true);
-        numberInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        numberInput.setText(detectedNumber);
-        numberInput.setSelection(numberInput.getText().length());
-        numberInput.setHint("Review or correct the number");
+        textInput.setSingleLine(false);
+        textInput.setMinLines(3);
+        textInput.setMaxLines(6);
+        textInput.setGravity(Gravity.TOP | Gravity.START);
+
+        textInput.setInputType(
+                InputType.TYPE_CLASS_TEXT
+                        | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                        | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        );
+
+        textInput.setText(detectedText);
+        textInput.setSelection(textInput.getText().length());
+        textInput.setHint("Review or correct the detected text");
 
         int horizontalPadding = (int) (
                 24 * activity.getResources()
                         .getDisplayMetrics().density
         );
 
-        numberInput.setPadding(
+        textInput.setPadding(
                 horizontalPadding,
-                numberInput.getPaddingTop(),
+                textInput.getPaddingTop(),
                 horizontalPadding,
-                numberInput.getPaddingBottom()
+                textInput.getPaddingBottom()
         );
 
         AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle("Review detected number")
+                .setTitle("Review detected text")
                 .setMessage(
-                        "Check the digits before using them in your barcode."
+                        "Check the recognized text before using it in your barcode."
                 )
-                .setView(numberInput)
+                .setView(textInput)
                 .setNegativeButton("Retake", null)
-                .setPositiveButton("Use Number", null)
+                .setPositiveButton("Use Text", null)
                 .create();
 
         dialog.setOnShowListener(dialogInterface -> {
@@ -55,22 +72,28 @@ public class DetectedNumberDialogController {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                     .setOnClickListener(v -> {
 
-                        String confirmedNumber = numberInput
+                        String confirmedText = textInput
                                 .getText()
                                 .toString()
                                 .trim();
 
-                        if (confirmedNumber.isEmpty()) {
-                            numberInput.setError("Enter a number first.");
+                        if (confirmedText.isEmpty()) {
+                            textInput.setError("Enter some text first.");
                             return;
                         }
 
                         if (listener != null) {
-                            listener.onNumberConfirmed(confirmedNumber);
+                            listener.onTextConfirmed(confirmedText);
                         }
 
                         dialog.dismiss();
                     });
+        });
+
+        dialog.setOnDismissListener(dialogInterface -> {
+            if (listener != null) {
+                listener.onDialogDismissed();
+            }
         });
 
         dialog.show();

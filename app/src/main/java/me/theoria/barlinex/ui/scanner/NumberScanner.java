@@ -1,72 +1,77 @@
 package me.theoria.barlinex.ui.scanner;
 
-import android.content.Context;
-import android.net.Uri;
+import android.graphics.RectF;
 
+import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import androidx.annotation.OptIn;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageProxy;
 
 public class NumberScanner {
 
-    private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
+    private final TextRecognizer recognizer =
+            TextRecognition.getClient(
+                    TextRecognizerOptions.DEFAULT_OPTIONS
+            );
 
-    public interface Listener {
-        void onScanResult(String number);
-        void onScanError(Exception error);
-        void onScanComplete();
-    }
+    @OptIn(markerClass = ExperimentalGetImage.class)
+    public Task<Text> process(ImageProxy imageProxy) {
 
-    public void scan(Context context, Uri imageUri, Listener listener) {
+        if (imageProxy.getImage() == null) {
+            throw new IllegalStateException(
+                    "Camera frame does not contain an image."
+            );
+        }
 
-        TextRecognizer recognizer = TextRecognition.getClient(
-                TextRecognizerOptions.DEFAULT_OPTIONS
+        InputImage image = InputImage.fromMediaImage(
+                imageProxy.getImage(),
+                imageProxy.getImageInfo().getRotationDegrees()
         );
 
-        try {
-            InputImage image = InputImage.fromFilePath(context, imageUri);
-
-            recognizer.process(image)
-                    .addOnSuccessListener(result -> {
-                        String number = findBestNumber(result.getText());
-                        listener.onScanResult(number);
-                    })
-                    .addOnFailureListener(listener::onScanError)
-                    .addOnCompleteListener(task -> {
-                        recognizer.close();
-                        listener.onScanComplete();
-                    });
-
-        } catch (IOException | RuntimeException e) {
-            recognizer.close();
-            listener.onScanError(e);
-            listener.onScanComplete();
-        }
+        return recognizer.process(image);
     }
 
-    private String findBestNumber(String recognizedText) {
+    public String extractText(Text result, RectF scanRegion) {
 
-        if (recognizedText == null || recognizedText.isEmpty()) {
+        if (result == null || scanRegion == null) {
             return "";
         }
 
-        Matcher matcher = NUMBER_PATTERN.matcher(recognizedText);
-        String bestNumber = "";
+        StringBuilder extractedText = new StringBuilder();
 
-        while (matcher.find()) {
-            String candidate = matcher.group();
+        for (Text.TextBlock block : result.getTextBlocks()) {
 
-            if (candidate.length() > bestNumber.length()) {
-                bestNumber = candidate;
+            for (Text.Line line : block.getLines()) {
+
+                if (line.getBoundingBox() == null) {
+                    continue;
+                }
+
+                RectF lineBounds = new RectF(
+                        line.getBoundingBox()
+                );
+
+                if (RectF.intersects(lineBounds, scanRegion)) {
+
+                    if (extractedText.length() > 0) {
+                        extractedText.append("\n");
+                    }
+
+                    extractedText.append(line.getText());
+                }
             }
         }
 
-        return bestNumber;
+        return extractedText.toString().trim();
+    }
+
+    public void close() {
+        recognizer.close();
     }
 }
-

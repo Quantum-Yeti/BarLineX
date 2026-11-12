@@ -1,63 +1,110 @@
+
 package me.theoria.barlinex.ui.controller;
 
-import android.content.ContentValues;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
+import android.graphics.RectF;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.FocusMeteringAction;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.MeteringPoint;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.camera.view.TransformExperimental;
+import androidx.camera.view.transform.CoordinateTransform;
+import androidx.camera.view.transform.ImageProxyTransformFactory;
+import androidx.camera.view.transform.OutputTransform;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import me.theoria.barlinex.ui.scanner.NumberScanner;
+import me.theoria.barlinex.ui.widget.ScannerOverlay;
 
+@TransformExperimental
 public class NumberScannerController {
 
     private static final String TAG = "NumberScannerController";
+    private static final long ANALYSIS_INTERVAL_MS = 250L;
 
     public interface Listener {
-        void onNumberDetected(String number);
+        void onTextDetected(String text);
         void onScanError(String message, Exception error);
     }
 
+    // UI components
     private final AppCompatActivity activity;
     private final PreviewView previewView;
-    private final MaterialButton captureButton;
+    private final ScannerOverlay scannerOverlay;
+    private final MaterialButton useTextButton;
+
+    // Scanner
     private final NumberScanner numberScanner;
     private final Listener listener;
 
+    // Camera image transformation
+    private final ImageProxyTransformFactory imageTransformFactory =
+            new ImageProxyTransformFactory();
+
+    // Background processing
+    private final ExecutorService analysisExecutor =
+            Executors.newSingleThreadExecutor();
+
+    private final AtomicBoolean processingFrame =
+            new AtomicBoolean(false);
+
+    // Camera components
     private ProcessCameraProvider cameraProvider;
-    private ImageCapture imageCapture;
-    private Uri pendingImageUri;
+    private ImageAnalysis imageAnalysis;
+    private Camera camera;
+
+    // Scanner state
+    private volatile boolean cameraActive = false;
+    private volatile boolean paused = false;
+
+    private long lastAnalysisTime = 0L;
+    private String stableText = "";
 
     public NumberScannerController(
             AppCompatActivity activity,
             PreviewView previewView,
-            MaterialButton captureButton,
+            ScannerOverlay scannerOverlay,
+            MaterialButton useTextButton,
             Listener listener
     ) {
+
         this.activity = activity;
         this.previewView = previewView;
-        this.captureButton = captureButton;
+        this.scannerOverlay = scannerOverlay;
+        this.useTextButton = useTextButton;
         this.listener = listener;
+
         this.numberScanner = new NumberScanner();
+
+        imageTransformFactory.setUsingCropRect(true);
+        imageTransformFactory.setUsingRotationDegrees(true);
+
+        useTextButton.setEnabled(false);
     }
 
-    // Camera
+    // Camera initialization
     public void startCamera() {
+
+        if (cameraActive) {
+            return;
+        }
 
         ListenableFuture<ProcessCameraProvider> future =
                 ProcessCameraProvider.getInstance(activity);
@@ -72,32 +119,44 @@ public class NumberScannerController {
 
                 cameraProvider = future.get();
 
-                Preview preview = new Preview.Builder().build();
+                Preview preview = new Preview.Builder()
+                        .build();
 
                 preview.setSurfaceProvider(
                         previewView.getSurfaceProvider()
                 );
 
-                imageCapture = new ImageCapture.Builder()
-                        .setCaptureMode(
-                                ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+                int rotation = previewView.getDisplay() != null
+                        ? previewView.getDisplay().getRotation()
+                        : Surface.ROTATION_0;
+
+                imageAnalysis = new ImageAnalysis.Builder()
+                        .setTargetRotation(rotation)
+                        .setBackpressureStrategy(
+                                ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
                         )
                         .build();
 
+                imageAnalysis.setAnalyzer(
+                        analysisExecutor,
+                        this::analyzeFrame
+                );
+
                 cameraProvider.unbindAll();
 
-                cameraProvider.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                         activity,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
-                        imageCapture
+                        imageAnalysis
                 );
 
-            } catch (ExecutionException | InterruptedException e) {
+                cameraActive = true;
+                paused = false;
 
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
+                focusOnScanningArea();
+
+            } catch (Exception e) {
 
                 Log.e(TAG, "Could not start camera", e);
 
@@ -110,174 +169,231 @@ public class NumberScannerController {
         }, ContextCompat.getMainExecutor(activity));
     }
 
+    // Camera focus
+    private void focusOnScanningArea() {
+
+        previewView.post(() -> {
+
+            if (camera == null || !cameraActive) {
+                return;
+            }
+
+            RectF guide = scannerOverlay.getGuideRect();
+
+            MeteringPoint point =
+                    previewView.getMeteringPointFactory().createPoint(
+                            guide.centerX(),
+                            guide.centerY()
+                    );
+
+            FocusMeteringAction action =
+                    new FocusMeteringAction.Builder(point)
+                            .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                            .build();
+
+            camera.getCameraControl().startFocusAndMetering(action);
+        });
+    }
+
+    // Scanning region transformation
+    private RectF getImageScanRegion(ImageProxy imageProxy) {
+
+        OutputTransform previewTransform =
+                previewView.getOutputTransform();
+
+        if (previewTransform == null) {
+            return null;
+        }
+
+        OutputTransform imageTransform =
+                imageTransformFactory.getOutputTransform(imageProxy);
+
+        RectF scanRegion = scannerOverlay.getGuideRect();
+
+        CoordinateTransform coordinateTransform =
+                new CoordinateTransform(
+                        previewTransform,
+                        imageTransform
+                );
+
+        coordinateTransform.mapRect(scanRegion);
+
+        int rotation =
+                imageProxy.getImageInfo().getRotationDegrees();
+
+        int imageWidth = imageProxy.getWidth();
+        int imageHeight = imageProxy.getHeight();
+
+        if (rotation == 90 || rotation == 270) {
+            imageWidth = imageProxy.getHeight();
+            imageHeight = imageProxy.getWidth();
+        }
+
+        if (!scanRegion.intersect(
+                0,
+                0,
+                imageWidth,
+                imageHeight
+        )) {
+            return null;
+        }
+
+        return scanRegion;
+    }
+
+    // Live image analysis
+    private void analyzeFrame(@NonNull ImageProxy imageProxy) {
+
+        if (!cameraActive || paused) {
+            imageProxy.close();
+            return;
+        }
+
+        long now = android.os.SystemClock.elapsedRealtime();
+
+        if (now - lastAnalysisTime < ANALYSIS_INTERVAL_MS
+                || !processingFrame.compareAndSet(false, true)) {
+
+            imageProxy.close();
+            return;
+        }
+
+        lastAnalysisTime = now;
+
+        try {
+
+            RectF scanRegion = getImageScanRegion(imageProxy);
+
+            if (scanRegion == null) {
+                imageProxy.close();
+                processingFrame.set(false);
+                return;
+            }
+
+            numberScanner.process(imageProxy)
+
+                    .addOnSuccessListener(
+                            ContextCompat.getMainExecutor(activity),
+                            result -> {
+
+                                if (!cameraActive || paused
+                                        || activity.isFinishing()
+                                        || activity.isDestroyed()) {
+                                    return;
+                                }
+
+                                String candidate =
+                                        numberScanner.extractText(
+                                                result,
+                                                scanRegion
+                                        );
+
+                                Log.d(
+                                        TAG,
+                                        "Recognized text: " + candidate
+                                );
+
+                                updateStableText(candidate);
+                            }
+                    )
+
+                    .addOnFailureListener(
+                            ContextCompat.getMainExecutor(activity),
+                            error -> Log.w(
+                                    TAG,
+                                    "Text recognition failed",
+                                    error
+                            )
+                    )
+
+                    .addOnCompleteListener(
+                            ContextCompat.getMainExecutor(activity),
+                            task -> {
+
+                                imageProxy.close();
+                                processingFrame.set(false);
+                            }
+                    );
+
+        } catch (Exception e) {
+
+            Log.e(TAG, "Could not process camera frame", e);
+
+            imageProxy.close();
+            processingFrame.set(false);
+        }
+    }
+
+    // Recognized text handling
+    private void updateStableText(String candidate) {
+
+        if (candidate == null || candidate.trim().isEmpty()) {
+            return;
+        }
+
+        stableText = candidate.trim();
+
+        useTextButton.setEnabled(true);
+
+        Log.d(TAG, "Text ready: " + stableText);
+    }
+
+    // User confirmation
+    public void confirmCurrentText() {
+
+        if (stableText == null || stableText.trim().isEmpty() || paused) {
+
+            Log.d(TAG, "No recognized text available.");
+            return;
+        }
+
+        paused = true;
+        useTextButton.setEnabled(false);
+
+        Log.d(TAG, "Confirming text: " + stableText);
+
+        listener.onTextDetected(stableText);
+    }
+
+    public void resumeScanning() {
+
+        if (!cameraActive) {
+            return;
+        }
+
+        paused = false;
+        stableText = "";
+
+        useTextButton.setEnabled(false);
+    }
+
+    // Camera cleanup
     public void stopCamera() {
 
-        imageCapture = null;
+        cameraActive = false;
+        paused = true;
+
+        if (imageAnalysis != null) {
+            imageAnalysis.clearAnalyzer();
+            imageAnalysis = null;
+        }
 
         if (cameraProvider != null) {
             cameraProvider.unbindAll();
             cameraProvider = null;
         }
-    }
 
-    // Image capture
-    public void capturePhoto() {
+        camera = null;
+        stableText = "";
 
-        if (imageCapture == null) {
-            Toast.makeText(
-                    activity,
-                    "Camera is not ready yet.",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-            return;
-        }
-
-        ContentValues values = new ContentValues();
-
-        values.put(
-                MediaStore.Images.Media.DISPLAY_NAME,
-                "BarLineX_scan_" + System.currentTimeMillis() + ".jpg"
-        );
-
-        values.put(
-                MediaStore.Images.Media.MIME_TYPE,
-                "image/jpeg"
-        );
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            values.put(
-                    MediaStore.Images.Media.RELATIVE_PATH,
-                    "Pictures/BarLineX/Scans"
-            );
-        }
-
-        ImageCapture.OutputFileOptions options =
-                new ImageCapture.OutputFileOptions.Builder(
-                        activity.getContentResolver(),
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        values
-                ).build();
-
-        captureButton.setEnabled(false);
-
-        imageCapture.takePicture(
-                options,
-                ContextCompat.getMainExecutor(activity),
-                new ImageCapture.OnImageSavedCallback() {
-
-                    @Override
-                    public void onImageSaved(
-                            @NonNull ImageCapture.OutputFileResults results
-                    ) {
-
-                        captureButton.setEnabled(true);
-
-                        Uri savedUri = results.getSavedUri();
-
-                        if (savedUri == null) {
-                            listener.onScanError(
-                                    "Could not save the photo. Please try again.",
-                                    null
-                            );
-                            return;
-                        }
-
-                        pendingImageUri = savedUri;
-
-                        processImage(savedUri);
-                    }
-
-                    @Override
-                    public void onError(
-                            @NonNull ImageCaptureException exception
-                    ) {
-
-                        captureButton.setEnabled(true);
-
-                        Log.e(TAG, "Photo capture failed", exception);
-
-                        listener.onScanError(
-                                "Could not take the photo. Please try again.",
-                                exception
-                        );
-                    }
-                }
-        );
-    }
-
-    // Number recognition
-    private void processImage(Uri imageUri) {
-
-        numberScanner.scan(
-                activity,
-                imageUri,
-                new NumberScanner.Listener() {
-
-                    @Override
-                    public void onScanResult(String number) {
-
-                        if (activity.isFinishing() || activity.isDestroyed()) {
-                            return;
-                        }
-
-                        if (number == null || number.isEmpty()) {
-
-                            listener.onScanError(
-                                    "No numbers detected. Try again with better lighting and a clearer photo.",
-                                    null
-                            );
-
-                        } else {
-
-                            listener.onNumberDetected(number);
-                        }
-                    }
-
-                    @Override
-                    public void onScanError(Exception error) {
-
-                        if (!activity.isFinishing() && !activity.isDestroyed()) {
-                            listener.onScanError(
-                                    "Could not read the number. Please try another photo.",
-                                    error
-                            );
-                        }
-                    }
-
-                    @Override
-                    public void onScanComplete() {
-                        deleteImage(imageUri);
-                    }
-                }
-        );
-    }
-
-    // Cleanup
-    private void deleteImage(Uri imageUri) {
-
-        try {
-            activity.getContentResolver().delete(
-                    imageUri,
-                    null,
-                    null
-            );
-
-        } catch (SecurityException e) {
-            Log.w(TAG, "Could not delete temporary scan image", e);
-        }
-
-        if (imageUri.equals(pendingImageUri)) {
-            pendingImageUri = null;
-        }
+        useTextButton.setEnabled(false);
     }
 
     public void close() {
+
         stopCamera();
 
-        if (pendingImageUri != null) {
-            deleteImage(pendingImageUri);
-        }
+        numberScanner.close();
+        analysisExecutor.shutdown();
     }
 }
-
