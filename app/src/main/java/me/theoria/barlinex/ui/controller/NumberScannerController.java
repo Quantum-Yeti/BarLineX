@@ -51,7 +51,7 @@ public class NumberScannerController {
     private final MaterialButton useTextButton;
 
     // Scanner
-    private final NumberScanner numberScanner;
+    private NumberScanner numberScanner;
     private final Listener listener;
 
     // Camera image transformation
@@ -91,8 +91,6 @@ public class NumberScannerController {
         this.useTextButton = useTextButton;
         this.listener = listener;
 
-        this.numberScanner = new NumberScanner();
-
         imageTransformFactory.setUsingCropRect(true);
         imageTransformFactory.setUsingRotationDegrees(true);
 
@@ -101,6 +99,10 @@ public class NumberScannerController {
 
     // Camera initialization
     public void startCamera() {
+
+        if (numberScanner == null) {
+            numberScanner = new NumberScanner();
+        }
 
         if (cameraActive) {
             return;
@@ -393,7 +395,11 @@ public class NumberScannerController {
 
         stopCamera();
 
-        numberScanner.close();
+        if (numberScanner != null) {
+            numberScanner.close();
+            numberScanner = null;
+        }
+
         analysisExecutor.shutdown();
     }
 }
