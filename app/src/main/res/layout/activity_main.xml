@@ -444,6 +444,7 @@
 
             <!-- CONTENT -->
             <TextView
+                android:id="@+id/barcodeContentLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -523,7 +524,7 @@
             android:layout_height="match_parent"
             app:scaleType="fillCenter" />
 
-        <me.theoria.barlinex.ui.widget.ScannerOverlay
+        <me.theoria.barlinex.ui.scanner.ScannerOverlay
             android:id="@+id/numberScannerOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

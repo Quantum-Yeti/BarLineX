@@ -4,19 +4,21 @@ import android.content.Context;
 
 import androidx.room.Room;
 
+import me.theoria.barlinex.data.local.BarcodeDatabase;
+
 public final class DatabaseProvider {
 
-    private static volatile AppDatabase INSTANCE;
+    private static volatile BarcodeDatabase INSTANCE;
 
     private DatabaseProvider() {}
 
-    public static AppDatabase getDatabase(Context context) {
+    public static BarcodeDatabase getDatabase(Context context) {
         if (INSTANCE == null) {
             synchronized (DatabaseProvider.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(
                             context.getApplicationContext(),
-                            AppDatabase.class,
+                            BarcodeDatabase.class,
                             "barlinex_database"
                     )
                             .fallbackToDestructiveMigration(true)

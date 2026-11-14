@@ -23,7 +23,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="#1C1C1E"
+        app:boxBackgroundColor="#121212"
         app:boxCornerRadiusBottomEnd="14dp"
         app:boxCornerRadiusBottomStart="14dp"
         app:boxCornerRadiusTopEnd="14dp"
@@ -43,8 +43,462 @@
             android:popupBackground="#232326"
             android:text="Text / URL"
             android:textColor="#F5F5F5"
-            android:textSize="15sp" />
+            android:textColorHint="#f5f5f5"
+            android:textSize="15sp"
+            />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- WI-FI -->
+    <LinearLayout
+        android:id="@+id/qrWifiFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrWifiSsid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Network name (SSID)"
+                android:inputType="text"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrWifiPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/qrWifiSecurity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:padding="16dp"
+                android:text="WPA/WPA2"
+                android:textColor="#F5F5F5"
+                android:textSize="15sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/qrWifiHidden"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Hidden network"
+            android:textColor="#D4D4D8"
+            app:buttonTint="#8B9EFF" />
+
+    </LinearLayout>
+
+    <!-- CONTACT -->
+    <LinearLayout
+        android:id="@+id/qrContactFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrContactFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="First name"
+                android:inputType="textCapWords"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrContactLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Last name"
+                android:inputType="textCapWords"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrContactPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrContactEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email address"
+                android:inputType="textEmailAddress"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrContactOrganization"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Organization (optional)"
+                android:inputType="textCapSentences"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <!-- EMAIL -->
+    <LinearLayout
+        android:id="@+id/qrEmailFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Recipient email"
+                android:inputType="textEmailAddress"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEmailSubject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Subject (optional)"
+                android:inputType="textCapSentences"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEmailBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Message (optional)"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <!-- SMS -->
+    <LinearLayout
+        android:id="@+id/qrSmsFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrSmsPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrSmsMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Message (optional)"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <!-- EVENT -->
+    <LinearLayout
+        android:id="@+id/qrEventFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEventTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Event title"
+                android:inputType="textCapSentences"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEventLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Location (optional)"
+                android:inputType="textCapSentences"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEventStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Start: yyyy-MM-dd HH:mm"
+                android:inputType="datetime"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEventEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="End: yyyy-MM-dd HH:mm"
+                android:inputType="datetime"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrEventDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Description (optional)"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <!-- LOCATION -->
+    <LinearLayout
+        android:id="@+id/qrLocationFields"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrLocationLatitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Latitude"
+                android:inputType="numberDecimal|numberSigned"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:boxBackgroundColor="#1C1C1E"
+            app:boxStrokeColor="#8B9EFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/qrLocationLongitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Longitude"
+                android:inputType="numberDecimal|numberSigned"
+                android:padding="16dp"
+                android:textColor="#F5F5F5"
+                android:textColorHint="#A1A1AA" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

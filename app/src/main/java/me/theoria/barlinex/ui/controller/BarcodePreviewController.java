@@ -10,12 +10,12 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.zxing.BarcodeFormat;
 
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.ui.formatter.BarcodeFormatDisplay;
-import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.ui.common.BarcodeFormatDisplay;
+import me.theoria.barlinex.ui.main.MainViewModel;
 
 public class BarcodePreviewController {
 
-    private final BarcodeViewModel barcodeViewModel;
+    private final MainViewModel mainViewModel;
     private final BarcodeInputController inputController;
 
     private final ImageView imagePreview;
@@ -27,7 +27,7 @@ public class BarcodePreviewController {
     private final TextView textPreviewInfo;
 
     public BarcodePreviewController(
-            BarcodeViewModel barcodeViewModel,
+            MainViewModel mainViewModel,
             BarcodeInputController inputController,
             ImageView imagePreview,
             View previewPlaceholder,
@@ -36,7 +36,7 @@ public class BarcodePreviewController {
             TextView textPreviewContent,
             TextView textPreviewInfo
     ) {
-        this.barcodeViewModel = barcodeViewModel;
+        this.mainViewModel = mainViewModel;
         this.inputController = inputController;
 
         this.imagePreview = imagePreview;
@@ -51,7 +51,7 @@ public class BarcodePreviewController {
     // Observers
     public void observeBarcode(LifecycleOwner lifecycleOwner) {
 
-        barcodeViewModel.getBarcodeImage().observe(
+        mainViewModel.getBarcodeImage().observe(
                 lifecycleOwner,
                 bitmap -> {
                     if (bitmap == null) {
@@ -62,7 +62,7 @@ public class BarcodePreviewController {
                 }
         );
 
-        barcodeViewModel.getBarcodeStatus().observe(
+        mainViewModel.getBarcodeStatus().observe(
                 lifecycleOwner,
                 message -> {
                     if (message == null || message.isEmpty()) {
@@ -94,7 +94,7 @@ public class BarcodePreviewController {
             return;
         }
 
-        barcodeViewModel.generateBarcode(
+        mainViewModel.generateBarcode(
                 content,
                 format,
                 false
@@ -128,12 +128,12 @@ public class BarcodePreviewController {
 
     // State
     private String getCurrentContent() {
-        String content = barcodeViewModel.getBarcodeContent().getValue();
+        String content = mainViewModel.getBarcodeContent().getValue();
         return content != null ? content.trim() : "";
     }
 
     private BarcodeFormat getSelectedFormat() {
-        BarcodeFormat format = barcodeViewModel.getSelectedBarcodeFormat().getValue();
+        BarcodeFormat format = mainViewModel.getSelectedBarcodeFormat().getValue();
         return format != null ? format : BarcodeFormat.QR_CODE;
     }
 

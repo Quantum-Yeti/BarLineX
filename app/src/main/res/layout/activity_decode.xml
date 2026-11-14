@@ -67,7 +67,7 @@
             android:layout_height="match_parent"
             android:visibility="visible" />
 
-        <me.theoria.barlinex.ui.widget.ScannerOverlay
+        <me.theoria.barlinex.ui.scanner.ScannerOverlay
             android:id="@+id/scannerOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

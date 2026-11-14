@@ -7,9 +7,7 @@ import com.google.zxing.BarcodeFormat;
 
 import org.junit.Test;
 
-import me.theoria.barlinex.domain.validator.BarcodeValidator;
-import me.theoria.barlinex.ui.controller.BarcodeInputController;
-import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.domain.barcode.BarcodeValidator;
 
 public class BarcodeValidatorTest {
 

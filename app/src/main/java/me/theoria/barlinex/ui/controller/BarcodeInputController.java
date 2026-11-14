@@ -1,7 +1,11 @@
 package me.theoria.barlinex.ui.controller;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,22 +17,29 @@ import com.google.zxing.BarcodeFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.theoria.barlinex.domain.rules.BarcodeFormatRules;
-import me.theoria.barlinex.ui.adapter.BarcodeFormatAdapter;
-import me.theoria.barlinex.ui.formatter.BarcodeFormatDisplay;
-import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.domain.barcode.BarcodeFormatRules;
+import me.theoria.barlinex.ui.common.BarcodeFormatAdapter;
+import me.theoria.barlinex.ui.common.BarcodeFormatDisplay;
+import me.theoria.barlinex.ui.main.MainViewModel;
 
 public class BarcodeInputController {
+
+    private static final long PREVIEW_DEBOUNCE_MS = 150L;
 
     // Views
     private final EditText barcodeContentInput;
     private final TextInputLayout barcodeContentInputLayout;
     private final MaterialAutoCompleteTextView barcodeFormatDropdown;
     private final View qrContentTypeSection;
-    private final MaterialAutoCompleteTextView qrContentTypeDropdown;
 
     // ViewModel
-    private final BarcodeViewModel barcodeViewModel;
+    private final MainViewModel mainViewModel;
+
+    // Preview
+    private final Handler previewHandler = new Handler(Looper.getMainLooper());
+    private Runnable previewRunnable;
+    private BarcodePreviewController previewController;
+    private boolean suppressPreviewUpdates = false;
 
     // Listener
     private OnBarcodeFormatChangedListener barcodeFormatChangedListener;
@@ -38,7 +49,7 @@ public class BarcodeInputController {
     }
 
     public BarcodeInputController(
-            BarcodeViewModel barcodeViewModel,
+            MainViewModel mainViewModel,
             EditText barcodeContentInput,
             TextInputLayout barcodeContentInputLayout,
             MaterialAutoCompleteTextView barcodeFormatDropdown,
@@ -46,18 +57,119 @@ public class BarcodeInputController {
             View qrContentTypeSection,
             MaterialAutoCompleteTextView qrContentTypeDropdown
     ) {
-        this.barcodeViewModel = barcodeViewModel;
+        this.mainViewModel = mainViewModel;
         this.barcodeContentInput = barcodeContentInput;
         this.barcodeContentInputLayout = barcodeContentInputLayout;
         this.barcodeFormatDropdown = barcodeFormatDropdown;
         this.qrContentTypeSection = qrContentTypeSection;
-        this.qrContentTypeDropdown = qrContentTypeDropdown;
 
         setupBarcodeFormatDropdown(barcodeFormatCount);
     }
 
-    // Format dropdown
+    // Text input listeners
+    public void setupTextWatchers(
+            EditText barcodeNameInput,
+            BarcodePreviewController previewController
+    ) {
+        this.previewController = previewController;
 
+        // Barcode name
+        barcodeNameInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(
+                    CharSequence s, int start, int count, int after
+            ) {
+            }
+
+            @Override
+            public void onTextChanged(
+                    CharSequence s, int start, int before, int count
+            ) {
+                mainViewModel.setBarcodeName(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+
+        // Barcode content
+        barcodeContentInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(
+                    CharSequence s, int start, int count, int after
+            ) {
+            }
+
+            @Override
+            public void onTextChanged(
+                    CharSequence s, int start, int before, int count
+            ) {
+                mainViewModel.setBarcodeContent(s.toString());
+
+                if (suppressPreviewUpdates || BarcodeInputController.this.previewController == null) {
+                    return;
+                }
+
+                BarcodeInputController.this.previewController.updatePreviewLabels();
+
+                schedulePreviewUpdate();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+    }
+
+    private void schedulePreviewUpdate() {
+        if (previewController == null || suppressPreviewUpdates) {
+            return;
+        }
+
+        cancelPendingPreviewUpdate();
+
+        previewRunnable = () -> {
+            if (previewController != null && !suppressPreviewUpdates) {
+                previewController.updateLivePreview();
+            }
+        };
+
+        previewHandler.postDelayed(
+                previewRunnable,
+                PREVIEW_DEBOUNCE_MS
+        );
+    }
+
+    public void refreshPreviewNow() {
+        cancelPendingPreviewUpdate();
+
+        if (previewController != null && !suppressPreviewUpdates) {
+            previewController.updateLivePreview();
+        }
+    }
+
+    public void setPreviewUpdatesSuppressed(boolean suppressed) {
+        suppressPreviewUpdates = suppressed;
+
+        if (suppressed) {
+            cancelPendingPreviewUpdate();
+        }
+    }
+
+    private void cancelPendingPreviewUpdate() {
+        if (previewRunnable != null) {
+            previewHandler.removeCallbacks(previewRunnable);
+            previewRunnable = null;
+        }
+    }
+
+    public void cleanup() {
+        cancelPendingPreviewUpdate();
+        previewController = null;
+    }
+
+    // Format dropdown
     private void setupBarcodeFormatDropdown(TextView barcodeFormatCount) {
 
         List<BarcodeFormat> supportedBarcodeFormats =
@@ -95,7 +207,7 @@ public class BarcodeInputController {
         );
 
         BarcodeFormat selectedBarcodeFormat =
-                barcodeViewModel.getSelectedBarcodeFormat().getValue();
+                mainViewModel.getSelectedBarcodeFormat().getValue();
 
         if (BarcodeFormatRules.isSupported(selectedBarcodeFormat)) {
             selectBarcodeFormat(selectedBarcodeFormat);
@@ -105,7 +217,6 @@ public class BarcodeInputController {
     }
 
     // Format selection
-
     public void setOnBarcodeFormatChangedListener(
             OnBarcodeFormatChangedListener listener
     ) {
@@ -118,7 +229,7 @@ public class BarcodeInputController {
             return;
         }
 
-        barcodeViewModel.setSelectedBarcodeFormat(barcodeFormat);
+        mainViewModel.setSelectedBarcodeFormat(barcodeFormat);
 
         barcodeFormatDropdown.setText(
                 BarcodeFormatDisplay.getFormatDisplayName(barcodeFormat),
@@ -130,7 +241,7 @@ public class BarcodeInputController {
         updateQrContentTypeVisibility(barcodeFormat);
     }
 
-    // Qr Selected
+    // QR content visibility
     private void updateQrContentTypeVisibility(BarcodeFormat barcodeFormat) {
 
         qrContentTypeSection.setVisibility(
@@ -145,7 +256,7 @@ public class BarcodeInputController {
 
         String content = barcodeContent != null ? barcodeContent : "";
 
-        barcodeViewModel.setBarcodeContent(content);
+        mainViewModel.setBarcodeContent(content);
 
         if (!barcodeContentInput.getText().toString().equals(content)) {
             barcodeContentInput.setText(content);
@@ -161,6 +272,7 @@ public class BarcodeInputController {
     public void setBarcodeInputError(String errorMessage) {
         barcodeContentInputLayout.setError(errorMessage);
     }
+
     public void clearBarcodeInputError() {
         barcodeContentInputLayout.setError(null);
     }
@@ -209,9 +321,9 @@ public class BarcodeInputController {
         }
 
         // Format-specific guidance
-        /*barcodeContentInputLayout.setHelperText(
-                BarcodeFormatRules.hintFor(barcodeFormat)
-        );*/
+        // barcodeContentInputLayout.setHelperText(
+        //         BarcodeFormatRules.hintFor(barcodeFormat)
+        // );
 
         barcodeContentInputLayout.setError(null);
     }

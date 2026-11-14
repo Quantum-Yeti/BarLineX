@@ -41,10 +41,10 @@ import java.util.Date;
 import java.util.Locale;
 
 import me.theoria.barlinex.R;
-import me.theoria.barlinex.data.BarcodeRepository;
-import me.theoria.barlinex.ui.BarcodePreviewActivity;
-import me.theoria.barlinex.ui.helper.BarcodeImageHelper;
-import me.theoria.barlinex.ui.viewmodel.BarcodeViewModel;
+import me.theoria.barlinex.data.repository.BarcodeRepository;
+import me.theoria.barlinex.ui.preview.BarcodePreviewActivity;
+import me.theoria.barlinex.ui.common.BarcodeImageHelper;
+import me.theoria.barlinex.ui.main.MainViewModel;
 
 public class BarcodeActionController {
 
@@ -59,7 +59,7 @@ public class BarcodeActionController {
     private final Runnable onOpenHistory;
 
     // ViewModel
-    private final BarcodeViewModel barcodeViewModel;
+    private final MainViewModel mainViewModel;
 
     private final ActivityResultLauncher<String> csvExportLauncher;
 
@@ -68,13 +68,13 @@ public class BarcodeActionController {
 
     public BarcodeActionController(
             AppCompatActivity activity,
-            BarcodeViewModel barcodeViewModel,
+            MainViewModel mainViewModel,
             MaterialButton buttonSaveBarcode,
             Runnable onOpenHistory,
             ActivityResultLauncher<String> csvExportLauncher
     ) {
         this.activity = activity;
-        this.barcodeViewModel = barcodeViewModel;
+        this.mainViewModel = mainViewModel;
         this.buttonSaveBarcode = buttonSaveBarcode;
         this.onOpenHistory = onOpenHistory;
         this.csvExportLauncher = csvExportLauncher;
@@ -91,7 +91,7 @@ public class BarcodeActionController {
             return;
         }
 
-        boolean generated = barcodeViewModel.generateBarcode(
+        boolean generated = mainViewModel.generateBarcode(
                 content,
                 format,
                 true,
@@ -134,7 +134,7 @@ public class BarcodeActionController {
     // Share barcode image
     public void shareBarcodeImage() {
 
-        Bitmap bitmap = barcodeViewModel
+        Bitmap bitmap = mainViewModel
                 .getBarcodeImage()
                 .getValue();
 
@@ -180,7 +180,7 @@ public class BarcodeActionController {
     // Copy barcode image
     public void copyBarcodeImage() {
 
-        Bitmap bitmap = barcodeViewModel
+        Bitmap bitmap = mainViewModel
                 .getBarcodeImage()
                 .getValue();
 
@@ -230,7 +230,7 @@ public class BarcodeActionController {
     // Export
     public void exportBarcodeImage() {
 
-        Bitmap bitmap = barcodeViewModel
+        Bitmap bitmap = mainViewModel
                 .getBarcodeImage()
                 .getValue();
 
@@ -339,7 +339,7 @@ public class BarcodeActionController {
     // Print barcode image
     public void printBarcodeImage() {
 
-        Bitmap bitmap = barcodeViewModel
+        Bitmap bitmap = mainViewModel
                 .getBarcodeImage()
                 .getValue();
 
@@ -385,7 +385,7 @@ public class BarcodeActionController {
 
         intent.putExtra(
                 EXTRA_BARCODE_NAME,
-                barcodeViewModel.getBarcodeName().getValue()
+                mainViewModel.getBarcodeName().getValue()
         );
 
         intent.putExtra(EXTRA_BARCODE_CONTENT, content);
@@ -410,7 +410,7 @@ public class BarcodeActionController {
             return false;
         }
 
-        return barcodeViewModel.generateBarcode(
+        return mainViewModel.generateBarcode(
                 content,
                 format,
                 false,
@@ -420,12 +420,12 @@ public class BarcodeActionController {
 
     // State
     private String getCurrentContent() {
-        String content = barcodeViewModel.getBarcodeContent().getValue();
+        String content = mainViewModel.getBarcodeContent().getValue();
         return content != null ? content.trim() : "";
     }
 
     private BarcodeFormat getSelectedFormat() {
-        BarcodeFormat format = barcodeViewModel.getSelectedBarcodeFormat().getValue();
+        BarcodeFormat format = mainViewModel.getSelectedBarcodeFormat().getValue();
         return format != null ? format : BarcodeFormat.QR_CODE;
     }
 
