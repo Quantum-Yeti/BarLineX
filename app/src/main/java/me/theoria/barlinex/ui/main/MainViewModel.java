@@ -13,23 +13,24 @@ import com.google.zxing.WriterException;
 
 import me.theoria.barlinex.data.local.BarcodeEntity;
 import me.theoria.barlinex.data.repository.BarcodeRepository;
-import me.theoria.barlinex.domain.barcode.BarcodeValidator;
+import me.theoria.barlinex.domain.barcode.BarcodeGenerationResult;
 import me.theoria.barlinex.domain.barcode.BarcodeGenerator;
+import me.theoria.barlinex.domain.barcode.BarcodeStatistics;
+import me.theoria.barlinex.domain.barcode.BarcodeValidator;
 
 public class MainViewModel extends AndroidViewModel {
 
-    // Repository
     private final BarcodeRepository barcodeRepository;
 
-    // Barcode preview
     private final MutableLiveData<Bitmap> barcodeImage =
             new MutableLiveData<>();
 
-    // Status
+    private final MutableLiveData<BarcodeStatistics> barcodeStatistics =
+            new MutableLiveData<>();
+
     private final MutableLiveData<String> barcodeStatus =
             new MutableLiveData<>("");
 
-    // Barcode input state
     private final MutableLiveData<BarcodeFormat> selectedBarcodeFormat =
             new MutableLiveData<>(BarcodeFormat.QR_CODE);
 
@@ -39,11 +40,9 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<String> barcodeContent =
             new MutableLiveData<>("");
 
-    // Barcode note
     private final MutableLiveData<String> barcodeNote =
             new MutableLiveData<>("");
 
-    // Barcode category
     private final MutableLiveData<String> barcodeCategory =
             new MutableLiveData<>("");
 
@@ -52,9 +51,13 @@ public class MainViewModel extends AndroidViewModel {
         barcodeRepository = new BarcodeRepository(application);
     }
 
-    // LiveData Getters
+    // LiveData
     public LiveData<Bitmap> getBarcodeImage() {
         return barcodeImage;
+    }
+
+    public LiveData<BarcodeStatistics> getBarcodeStatistics() {
+        return barcodeStatistics;
     }
 
     public LiveData<String> getBarcodeStatus() {
@@ -65,7 +68,9 @@ public class MainViewModel extends AndroidViewModel {
         return selectedBarcodeFormat;
     }
 
-    public LiveData<String> getBarcodeName() { return barcodeName; }
+    public LiveData<String> getBarcodeName() {
+        return barcodeName;
+    }
 
     public LiveData<String> getBarcodeContent() {
         return barcodeContent;
@@ -75,40 +80,34 @@ public class MainViewModel extends AndroidViewModel {
         return barcodeNote;
     }
 
-    public LiveData<String> getBarcodeCategory() { return barcodeCategory; }
+    public LiveData<String> getBarcodeCategory() {
+        return barcodeCategory;
+    }
 
-    // Barcode input state
-    public void setSelectedBarcodeFormat(BarcodeFormat barcodeFormat) {
-        if (barcodeFormat != null) {
-            selectedBarcodeFormat.setValue(barcodeFormat);
+    // Input state
+    public void setSelectedBarcodeFormat(BarcodeFormat format) {
+        if (format != null) {
+            selectedBarcodeFormat.setValue(format);
         }
     }
 
-    public void setBarcodeName(String barcodeName) {
-        this.barcodeName.setValue(
-                barcodeName != null ? barcodeName : ""
-        );
+    public void setBarcodeName(String name) {
+        barcodeName.setValue(name != null ? name : "");
     }
 
-    public void setBarcodeContent(String barcodeContent) {
-        this.barcodeContent.setValue(
-                barcodeContent != null ? barcodeContent : ""
-        );
+    public void setBarcodeContent(String content) {
+        barcodeContent.setValue(content != null ? content : "");
     }
 
-    public void setBarcodeNote(String barcodeNote) {
-        this.barcodeNote.setValue(
-                barcodeNote != null ? barcodeNote : ""
-        );
+    public void setBarcodeNote(String note) {
+        barcodeNote.setValue(note != null ? note : "");
     }
 
-    public void setBarcodeCategory(String barcodeCategory) {
-        this.barcodeCategory.setValue(
-                barcodeCategory != null ? barcodeCategory : ""
-        );
+    public void setBarcodeCategory(String category) {
+        barcodeCategory.setValue(category != null ? category : "");
     }
 
-    // Barcode generation
+    // Generation
     public void generateBarcode(boolean saveToHistory) {
         generateBarcode(
                 barcodeContent.getValue(),
@@ -118,68 +117,75 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void generateBarcode(
-            String barcodeContent,
-            BarcodeFormat barcodeFormat,
+            String content,
+            BarcodeFormat format,
             boolean saveToHistory
     ) {
         generateBarcode(
-                barcodeContent,
-                barcodeFormat,
+                content,
+                format,
                 saveToHistory,
                 null
         );
     }
 
     public boolean generateBarcode(
-            String barcodeContent,
-            BarcodeFormat barcodeFormat,
+            String content,
+            BarcodeFormat format,
             boolean saveToHistory,
             BarcodeRepository.SaveCallback saveCallback
     ) {
 
-        if (barcodeContent == null || barcodeContent.trim().isEmpty()) {
-            barcodeImage.setValue(null);
-            barcodeStatus.setValue("");
+        if (content == null || content.trim().isEmpty()) {
+            clearGeneratedBarcode();
             return false;
         }
 
-        if (barcodeFormat == null) {
-            barcodeImage.setValue(null);
+        if (format == null) {
+            clearGeneratedBarcode();
             barcodeStatus.setValue("Select a barcode format");
             return false;
         }
 
         String validationError =
-                BarcodeValidator.validate(barcodeFormat, barcodeContent);
+                BarcodeValidator.validate(format, content);
 
         if (validationError != null) {
-            barcodeImage.setValue(null);
+            clearGeneratedBarcode();
             barcodeStatus.setValue(validationError);
             return false;
         }
 
-        int barcodeWidth =
-                barcodeFormat == BarcodeFormat.QR_CODE ? 500 : 800;
+        int width = format == BarcodeFormat.QR_CODE
+                ? 500
+                : 800;
 
-        int barcodeHeight =
-                barcodeFormat == BarcodeFormat.QR_CODE ? 500 : 300;
+        int height = format == BarcodeFormat.QR_CODE
+                ? 500
+                : 300;
 
         try {
 
-            Bitmap generatedBarcode = BarcodeGenerator.generate(
-                    barcodeContent,
-                    barcodeFormat,
-                    barcodeWidth,
-                    barcodeHeight
+            BarcodeGenerationResult result =
+                    BarcodeGenerator.generateDetailed(
+                            content,
+                            format,
+                            width,
+                            height
+                    );
+
+            barcodeImage.setValue(result.getBitmap());
+
+            barcodeStatistics.setValue(
+                    result.getStatistics()
             );
 
-            barcodeImage.setValue(generatedBarcode);
             barcodeStatus.setValue("");
 
             if (saveToHistory) {
                 saveBarcodeToHistory(
-                        barcodeContent,
-                        barcodeFormat,
+                        content,
+                        format,
                         barcodeNote.getValue(),
                         saveCallback
                 );
@@ -189,7 +195,7 @@ public class MainViewModel extends AndroidViewModel {
 
         } catch (WriterException | IllegalArgumentException e) {
 
-            barcodeImage.setValue(null);
+            clearGeneratedBarcode();
 
             barcodeStatus.setValue(
                     "Could not generate code: " + e.getMessage()
@@ -199,42 +205,46 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
-    // History
+    private void clearGeneratedBarcode() {
+        barcodeImage.setValue(null);
+        barcodeStatistics.setValue(null);
+    }
 
+    // History
     private void saveBarcodeToHistory(
-            String barcodeContent,
-            BarcodeFormat barcodeFormat,
-            String barcodeNote,
+            String content,
+            BarcodeFormat format,
+            String note,
             BarcodeRepository.SaveCallback saveCallback
     ) {
 
-        BarcodeEntity barcodeEntity = new BarcodeEntity(
-                barcodeContent,
-                barcodeFormat.name(),
-                barcodeNote,
+        BarcodeEntity entity = new BarcodeEntity(
+                content,
+                format.name(),
+                note,
                 barcodeCategory.getValue()
         );
 
         String name = barcodeName.getValue();
-        barcodeEntity.barcodeName = name != null && !name.trim().isEmpty()
-                ? name.trim()
-                : null;
 
-        barcodeRepository.save(barcodeEntity, saveCallback);
+        entity.barcodeName =
+                name != null && !name.trim().isEmpty()
+                        ? name.trim()
+                        : null;
+
+        barcodeRepository.save(entity, saveCallback);
     }
 
     // Status
-
     public void clearBarcodeStatus() {
         barcodeStatus.setValue("");
     }
 
     public void clearBarcodeImage() {
-        barcodeImage.setValue(null);
+        clearGeneratedBarcode();
         clearBarcodeStatus();
     }
 
-    // Cleanup
     @Override
     protected void onCleared() {
         barcodeRepository.shutdown();
