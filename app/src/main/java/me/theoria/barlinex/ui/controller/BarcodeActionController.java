@@ -52,6 +52,9 @@ public class BarcodeActionController {
     public static final String EXTRA_BARCODE_NAME = "barcode_name";
     public static final String EXTRA_BARCODE_CONTENT = "barcode_content";
     public static final String EXTRA_BARCODE_FORMAT = "barcode_format";
+    public static final String EXTRA_BARCODE_ID = "barcode_id";
+    public static final String EXTRA_BARCODE_NOTE = "barcode_note";
+    public static final String EXTRA_BARCODE_CATEGORY = "barcode_category";
 
     // Views
     private final AppCompatActivity activity;

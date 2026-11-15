@@ -304,10 +304,18 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    int selectedTab = result.getData().getIntExtra(
+                    Intent data = result.getData();
+
+                    int selectedTab = data.getIntExtra(
                             EXTRA_SELECTED_TAB,
                             R.id.nav_create
                     );
+
+                    // Restore barcode data when returning from Edit.
+                    if (data.hasExtra(
+                            BarcodeActionController.EXTRA_BARCODE_CONTENT)) {
+                        loadSavedBarcode(data);
+                    }
 
                     bottomNavigation.setSelectedItemId(selectedTab);
                 }
@@ -327,7 +335,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Saved barcode handling
     private void loadSavedBarcode() {
-        Intent intent = getIntent();
+        loadSavedBarcode(getIntent());
+    }
+
+    private void loadSavedBarcode(Intent intent) {
+        if (intent == null) {
+            return;
+        }
 
         String content = intent.getStringExtra(
                 BarcodeActionController.EXTRA_BARCODE_CONTENT
@@ -341,11 +355,49 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // Restore the original database ID.
+        if (intent.hasExtra(BarcodeActionController.EXTRA_BARCODE_ID)) {
+            int barcodeId = intent.getIntExtra(
+                    BarcodeActionController.EXTRA_BARCODE_ID,
+                    -1
+            );
+
+            mainViewModel.setEditingBarcodeId(
+                    barcodeId > 0 ? barcodeId : null
+            );
+        } else {
+            mainViewModel.setEditingBarcodeId(null);
+        }
+
+        String name = intent.getStringExtra(
+                BarcodeActionController.EXTRA_BARCODE_NAME
+        );
+
+        String note = intent.getStringExtra(
+                BarcodeActionController.EXTRA_BARCODE_NOTE
+        );
+
+        String category = intent.getStringExtra(
+                BarcodeActionController.EXTRA_BARCODE_CATEGORY
+        );
+
         BarcodeFormat format = parseBarcodeFormat(savedFormat);
 
         inputController.setPreviewUpdatesSuppressed(true);
 
         try {
+            // Restore the name.
+            inputName.setText(name != null ? name : "");
+
+            mainViewModel.setBarcodeName(
+                    name != null ? name : ""
+            );
+
+            // Restore note and category.
+            mainViewModel.setBarcodeNote(note);
+            mainViewModel.setBarcodeCategory(category);
+
+            // Restore barcode format.
             inputController.selectBarcodeFormat(format);
 
             BarcodeFormat selectedFormat =
@@ -357,6 +409,7 @@ public class MainActivity extends AppCompatActivity {
                 );
             }
 
+            // Restore barcode content.
             inputController.setBarcodeContent(content);
 
         } finally {
@@ -365,12 +418,29 @@ public class MainActivity extends AppCompatActivity {
 
         inputController.refreshPreviewNow();
 
+        // Remove consumed extras so they aren't restored again.
+        intent.removeExtra(
+                BarcodeActionController.EXTRA_BARCODE_ID
+        );
+
+        intent.removeExtra(
+                BarcodeActionController.EXTRA_BARCODE_NAME
+        );
+
         intent.removeExtra(
                 BarcodeActionController.EXTRA_BARCODE_CONTENT
         );
 
         intent.removeExtra(
                 BarcodeActionController.EXTRA_BARCODE_FORMAT
+        );
+
+        intent.removeExtra(
+                BarcodeActionController.EXTRA_BARCODE_NOTE
+        );
+
+        intent.removeExtra(
+                BarcodeActionController.EXTRA_BARCODE_CATEGORY
         );
     }
 

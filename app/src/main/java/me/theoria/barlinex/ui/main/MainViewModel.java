@@ -21,6 +21,7 @@ import me.theoria.barlinex.domain.barcode.BarcodeValidator;
 public class MainViewModel extends AndroidViewModel {
 
     private final BarcodeRepository barcodeRepository;
+    private Integer editingBarcodeId = null;
 
     private final MutableLiveData<Bitmap> barcodeImage =
             new MutableLiveData<>();
@@ -215,9 +216,52 @@ public class MainViewModel extends AndroidViewModel {
             String content,
             BarcodeFormat format,
             String note,
-            BarcodeRepository.SaveCallback saveCallback
+            BarcodeRepository.SaveCallback callback
     ) {
+        String name = barcodeName.getValue();
 
+        String savedName = name != null && !name.trim().isEmpty()
+                ? name.trim()
+                : null;
+
+        Integer currentEditingId = editingBarcodeId;
+
+        // Update an existing barcode.
+        if (currentEditingId != null) {
+
+            barcodeRepository.updateBarcodeDetails(
+                    currentEditingId,
+                    savedName,
+                    content,
+                    format.name(),
+                    note,
+                    barcodeCategory.getValue(),
+                    new BarcodeRepository.SaveCallback() {
+
+                        @Override
+                        public void onSaved(long id) {
+                            // Exit edit mode after a successful update.
+                            editingBarcodeId = null;
+
+                            if (callback != null) {
+                                callback.onSaved(id);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Exception exception) {
+                            // Keep edit mode active if the update fails.
+                            if (callback != null) {
+                                callback.onError(exception);
+                            }
+                        }
+                    }
+            );
+
+            return;
+        }
+
+        // Otherwise, create a new barcode record.
         BarcodeEntity entity = new BarcodeEntity(
                 content,
                 format.name(),
@@ -225,14 +269,21 @@ public class MainViewModel extends AndroidViewModel {
                 barcodeCategory.getValue()
         );
 
-        String name = barcodeName.getValue();
+        entity.barcodeName = savedName;
 
-        entity.barcodeName =
-                name != null && !name.trim().isEmpty()
-                        ? name.trim()
-                        : null;
+        barcodeRepository.save(entity, callback);
+    }
 
-        barcodeRepository.save(entity, saveCallback);
+    public void setEditingBarcodeId(Integer id) {
+        editingBarcodeId = id;
+    }
+
+    public Integer getEditingBarcodeId() {
+        return editingBarcodeId;
+    }
+
+    public boolean isEditingBarcode() {
+        return editingBarcodeId != null;
     }
 
     // Status

@@ -7,16 +7,26 @@
     android:layout_height="match_parent"
     android:background="#1A1A1D">
 
-    <!-- Header -->
+    <!-- BarLineX App Header -->
+    <include
+        android:id="@+id/decodeAppHeader"
+        layout="@layout/layout_app_header"
+        android:layout_width="0dp"
+        android:layout_height="68dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Decode Screen Header -->
     <LinearLayout
         android:id="@+id/decodeHeader"
         android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/decodeAppHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

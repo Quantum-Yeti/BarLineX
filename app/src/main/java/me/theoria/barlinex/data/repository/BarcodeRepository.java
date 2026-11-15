@@ -127,6 +127,50 @@ public class BarcodeRepository {
         });
     }
 
+    public void updateBarcodeDetails(
+            int id,
+            String name,
+            String content,
+            String format,
+            String note,
+            String category,
+            SaveCallback callback
+    ) {
+        executor.execute(() -> {
+            try {
+                int rowsUpdated = barcodeDao.updateBarcodeDetails(
+                        id,
+                        name,
+                        content,
+                        format,
+                        note,
+                        category
+                );
+
+                mainHandler.post(() -> {
+                    if (rowsUpdated > 0) {
+                        if (callback != null) {
+                            callback.onSaved(id);
+                        }
+                    } else {
+                        if (callback != null) {
+                            callback.onError(
+                                    new Exception("Barcode record could not be updated.")
+                            );
+                        }
+                    }
+                });
+
+            } catch (Exception exception) {
+                mainHandler.post(() -> {
+                    if (callback != null) {
+                        callback.onError(exception);
+                    }
+                });
+            }
+        });
+    }
+
     // Delete
     public void deleteById(int id, DeleteCallback callback) {
         executor.execute(() -> {

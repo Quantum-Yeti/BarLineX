@@ -8,6 +8,10 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true">
 
+    <!-- App Header -->
+    <include
+        layout="@layout/layout_app_header" />
+
     <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"

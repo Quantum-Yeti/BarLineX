@@ -21,6 +21,24 @@ public interface BarcodeDao {
     @Query("UPDATE saved_barcodes SET isFavorite = :isFavorite WHERE id = :id")
     void updateFavorite(int id, boolean isFavorite);
 
+    @Query(
+            "UPDATE saved_barcodes " +
+                    "SET barcodeName = :name, " +
+                    "barcodeContent = :content, " +
+                    "barcodeFormat = :format, " +
+                    "barcodeNote = :note, " +
+                    "barcodeCategory = :category " +
+                    "WHERE id = :id"
+    )
+    int updateBarcodeDetails(
+            int id,
+            String name,
+            String content,
+            String format,
+            String note,
+            String category
+    );
+
     @Query("DELETE FROM saved_barcodes WHERE id = :id")
     void deleteById(int id);
 

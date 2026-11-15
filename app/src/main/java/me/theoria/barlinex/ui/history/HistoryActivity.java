@@ -230,6 +230,11 @@ public class HistoryActivity extends AppCompatActivity {
         );
 
         result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_ID,
+                barcode.id
+        );
+
+        result.putExtra(
                 BarcodeActionController.EXTRA_BARCODE_NAME,
                 barcode.barcodeName
         );
@@ -242,6 +247,16 @@ public class HistoryActivity extends AppCompatActivity {
         result.putExtra(
                 BarcodeActionController.EXTRA_BARCODE_FORMAT,
                 barcode.barcodeFormat
+        );
+
+        result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_NOTE,
+                barcode.barcodeNote
+        );
+
+        result.putExtra(
+                BarcodeActionController.EXTRA_BARCODE_CATEGORY,
+                barcode.barcodeCategory
         );
 
         setResult(RESULT_OK, result);

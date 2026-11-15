@@ -2,7 +2,7 @@
 
     <!-- App Name Strings -->
     <string name="app_name">BarLineX</string>
-    <string name="barlinex_bigfoot_logo">BarLineX Logo</string>
+    <string name="app_logo">BarLineX Logo</string>
 
     <!-- Barcode Strings -->
     <string name="create_a_barcode">Create A Barcode</string>
