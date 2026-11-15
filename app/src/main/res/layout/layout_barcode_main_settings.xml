@@ -138,8 +138,6 @@
         app:boxStrokeWidthFocused="2dp"
         app:counterEnabled="false"
         app:endIconCheckable="false"
-        app:endIconContentDescription="Scan number with camera"
-        app:endIconDrawable="@drawable/ic_scan_number"
         app:endIconMode="custom"
         app:endIconTint="#8B9EFF"
         app:errorEnabled="true"

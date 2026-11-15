@@ -42,65 +42,7 @@
 
     </ScrollView>
 
-    <!-- Scanner: replaces the form while the Scan tab is selected.
-         The bottom dock below stays on screen. -->
-    <FrameLayout
-        android:id="@+id/scanOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#000000"
-        android:visibility="gone">
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/cameraPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:scaleType="fillCenter" />
-
-        <me.theoria.barlinex.ui.scanner.ScannerOverlay
-            android:id="@+id/numberScannerOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="16dp"
-            android:background="#99000000"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="8dp"
-            android:text="Frame the number, then tap the button"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonCapture"
-            android:layout_width="160dp"
-            android:layout_height="56dp"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="24dp"
-            android:contentDescription="Use detected text"
-            android:enabled="false"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:paddingHorizontal="16dp"
-            android:text="Use Text"
-            android:textAllCaps="false"
-            android:textColor="#121212"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="#8B9EFF"
-            app:cornerRadius="28dp"
-            app:icon="@drawable/ic_scan_number"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconSize="22dp"
-            app:iconTint="#121212" />
-
-    </FrameLayout>
 
     <!-- Persistent save actions and navigation -->
     <include

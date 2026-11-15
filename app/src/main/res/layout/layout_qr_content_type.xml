@@ -23,7 +23,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="#121212"
+        app:boxBackgroundColor="#1C1C1E"
         app:boxCornerRadiusBottomEnd="14dp"
         app:boxCornerRadiusBottomStart="14dp"
         app:boxCornerRadiusTopEnd="14dp"
@@ -43,9 +43,8 @@
             android:popupBackground="#232326"
             android:text="Text / URL"
             android:textColor="#F5F5F5"
-            android:textColorHint="#f5f5f5"
-            android:textSize="15sp"
-            />
+            android:textColorHint="#A1A1AA"
+            android:textSize="15sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
