@@ -89,23 +89,6 @@ public class BarcodeRepository {
         });
     }
 
-    // Update barcodeName
-    public void updateName(int id, String name, OperationCallback callback) {
-        executor.execute(() -> {
-            try {
-                barcodeDao.updateName(id, name);
-
-                if (callback != null) {
-                    mainHandler.post(callback::onComplete);
-                }
-            } catch (Exception e) {
-                if (callback != null) {
-                    mainHandler.post(() -> callback.onError(e));
-                }
-            }
-        });
-    }
-
     // Update favorite
     public void updateFavorite(
             int id,

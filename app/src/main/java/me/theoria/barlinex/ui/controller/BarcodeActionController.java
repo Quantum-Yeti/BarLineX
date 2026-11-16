@@ -42,9 +42,9 @@ import java.util.Locale;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.data.repository.BarcodeRepository;
-import me.theoria.barlinex.ui.preview.BarcodePreviewActivity;
 import me.theoria.barlinex.ui.common.BarcodeImageHelper;
 import me.theoria.barlinex.ui.main.MainViewModel;
+import me.theoria.barlinex.ui.preview.BarcodePreviewActivity;
 
 public class BarcodeActionController {
 
@@ -84,6 +84,7 @@ public class BarcodeActionController {
     }
 
     // Save
+
     public void saveBarcode() {
 
         String content = getCurrentContent();
@@ -94,7 +95,7 @@ public class BarcodeActionController {
             return;
         }
 
-        boolean generated = mainViewModel.generateBarcode(
+        mainViewModel.generateBarcodeAsync(
                 content,
                 format,
                 true,
@@ -120,21 +121,22 @@ public class BarcodeActionController {
                                 Snackbar.LENGTH_LONG
                         ).setAnchorView(buttonSaveBarcode).show();
                     }
+                },
+                success -> {
+
+                    if (success) {
+                        buttonSaveBarcode.performHapticFeedback(
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                                        ? HapticFeedbackConstants.CONFIRM
+                                        : HapticFeedbackConstants.VIRTUAL_KEY
+                        );
+                    }
                 }
-        );
-
-        if (!generated) {
-            return;
-        }
-
-        buttonSaveBarcode.performHapticFeedback(
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                        ? HapticFeedbackConstants.CONFIRM
-                        : HapticFeedbackConstants.VIRTUAL_KEY
         );
     }
 
     // Share barcode image
+
     public void shareBarcodeImage() {
 
         Bitmap bitmap = mainViewModel
@@ -181,6 +183,7 @@ public class BarcodeActionController {
     }
 
     // Copy barcode image
+
     public void copyBarcodeImage() {
 
         Bitmap bitmap = mainViewModel
@@ -231,6 +234,7 @@ public class BarcodeActionController {
     }
 
     // Export
+
     public void exportBarcodeImage() {
 
         Bitmap bitmap = mainViewModel
@@ -259,6 +263,7 @@ public class BarcodeActionController {
     }
 
     // Export menu
+
     public void showExportMenu() {
         String[] exportOptions = {"PNG Image", "CSV File"};
 
@@ -269,6 +274,7 @@ public class BarcodeActionController {
                         case 0:
                             exportBarcodeImage();
                             break;
+
                         case 1:
                             exportBarcodeCsv();
                             break;
@@ -282,7 +288,12 @@ public class BarcodeActionController {
         pendingCsvFormat = getSelectedFormat();
 
         if (pendingCsvContent == null || pendingCsvContent.trim().isEmpty()) {
-            Toast.makeText(activity, "Enter some text first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    activity,
+                    "Enter some text first",
+                    Toast.LENGTH_SHORT
+            ).show();
+
             return;
         }
 
@@ -333,6 +344,7 @@ public class BarcodeActionController {
                     "Unable to export CSV",
                     Toast.LENGTH_SHORT
             ).show();
+
         } finally {
             pendingCsvContent = null;
             pendingCsvFormat = null;
@@ -340,6 +352,7 @@ public class BarcodeActionController {
     }
 
     // Print barcode image
+
     public void printBarcodeImage() {
 
         Bitmap bitmap = mainViewModel
@@ -372,56 +385,54 @@ public class BarcodeActionController {
     }
 
     // Enlarged preview
+
     public void openEnlargedPreview() {
 
         String content = getCurrentContent();
         BarcodeFormat format = getSelectedFormat();
 
-        if (!generateBarcode(content, format)) {
+        if (content.isEmpty()) {
+            showToast("Enter some text first");
             return;
         }
 
-        Intent intent = new Intent(
-                activity,
-                BarcodePreviewActivity.class
+        mainViewModel.generateBarcodeAsync(
+                content,
+                format,
+                false,
+                null,
+                success -> {
+
+                    if (!success || activity.isFinishing() || activity.isDestroyed()) {
+                        return;
+                    }
+
+                    Intent intent = new Intent(
+                            activity,
+                            BarcodePreviewActivity.class
+                    );
+
+                    intent.putExtra(
+                            EXTRA_BARCODE_NAME,
+                            mainViewModel.getBarcodeName().getValue()
+                    );
+
+                    intent.putExtra(EXTRA_BARCODE_CONTENT, content);
+                    intent.putExtra(EXTRA_BARCODE_FORMAT, format.name());
+
+                    activity.startActivity(intent);
+                }
         );
-
-        intent.putExtra(
-                EXTRA_BARCODE_NAME,
-                mainViewModel.getBarcodeName().getValue()
-        );
-
-        intent.putExtra(EXTRA_BARCODE_CONTENT, content);
-        intent.putExtra(EXTRA_BARCODE_FORMAT, format.name());
-
-        activity.startActivity(intent);
     }
 
     // Customize barcode
+
     public void customizeBarcode() {
         showToast("Customization options coming soon.");
     }
 
-    // Barcode generation
-    private boolean generateBarcode(
-            String content,
-            BarcodeFormat format
-    ) {
-
-        if (content.isEmpty()) {
-            showToast("Enter some text first");
-            return false;
-        }
-
-        return mainViewModel.generateBarcode(
-                content,
-                format,
-                false,
-                null
-        );
-    }
-
     // State
+
     private String getCurrentContent() {
         String content = mainViewModel.getBarcodeContent().getValue();
         return content != null ? content.trim() : "";
@@ -433,6 +444,7 @@ public class BarcodeActionController {
     }
 
     // Feedback
+
     private void showToast(String message) {
         Toast.makeText(
                 activity,
@@ -442,6 +454,7 @@ public class BarcodeActionController {
     }
 
     // Save feedback
+
     private void showSaveSuccess() {
 
         Snackbar.make(
@@ -455,11 +468,13 @@ public class BarcodeActionController {
     }
 
     // Helpers
+
     private String escapeCsv(String value) {
         return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 
     // Printing
+
     private class BarcodePrintAdapter extends PrintDocumentAdapter {
 
         private final Bitmap bitmap;

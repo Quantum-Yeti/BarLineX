@@ -21,16 +21,18 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.Result;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.domain.barcode.BarcodeValidator;
-import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
+import me.theoria.barlinex.ui.advanced.AdvancedActivity;
 import me.theoria.barlinex.ui.common.BottomNavigationHelper;
 import me.theoria.barlinex.ui.common.WindowsInsetHelper;
 import me.theoria.barlinex.ui.common.ZoomControlsController;
+import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
 import me.theoria.barlinex.ui.history.HistoryActivity;
 import me.theoria.barlinex.ui.scanner.ScannerOverlay;
 
@@ -53,6 +55,29 @@ public class DecodeActivity extends AppCompatActivity {
     private TextView textDecodedCheckDigit;
     private TextView textDecodedTime;
 
+    // Content Analysis
+
+    private TextView textAnalysisCharacters;
+    private TextView textAnalysisBytes;
+    private TextView textAnalysisLetters;
+    private TextView textAnalysisNumbers;
+    private TextView textAnalysisWhitespace;
+    private TextView textAnalysisSymbols;
+
+    // Technical Properties
+
+    private TextView textTechnicalFormat;
+    private TextView textTechnicalErrorCorrection;
+    private TextView textTechnicalSymbology;
+    private TextView textTechnicalByteSegments;
+    private TextView textTechnicalStructuredAppend;
+
+    // Interpretation and Validation
+
+    private TextView textDataInterpretation;
+    private TextView textValidationStatus;
+    private TextView textRawData;
+
     // ViewModel
 
     private DecoderViewModel decodeViewModel;
@@ -70,12 +95,12 @@ public class DecodeActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<String> cameraPermissionLauncher;
 
-
     // Activity initialization
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_decode);
 
         WindowsInsetHelper.applySystemBarInsets(
@@ -83,6 +108,8 @@ public class DecodeActivity extends AppCompatActivity {
         );
 
         initializeViews();
+        setupExpandableSections();
+
         initializeViewModel();
         registerCameraPermissionLauncher();
         initializeDecoder();
@@ -98,7 +125,6 @@ public class DecodeActivity extends AppCompatActivity {
 
         checkCameraPermission();
     }
-
 
     // View initialization
 
@@ -151,8 +177,161 @@ public class DecodeActivity extends AppCompatActivity {
         textDecodedTime = findViewById(
                 R.id.textDecodedTime
         );
+
+        // Content Analysis
+
+        textAnalysisCharacters = findViewById(
+                R.id.textAnalysisCharacters
+        );
+
+        textAnalysisBytes = findViewById(
+                R.id.textAnalysisBytes
+        );
+
+        textAnalysisLetters = findViewById(
+                R.id.textAnalysisLetters
+        );
+
+        textAnalysisNumbers = findViewById(
+                R.id.textAnalysisNumbers
+        );
+
+        textAnalysisWhitespace = findViewById(
+                R.id.textAnalysisWhitespace
+        );
+
+        textAnalysisSymbols = findViewById(
+                R.id.textAnalysisSymbols
+        );
+
+        // Technical Properties
+
+        textTechnicalFormat = findViewById(
+                R.id.textTechnicalFormat
+        );
+
+        textTechnicalErrorCorrection = findViewById(
+                R.id.textTechnicalErrorCorrection
+        );
+
+        textTechnicalSymbology = findViewById(
+                R.id.textTechnicalSymbology
+        );
+
+        textTechnicalByteSegments = findViewById(
+                R.id.textTechnicalByteSegments
+        );
+
+        textTechnicalStructuredAppend = findViewById(
+                R.id.textTechnicalStructuredAppend
+        );
+
+        // Interpretation and Validation
+
+        textDataInterpretation = findViewById(
+                R.id.textDataInterpretation
+        );
+
+        textValidationStatus = findViewById(
+                R.id.textValidationStatus
+        );
+
+        textRawData = findViewById(
+                R.id.textRawData
+        );
     }
 
+    // Expandable sections
+
+    private void setupExpandableSections() {
+
+        setupExpandableSection(
+                R.id.headerBarcodeInformation,
+                R.id.contentBarcodeInformation,
+                R.id.arrowBarcodeInformation,
+                true
+        );
+
+        setupExpandableSection(
+                R.id.headerContentAnalysis,
+                R.id.contentContentAnalysis,
+                R.id.arrowContentAnalysis,
+                false
+        );
+
+        setupExpandableSection(
+                R.id.headerTechnicalProperties,
+                R.id.contentTechnicalProperties,
+                R.id.arrowTechnicalProperties,
+                false
+        );
+
+        setupExpandableSection(
+                R.id.headerDataInterpretation,
+                R.id.contentDataInterpretation,
+                R.id.arrowDataInterpretation,
+                false
+        );
+
+        setupExpandableSection(
+                R.id.headerValidation,
+                R.id.contentValidation,
+                R.id.arrowValidation,
+                false
+        );
+
+        setupExpandableSection(
+                R.id.headerRawData,
+                R.id.contentRawData,
+                R.id.arrowRawData,
+                false
+        );
+    }
+
+    private void setupExpandableSection(
+            int headerId,
+            int contentId,
+            int arrowId,
+            boolean initiallyExpanded
+    ) {
+
+        View header = findViewById(headerId);
+        View content = findViewById(contentId);
+        TextView arrow = findViewById(arrowId);
+
+        content.setVisibility(
+                initiallyExpanded
+                        ? View.VISIBLE
+                        : View.GONE
+        );
+
+        arrow.setRotation(
+                initiallyExpanded ? 180f : 0f
+        );
+
+        header.setOnClickListener(view -> {
+
+            boolean isExpanded =
+                    content.getVisibility() == View.VISIBLE;
+
+            content.setVisibility(
+                    isExpanded
+                            ? View.GONE
+                            : View.VISIBLE
+            );
+
+            arrow.animate()
+                    .rotation(isExpanded ? 0f : 180f)
+                    .setDuration(180)
+                    .start();
+
+            header.setContentDescription(
+                    isExpanded
+                            ? "Expand section"
+                            : "Collapse section"
+            );
+        });
+    }
 
     // ViewModel
 
@@ -190,7 +369,6 @@ public class DecodeActivity extends AppCompatActivity {
                 }
         );
     }
-
 
     // Camera permissions
 
@@ -235,7 +413,6 @@ public class DecodeActivity extends AppCompatActivity {
         }
     }
 
-
     // Barcode decoder
 
     private void initializeDecoder() {
@@ -247,10 +424,7 @@ public class DecodeActivity extends AppCompatActivity {
                 new BarcodeDecoderController.Listener() {
 
                     @Override
-                    public void onBarcodeDetected(
-                            String content,
-                            BarcodeFormat format
-                    ) {
+                    public void onBarcodeDetected(Result result) {
 
                         runOnUiThread(() -> {
 
@@ -262,10 +436,7 @@ public class DecodeActivity extends AppCompatActivity {
 
                             decodeController.stopCamera();
 
-                            decodeViewModel.onBarcodeDetected(
-                                    content,
-                                    format
-                            );
+                            decodeViewModel.onBarcodeDetected(result);
                         });
                     }
 
@@ -313,7 +484,6 @@ public class DecodeActivity extends AppCompatActivity {
         );
     }
 
-
     // Barcode result
 
     private void displayBarcodeDetails(DecodeResult result) {
@@ -321,33 +491,44 @@ public class DecodeActivity extends AppCompatActivity {
         String content = result.getContent();
         BarcodeFormat format = result.getFormat();
 
+        // Reset section states for each new scan.
+
+        resetExpandableSections();
+
+        // Main result
+
         textDecodedFormat.setText(
                 format.toString().replace("_", " ")
         );
 
         textDecodedContent.setText(content);
 
+        // Barcode Information
+
         textDecodedType.setText(
-                result.isTwoDimensional()
-                        ? "2D"
-                        : "Linear"
+                "Barcode type: "
+                        + (result.isTwoDimensional() ? "2D" : "Linear")
         );
 
         int characterCount = result.getCharacterCount();
 
         textDecodedLength.setText(
-                characterCount + (
-                        characterCount == 1
-                                ? " character"
-                                : " characters"
-                )
+                "Content length: "
+                        + characterCount
+                        + (characterCount == 1
+                        ? " character"
+                        : " characters")
         );
 
+        String checkDigitStatus = result.isProductBarcode()
+                ? BarcodeValidator.getCheckDigitStatus(
+                content,
+                format
+        )
+                : "Not applicable";
+
         textDecodedCheckDigit.setText(
-                BarcodeValidator.getCheckDigitStatus(
-                        content,
-                        format
-                )
+                "Check digit: " + checkDigitStatus
         );
 
         String scanTime = DateFormat.getDateTimeInstance(
@@ -355,9 +536,164 @@ public class DecodeActivity extends AppCompatActivity {
                 DateFormat.SHORT
         ).format(new Date(result.getScannedAt()));
 
-        textDecodedTime.setText(scanTime);
+        textDecodedTime.setText(
+                "Scanned: " + scanTime
+        );
+
+        // Content Analysis
+
+        textAnalysisCharacters.setText(
+                "Characters: " + result.getCharacterCount()
+        );
+
+        textAnalysisBytes.setText(
+                "UTF-8 bytes: " + result.getByteCount()
+        );
+
+        textAnalysisLetters.setText(
+                "Letters: " + result.getLetterCount()
+        );
+
+        textAnalysisNumbers.setText(
+                "Numbers: " + result.getNumberCount()
+        );
+
+        textAnalysisWhitespace.setText(
+                "Whitespace: " + result.getWhitespaceCount()
+        );
+
+        textAnalysisSymbols.setText(
+                "Symbols: " + result.getSymbolCount()
+        );
+
+        // Technical Properties
+
+        textTechnicalFormat.setText(
+                "Format: " + format.toString().replace("_", " ")
+        );
+
+        String errorCorrection = result.getErrorCorrectionLevel();
+
+        textTechnicalErrorCorrection.setText(
+                "Error correction: "
+                        + (errorCorrection == null
+                        ? "Not available"
+                        : errorCorrection)
+        );
+
+        String symbologyIdentifier = result.getSymbologyIdentifier();
+
+        textTechnicalSymbology.setText(
+                "Symbology identifier: "
+                        + (symbologyIdentifier == null
+                        ? "Not available"
+                        : symbologyIdentifier)
+        );
+
+        int byteSegmentCount = result.getByteSegmentCount();
+        int byteSegmentSize = result.getByteSegmentSize();
+
+        textTechnicalByteSegments.setText(
+                "Byte segments: "
+                        + byteSegmentCount
+                        + " ("
+                        + byteSegmentSize
+                        + " bytes)"
+        );
+
+        if (result.hasStructuredAppend()) {
+
+            String sequence = result.getStructuredAppendSequence();
+            String parity = result.getStructuredAppendParity();
+
+            textTechnicalStructuredAppend.setText(
+                    "Structured append: Detected"
+                            + "\nSequence: "
+                            + (sequence == null ? "Unknown" : sequence)
+                            + "\nParity: "
+                            + (parity == null ? "Unknown" : parity)
+            );
+
+        } else {
+
+            textTechnicalStructuredAppend.setText(
+                    "Structured append: Not detected"
+            );
+        }
+
+        // Data Interpretation
+
+        textDataInterpretation.setText(
+                "Interpretation: " + result.getInterpretation()
+        );
+
+        // Validation
+
+        textValidationStatus.setText(
+                "Validation: " + result.getValidationStatus()
+        );
+
+        // Raw Data
+
+        textRawData.setText(content);
     }
 
+    private void resetExpandableSections() {
+
+        collapseSection(
+                R.id.contentBarcodeInformation,
+                R.id.arrowBarcodeInformation,
+                true
+        );
+
+        collapseSection(
+                R.id.contentContentAnalysis,
+                R.id.arrowContentAnalysis,
+                false
+        );
+
+        collapseSection(
+                R.id.contentTechnicalProperties,
+                R.id.arrowTechnicalProperties,
+                false
+        );
+
+        collapseSection(
+                R.id.contentDataInterpretation,
+                R.id.arrowDataInterpretation,
+                false
+        );
+
+        collapseSection(
+                R.id.contentValidation,
+                R.id.arrowValidation,
+                false
+        );
+
+        collapseSection(
+                R.id.contentRawData,
+                R.id.arrowRawData,
+                false
+        );
+    }
+
+    private void collapseSection(
+            int contentId,
+            int arrowId,
+            boolean expanded
+    ) {
+
+        View content = findViewById(contentId);
+        View arrow = findViewById(arrowId);
+
+        content.setVisibility(
+                expanded ? View.VISIBLE : View.GONE
+        );
+
+        arrow.setRotation(
+                expanded ? 180f : 0f
+        );
+    }
 
     // Scanning
 
@@ -383,7 +719,6 @@ public class DecodeActivity extends AppCompatActivity {
         decodeController.startCamera();
     }
 
-
     // Gallery
 
     private void setupGalleryButton() {
@@ -397,7 +732,6 @@ public class DecodeActivity extends AppCompatActivity {
             ).show();
         });
     }
-
 
     // Result actions
 
@@ -431,7 +765,6 @@ public class DecodeActivity extends AppCompatActivity {
             ).show();
         });
 
-
         findViewById(R.id.buttonShareResult).setOnClickListener(view -> {
 
             DecodeResult result =
@@ -458,7 +791,6 @@ public class DecodeActivity extends AppCompatActivity {
             );
         });
 
-
         findViewById(R.id.buttonScanAgain).setOnClickListener(view -> {
 
             decodeViewModel.clearResult();
@@ -472,7 +804,6 @@ public class DecodeActivity extends AppCompatActivity {
             startScanning();
         });
     }
-
 
     // Bottom navigation
 
@@ -494,6 +825,17 @@ public class DecodeActivity extends AppCompatActivity {
                     }
 
                     @Override
+                    public void onAdvancedSelected() {
+
+                        startActivity(
+                                new Intent(
+                                        DecodeActivity.this,
+                                        AdvancedActivity.class
+                                )
+                        );
+                    }
+
+                    @Override
                     public void onHistorySelected() {
 
                         startActivity(
@@ -509,7 +851,6 @@ public class DecodeActivity extends AppCompatActivity {
         );
     }
 
-
     // Zoom touch events
 
     @Override
@@ -521,7 +862,6 @@ public class DecodeActivity extends AppCompatActivity {
 
         return super.dispatchTouchEvent(event);
     }
-
 
     // Activity lifecycle
 

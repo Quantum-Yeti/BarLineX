@@ -18,6 +18,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import me.theoria.barlinex.R;
+import me.theoria.barlinex.ui.advanced.AdvancedActivity;
 import me.theoria.barlinex.ui.common.BottomNavigationHelper;
 import me.theoria.barlinex.ui.common.SplashScreenHelper;
 import me.theoria.barlinex.ui.common.WindowsInsetHelper;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_TAB = "selected_tab";
 
     // Views
+
     private EditText inputName;
     private EditText inputContent;
 
@@ -57,9 +59,11 @@ public class MainActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView qrContentTypeDropdown;
 
     // ViewModel
+
     private MainViewModel mainViewModel;
 
     // Controllers
+
     private BarcodeInputController inputController;
     private BarcodePreviewController previewController;
     private BarcodeActionController actionController;
@@ -67,10 +71,12 @@ public class MainActivity extends AppCompatActivity {
     private BarcodeRestoreController restoreController;
 
     // Activity result launchers
+
     private ActivityResultLauncher<String> csvExportLauncher;
     private ActivityResultLauncher<Intent> historyLauncher;
 
     // Lifecycle
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialize views and dependencies
+
         initializeViews();
         initializeWindowInsets();
         initializeViewModel();
@@ -87,19 +94,23 @@ public class MainActivity extends AppCompatActivity {
         initializeControllers();
 
         // Set up input and barcode functionality
+
         setupInputHandling();
         setupBarcodeActions();
         setupNavigation();
 
         // Initialize the barcode preview
+
         previewController.updatePreviewLabels();
 
         // Restore barcode data passed through the Intent
+
         loadSavedBarcode();
     }
 
     @Override
     protected void onDestroy() {
+
         if (inputController != null) {
             inputController.cleanup();
         }
@@ -108,7 +119,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Initialization
+
     private void initializeViews() {
+
         inputName = findViewById(R.id.barcodeUserName);
         inputContent = findViewById(R.id.barcodeUserContent);
         contentInputLayout = findViewById(R.id.barcodeUserContentLayout);
@@ -132,17 +145,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeWindowInsets() {
+
         WindowsInsetHelper.applySystemBarInsets(
                 findViewById(R.id.main)
         );
     }
 
     private void initializeViewModel() {
+
         mainViewModel = new ViewModelProvider(this)
                 .get(MainViewModel.class);
     }
 
     private void initializeControllers() {
+
         initializeInputController();
 
         qrTemplateController = new QrTemplateController(
@@ -164,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeInputController() {
+
         inputController = new BarcodeInputController(
                 mainViewModel,
                 inputContent,
@@ -180,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializePreviewController() {
+
         previewController = new BarcodePreviewController(
                 mainViewModel,
                 inputController,
@@ -195,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeActionController() {
+
         actionController = new BarcodeActionController(
                 this,
                 mainViewModel,
@@ -205,7 +224,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Input handling
+
     private void setupInputHandling() {
+
         inputController.setupTextWatchers(
                 inputName,
                 previewController
@@ -213,7 +234,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Barcode actions
+
     private void setupBarcodeActions() {
+
         buttonSaveBarcode.setOnClickListener(
                 view -> actionController.saveBarcode()
         );
@@ -240,15 +263,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Activity result launchers
+
     private void initializeLaunchers() {
+
         registerHistoryLauncher();
         registerCsvExportLauncher();
     }
 
     private void registerHistoryLauncher() {
+
         historyLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
+
                     if (result.getResultCode() != RESULT_OK
                             || result.getData() == null) {
                         return;
@@ -262,8 +289,10 @@ public class MainActivity extends AppCompatActivity {
                     );
 
                     // Restore barcode data when returning from Edit.
+
                     if (data.hasExtra(
-                            BarcodeActionController.EXTRA_BARCODE_CONTENT)) {
+                            BarcodeActionController.EXTRA_BARCODE_CONTENT
+                    )) {
                         loadSavedBarcode(data);
                     }
 
@@ -273,9 +302,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void registerCsvExportLauncher() {
+
         csvExportLauncher = registerForActivityResult(
                 new ActivityResultContracts.CreateDocument("text/csv"),
                 uri -> {
+
                     if (uri != null && actionController != null) {
                         actionController.writeBarcodeCsv(uri);
                     }
@@ -284,18 +315,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Saved barcode handling
+
     private void loadSavedBarcode() {
+
         loadSavedBarcode(getIntent());
     }
 
     private void loadSavedBarcode(Intent intent) {
+
         if (restoreController != null) {
             restoreController.restoreBarcode(intent);
         }
     }
 
     // Navigation
+
     private void setupNavigation() {
+
         BottomNavigationHelper.setup(
                 bottomNavigation,
                 R.id.nav_create,
@@ -308,10 +344,22 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onDecodeSelected() {
+
                         startActivity(
                                 new Intent(
                                         MainActivity.this,
                                         DecodeActivity.class
+                                )
+                        );
+                    }
+
+                    @Override
+                    public void onAdvancedSelected() {
+
+                        startActivity(
+                                new Intent(
+                                        MainActivity.this,
+                                        AdvancedActivity.class
                                 )
                         );
                     }
@@ -325,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openHistory() {
+
         historyLauncher.launch(
                 new Intent(this, HistoryActivity.class)
         );

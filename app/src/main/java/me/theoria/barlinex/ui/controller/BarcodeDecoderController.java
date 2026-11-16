@@ -50,7 +50,8 @@ public class BarcodeDecoderController {
     private static final String TAG = "BarcodeDecodeController";
 
     public interface Listener {
-        void onBarcodeDetected(String content, BarcodeFormat format);
+
+        void onBarcodeDetected(Result result);
 
         void onScanError(String message, Exception error);
 
@@ -323,18 +324,12 @@ public class BarcodeDecoderController {
                     && result.getText() != null
                     && resultDelivered.compareAndSet(false, true)) {
 
-                String content = result.getText();
-                BarcodeFormat format = result.getBarcodeFormat();
-
                 activity.runOnUiThread(() -> {
 
                     if (!activity.isFinishing()
                             && !activity.isDestroyed()) {
 
-                        listener.onBarcodeDetected(
-                                content,
-                                format
-                        );
+                        listener.onBarcodeDetected(result);
                     }
                 });
             }

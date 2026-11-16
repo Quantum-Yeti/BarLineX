@@ -16,7 +16,11 @@ public final class BottomNavigationHelper {
 
     public interface Listener {
         void onCreateSelected();
+
         void onDecodeSelected();
+
+        void onAdvancedSelected();
+
         void onHistorySelected();
     }
 
@@ -30,11 +34,13 @@ public final class BottomNavigationHelper {
                 ColorStateList.valueOf(ACTIVE_INDICATOR_COLOR)
         );
 
-        navigationView.setSelectedItemId(selectedItemId);
-
         navigationView.setOnItemSelectedListener(item -> {
 
             int itemId = item.getItemId();
+
+            if (itemId == selectedItemId) {
+                return true;
+            }
 
             if (itemId == R.id.nav_create) {
                 listener.onCreateSelected();
@@ -46,6 +52,11 @@ public final class BottomNavigationHelper {
                 return true;
             }
 
+            if (itemId == R.id.nav_advanced) {
+                listener.onAdvancedSelected();
+                return true;
+            }
+
             if (itemId == R.id.nav_history) {
                 listener.onHistorySelected();
                 return true;
@@ -53,5 +64,7 @@ public final class BottomNavigationHelper {
 
             return false;
         });
+
+        navigationView.setSelectedItemId(selectedItemId);
     }
 }

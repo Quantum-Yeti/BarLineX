@@ -49,25 +49,6 @@ public class HistoryViewModel extends AndroidViewModel {
         });
     }
 
-    // Rename
-    public void renameBarcode(BarcodeEntity barcode, String name) {
-        repository.updateName(
-                barcode.id,
-                name,
-                new BarcodeRepository.OperationCallback() {
-                    @Override
-                    public void onComplete() {
-                        loadBarcodes();
-                    }
-
-                    @Override
-                    public void onError(Exception error) {
-                        Log.e("HistoryViewModel", "Failed to rename barcode", error);
-                    }
-                }
-        );
-    }
-
     // Favorite
     public void toggleFavorite(BarcodeEntity barcode) {
         repository.updateFavorite(
@@ -88,7 +69,6 @@ public class HistoryViewModel extends AndroidViewModel {
     }
 
     // Delete
-
     public void deleteBarcode(
             BarcodeEntity barcode,
             Runnable onDeleted,
@@ -115,7 +95,6 @@ public class HistoryViewModel extends AndroidViewModel {
                 }
         );
     }
-
 
     // Cleanup
     @Override

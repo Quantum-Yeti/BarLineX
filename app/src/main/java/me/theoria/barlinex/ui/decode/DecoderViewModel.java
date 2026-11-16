@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.zxing.BarcodeFormat;
+import com.google.zxing.Result;
 
 public class DecoderViewModel extends ViewModel {
 
@@ -15,17 +15,14 @@ public class DecoderViewModel extends ViewModel {
         return decodedResult;
     }
 
-    public void onBarcodeDetected(
-            String content,
-            BarcodeFormat format
-    ) {
-        if (content == null || format == null) {
+    public void onBarcodeDetected(Result result) {
+        if (result == null
+                || result.getText() == null
+                || result.getBarcodeFormat() == null) {
             return;
         }
 
-        decodedResult.setValue(
-                new DecodeResult(content, format)
-        );
+        decodedResult.setValue(new DecodeResult(result));
     }
 
     public void clearResult() {
