@@ -19,7 +19,6 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
@@ -28,19 +27,15 @@ import java.util.Date;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.domain.barcode.BarcodeValidator;
-import me.theoria.barlinex.ui.advanced.AdvancedActivity;
-import me.theoria.barlinex.ui.common.BottomNavigationHelper;
 import me.theoria.barlinex.ui.common.WindowsInsetHelper;
 import me.theoria.barlinex.ui.common.ZoomControlsController;
 import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
-import me.theoria.barlinex.ui.history.HistoryActivity;
 import me.theoria.barlinex.ui.scanner.ScannerOverlay;
 
 public class DecodeActivity extends AppCompatActivity {
 
     // Views
 
-    private BottomNavigationView bottomNavigation;
     private PreviewView cameraPreview;
 
     private View scannerPlaceholder;
@@ -119,7 +114,6 @@ public class DecodeActivity extends AppCompatActivity {
                 decodeController
         );
 
-        setupBottomNavigation();
         setupGalleryButton();
         setupResultActions();
 
@@ -129,10 +123,6 @@ public class DecodeActivity extends AppCompatActivity {
     // View initialization
 
     private void initializeViews() {
-
-        bottomNavigation = findViewById(
-                R.id.decodeBottomNavigation
-        );
 
         cameraPreview = findViewById(
                 R.id.decodeCameraPreview
@@ -803,52 +793,6 @@ public class DecodeActivity extends AppCompatActivity {
 
             startScanning();
         });
-    }
-
-    // Bottom navigation
-
-    private void setupBottomNavigation() {
-
-        BottomNavigationHelper.setup(
-                bottomNavigation,
-                R.id.nav_decode,
-                new BottomNavigationHelper.Listener() {
-
-                    @Override
-                    public void onCreateSelected() {
-                        finish();
-                    }
-
-                    @Override
-                    public void onDecodeSelected() {
-                        // Already on Decode.
-                    }
-
-                    @Override
-                    public void onAdvancedSelected() {
-
-                        startActivity(
-                                new Intent(
-                                        DecodeActivity.this,
-                                        AdvancedActivity.class
-                                )
-                        );
-                    }
-
-                    @Override
-                    public void onHistorySelected() {
-
-                        startActivity(
-                                new Intent(
-                                        DecodeActivity.this,
-                                        HistoryActivity.class
-                                )
-                        );
-
-                        finish();
-                    }
-                }
-        );
     }
 
     // Zoom touch events

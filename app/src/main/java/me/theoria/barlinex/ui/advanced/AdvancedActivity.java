@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.card.MaterialCardView;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.ui.common.BottomNavigationHelper;
@@ -26,7 +27,9 @@ public class AdvancedActivity extends AppCompatActivity {
 
         initializeViews();
         initializeWindowInsets();
-        setupNavigation();
+
+        setupAdvancedOptionSelect();
+        setupBottomNavigation();
     }
 
     private void initializeViews() {
@@ -41,7 +44,22 @@ public class AdvancedActivity extends AppCompatActivity {
         );
     }
 
-    private void setupNavigation() {
+    private void setupAdvancedOptionSelect() {
+
+        MaterialCardView cardBarcodeDecoder =
+                findViewById(R.id.cardBarcodeDecoder);
+
+        cardBarcodeDecoder.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    AdvancedActivity.this,
+                    DecodeActivity.class
+            );
+            startActivity(intent);
+        });
+
+    }
+
+    private void setupBottomNavigation() {
 
         BottomNavigationHelper.setup(
                 bottomNavigation,
@@ -59,11 +77,6 @@ public class AdvancedActivity extends AppCompatActivity {
 
                         startActivity(intent);
                         finish();
-                    }
-
-                    @Override
-                    public void onDecodeSelected() {
-                        openActivity(DecodeActivity.class);
                     }
 
                     @Override

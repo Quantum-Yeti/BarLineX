@@ -7,11 +7,6 @@
         android:title="Create" />
 
     <item
-        android:id="@+id/nav_decode"
-        android:icon="@drawable/ic_scan_number"
-        android:title="Decode" />
-
-    <item
         android:id="@+id/nav_advanced"
         android:icon="@drawable/ic_adv"
         android:title="Advanced" />

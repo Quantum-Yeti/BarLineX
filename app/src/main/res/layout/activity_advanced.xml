@@ -95,6 +95,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="#252A40"
+                        android:src="@drawable/ic_bulk"
                         android:padding="10dp"
                         android:contentDescription="Bulk generation"
                         app:tint="#91A8FF" />
@@ -159,6 +160,7 @@
                         android:layout_height="44dp"
                         android:background="#252A40"
                         android:padding="10dp"
+                        android:src="@drawable/ic_design"
                         android:contentDescription="Label designer"
                         app:tint="#91A8FF" />
 
@@ -182,6 +184,71 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Create customized, printable barcode labels."
+                            android:textColor="#A1A1AA"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SOON"
+                        android:textColor="#91A8FF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- BARCODE DECODER -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardBarcodeDecoder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#1C1C1E"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#303034"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="18dp">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="#252A40"
+                        android:src="@drawable/ic_qr_scanner"
+                        android:padding="10dp"
+                        android:contentDescription="Barcode Decoder"
+                        app:tint="#91A8FF" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Barcode Decoder"
+                            android:textColor="#F5F5F5"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Decode barcode data with your camera."
                             android:textColor="#A1A1AA"
                             android:textSize="13sp" />
 
@@ -270,7 +337,10 @@
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1C1C1E"
+        android:background="#1A1A1D"
+        app:elevation="0dp"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/menu_bottom_navigation" />
 

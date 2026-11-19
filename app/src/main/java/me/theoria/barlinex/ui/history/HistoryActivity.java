@@ -307,11 +307,6 @@ public class HistoryActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onDecodeSelected() {
-                        navigateToMain(R.id.nav_decode);
-                    }
-
-                    @Override
                     public void onAdvancedSelected() {
 
                         startActivity(

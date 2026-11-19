@@ -27,7 +27,6 @@ import me.theoria.barlinex.ui.controller.BarcodeInputController;
 import me.theoria.barlinex.ui.controller.BarcodePreviewController;
 import me.theoria.barlinex.ui.controller.BarcodeRestoreController;
 import me.theoria.barlinex.ui.controller.QrTemplateController;
-import me.theoria.barlinex.ui.decode.DecodeActivity;
 import me.theoria.barlinex.ui.history.HistoryActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_TAB = "selected_tab";
 
     // Views
-
     private EditText inputName;
     private EditText inputContent;
 
@@ -59,11 +57,9 @@ public class MainActivity extends AppCompatActivity {
     private MaterialAutoCompleteTextView qrContentTypeDropdown;
 
     // ViewModel
-
     private MainViewModel mainViewModel;
 
     // Controllers
-
     private BarcodeInputController inputController;
     private BarcodePreviewController previewController;
     private BarcodeActionController actionController;
@@ -71,12 +67,10 @@ public class MainActivity extends AppCompatActivity {
     private BarcodeRestoreController restoreController;
 
     // Activity result launchers
-
     private ActivityResultLauncher<String> csvExportLauncher;
     private ActivityResultLauncher<Intent> historyLauncher;
 
     // Lifecycle
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialize views and dependencies
-
         initializeViews();
         initializeWindowInsets();
         initializeViewModel();
@@ -94,17 +87,14 @@ public class MainActivity extends AppCompatActivity {
         initializeControllers();
 
         // Set up input and barcode functionality
-
         setupInputHandling();
         setupBarcodeActions();
-        setupNavigation();
+        setupBottomNavigation();
 
         // Initialize the barcode preview
-
         previewController.updatePreviewLabels();
 
         // Restore barcode data passed through the Intent
-
         loadSavedBarcode();
     }
 
@@ -119,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Initialization
-
     private void initializeViews() {
 
         inputName = findViewById(R.id.barcodeUserName);
@@ -224,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Input handling
-
     private void setupInputHandling() {
 
         inputController.setupTextWatchers(
@@ -234,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Barcode actions
-
     private void setupBarcodeActions() {
 
         buttonSaveBarcode.setOnClickListener(
@@ -263,7 +250,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Activity result launchers
-
     private void initializeLaunchers() {
 
         registerHistoryLauncher();
@@ -315,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Saved barcode handling
-
     private void loadSavedBarcode() {
 
         loadSavedBarcode(getIntent());
@@ -329,8 +314,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Navigation
-
-    private void setupNavigation() {
+    private void setupBottomNavigation() {
 
         BottomNavigationHelper.setup(
                 bottomNavigation,
@@ -340,17 +324,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCreateSelected() {
                         // No additional action required.
-                    }
-
-                    @Override
-                    public void onDecodeSelected() {
-
-                        startActivity(
-                                new Intent(
-                                        MainActivity.this,
-                                        DecodeActivity.class
-                                )
-                        );
                     }
 
                     @Override
