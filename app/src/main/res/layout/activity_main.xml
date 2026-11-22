@@ -20,7 +20,8 @@
         android:background="#121212"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:overScrollMode="never">
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,11 +33,11 @@
 
             <!-- Live barcode preview -->
             <include
-                layout="@layout/layout_barcode_main_preview" />
+                layout="@layout/layout_main_barcode_preview" />
 
             <!-- Barcode settings -->
             <include
-                layout="@layout/layout_barcode_main_settings" />
+                layout="@layout/layout_main_barcode_options" />
 
         </LinearLayout>
 

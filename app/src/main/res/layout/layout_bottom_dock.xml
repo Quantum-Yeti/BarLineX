@@ -13,7 +13,7 @@
         android:background="#303034" />
 
     <include
-        layout="@layout/layout_barcode_main_actions" />
+        layout="@layout/layout_main_barcode_actions" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
