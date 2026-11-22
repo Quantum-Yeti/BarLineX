@@ -28,6 +28,7 @@ import me.theoria.barlinex.ui.controller.BarcodePreviewController;
 import me.theoria.barlinex.ui.controller.BarcodeRestoreController;
 import me.theoria.barlinex.ui.controller.QrTemplateController;
 import me.theoria.barlinex.ui.history.HistoryActivity;
+import me.theoria.barlinex.ui.options.SettingsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set up input and barcode functionality
         setupInputHandling();
+        setupSettingsNavigation();
         setupBarcodeActions();
         setupBottomNavigation();
 
@@ -275,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
                     );
 
                     // Restore barcode data when returning from Edit.
-
                     if (data.hasExtra(
                             BarcodeActionController.EXTRA_BARCODE_CONTENT
                     )) {
@@ -343,6 +344,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void setupSettingsNavigation() {
+
+        findViewById(R.id.buttonSettings).setOnClickListener(view -> {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SettingsActivity.class
+            );
+
+            startActivity(intent);
+        });
     }
 
     private void openHistory() {
