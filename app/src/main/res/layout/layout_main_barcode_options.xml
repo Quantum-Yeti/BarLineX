@@ -169,4 +169,23 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonSaveBarcodeToDB"
+        android:layout_width="190dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="Save Barcode"
+        android:textAllCaps="false"
+        android:textColor="#121212"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:backgroundTint="#8B9EFF"
+        app:cornerRadius="12dp"
+        app:icon="@drawable/ic_save"
+        app:iconGravity="textStart"
+        app:iconTint="#121212" />
+
 </LinearLayout>

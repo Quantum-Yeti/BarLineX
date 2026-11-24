@@ -230,9 +230,9 @@ public class MainActivity extends AppCompatActivity {
                 view -> actionController.saveBarcode()
         );
 
-        buttonExportBarcode.setOnClickListener(
+        /*buttonExportBarcode.setOnClickListener(
                 view -> actionController.showExportMenu()
-        );
+        );*/
 
         findViewById(R.id.buttonCustomizeBarcode).setOnClickListener(
                 view -> actionController.customizeBarcode()

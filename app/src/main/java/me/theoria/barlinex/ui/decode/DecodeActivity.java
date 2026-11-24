@@ -35,14 +35,13 @@ import me.theoria.barlinex.ui.scanner.ScannerOverlay;
 public class DecodeActivity extends AppCompatActivity {
 
     // Views
-
     private PreviewView cameraPreview;
-
     private View scannerPlaceholder;
-    private TextView textDecodeStatus;
     private View decodeResultPanel;
+    private TextView textDecodeStatus;
     private ScannerOverlay scannerOverlay;
 
+    // Barcode information
     private TextView textDecodedFormat;
     private TextView textDecodedContent;
     private TextView textDecodedType;
@@ -50,8 +49,7 @@ public class DecodeActivity extends AppCompatActivity {
     private TextView textDecodedCheckDigit;
     private TextView textDecodedTime;
 
-    // Content Analysis
-
+    // Content analysis
     private TextView textAnalysisCharacters;
     private TextView textAnalysisBytes;
     private TextView textAnalysisLetters;
@@ -59,43 +57,57 @@ public class DecodeActivity extends AppCompatActivity {
     private TextView textAnalysisWhitespace;
     private TextView textAnalysisSymbols;
 
-    // Technical Properties
-
+    // Technical properties
     private TextView textTechnicalFormat;
     private TextView textTechnicalErrorCorrection;
     private TextView textTechnicalSymbology;
     private TextView textTechnicalByteSegments;
     private TextView textTechnicalStructuredAppend;
 
-    // Interpretation and Validation
-
+    // Interpretation and validation
     private TextView textDataInterpretation;
     private TextView textValidationStatus;
     private TextView textRawData;
 
-    // ViewModel
-
+    // Components
     private DecoderViewModel decodeViewModel;
-
-    // Controllers
-
     private BarcodeDecoderController decodeController;
     private ZoomControlsController zoomControlsController;
-
-    // Camera state
+    private ActivityResultLauncher<String> cameraPermissionLauncher;
 
     private boolean isScanning = false;
 
-    // Permissions
+    // Expandable sections: header, content, arrow, initially expanded
+    private final int[][] expandableSections = {
+            {R.id.headerBarcodeInformation,
+                    R.id.contentBarcodeInformation,
+                    R.id.arrowBarcodeInformation, 1},
 
-    private ActivityResultLauncher<String> cameraPermissionLauncher;
+            {R.id.headerContentAnalysis,
+                    R.id.contentContentAnalysis,
+                    R.id.arrowContentAnalysis, 0},
 
-    // Activity initialization
+            {R.id.headerTechnicalProperties,
+                    R.id.contentTechnicalProperties,
+                    R.id.arrowTechnicalProperties, 0},
 
+            {R.id.headerDataInterpretation,
+                    R.id.contentDataInterpretation,
+                    R.id.arrowDataInterpretation, 0},
+
+            {R.id.headerValidation,
+                    R.id.contentValidation,
+                    R.id.arrowValidation, 0},
+
+            {R.id.headerRawData,
+                    R.id.contentRawData,
+                    R.id.arrowRawData, 0}
+    };
+
+    // Activity setup
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_decode);
 
         WindowsInsetHelper.applySystemBarInsets(
@@ -104,7 +116,6 @@ public class DecodeActivity extends AppCompatActivity {
 
         initializeViews();
         setupExpandableSections();
-
         initializeViewModel();
         registerCameraPermissionLauncher();
         initializeDecoder();
@@ -116,166 +127,65 @@ public class DecodeActivity extends AppCompatActivity {
 
         setupGalleryButton();
         setupResultActions();
-
         checkCameraPermission();
     }
 
     // View initialization
-
     private void initializeViews() {
+        cameraPreview = findViewById(R.id.decodeCameraPreview);
+        scannerPlaceholder = findViewById(R.id.scannerPlaceholder);
+        textDecodeStatus = findViewById(R.id.textDecodeStatus);
+        decodeResultPanel = findViewById(R.id.decodeResultPanel);
+        scannerOverlay = findViewById(R.id.scannerOverlay);
 
-        cameraPreview = findViewById(
-                R.id.decodeCameraPreview
-        );
+        initializeBarcodeInformationViews();
+        initializeAnalysisViews();
+        initializeTechnicalViews();
+        initializeInterpretationViews();
+    }
 
-        scannerPlaceholder = findViewById(
-                R.id.scannerPlaceholder
-        );
+    private void initializeBarcodeInformationViews() {
+        textDecodedFormat = findViewById(R.id.textDecodedFormat);
+        textDecodedContent = findViewById(R.id.textDecodedContent);
+        textDecodedType = findViewById(R.id.textDecodedType);
+        textDecodedLength = findViewById(R.id.textDecodedLength);
+        textDecodedCheckDigit = findViewById(R.id.textDecodedCheckDigit);
+        textDecodedTime = findViewById(R.id.textDecodedTime);
+    }
 
-        textDecodeStatus = findViewById(
-                R.id.textDecodeStatus
-        );
+    private void initializeAnalysisViews() {
+        textAnalysisCharacters = findViewById(R.id.textAnalysisCharacters);
+        textAnalysisBytes = findViewById(R.id.textAnalysisBytes);
+        textAnalysisLetters = findViewById(R.id.textAnalysisLetters);
+        textAnalysisNumbers = findViewById(R.id.textAnalysisNumbers);
+        textAnalysisWhitespace = findViewById(R.id.textAnalysisWhitespace);
+        textAnalysisSymbols = findViewById(R.id.textAnalysisSymbols);
+    }
 
-        decodeResultPanel = findViewById(
-                R.id.decodeResultPanel
-        );
+    private void initializeTechnicalViews() {
+        textTechnicalFormat = findViewById(R.id.textTechnicalFormat);
+        textTechnicalErrorCorrection = findViewById(R.id.textTechnicalErrorCorrection);
+        textTechnicalSymbology = findViewById(R.id.textTechnicalSymbology);
+        textTechnicalByteSegments = findViewById(R.id.textTechnicalByteSegments);
+        textTechnicalStructuredAppend = findViewById(R.id.textTechnicalStructuredAppend);
+    }
 
-        scannerOverlay = findViewById(
-                R.id.scannerOverlay
-        );
-
-        textDecodedFormat = findViewById(
-                R.id.textDecodedFormat
-        );
-
-        textDecodedContent = findViewById(
-                R.id.textDecodedContent
-        );
-
-        textDecodedType = findViewById(
-                R.id.textDecodedType
-        );
-
-        textDecodedLength = findViewById(
-                R.id.textDecodedLength
-        );
-
-        textDecodedCheckDigit = findViewById(
-                R.id.textDecodedCheckDigit
-        );
-
-        textDecodedTime = findViewById(
-                R.id.textDecodedTime
-        );
-
-        // Content Analysis
-
-        textAnalysisCharacters = findViewById(
-                R.id.textAnalysisCharacters
-        );
-
-        textAnalysisBytes = findViewById(
-                R.id.textAnalysisBytes
-        );
-
-        textAnalysisLetters = findViewById(
-                R.id.textAnalysisLetters
-        );
-
-        textAnalysisNumbers = findViewById(
-                R.id.textAnalysisNumbers
-        );
-
-        textAnalysisWhitespace = findViewById(
-                R.id.textAnalysisWhitespace
-        );
-
-        textAnalysisSymbols = findViewById(
-                R.id.textAnalysisSymbols
-        );
-
-        // Technical Properties
-
-        textTechnicalFormat = findViewById(
-                R.id.textTechnicalFormat
-        );
-
-        textTechnicalErrorCorrection = findViewById(
-                R.id.textTechnicalErrorCorrection
-        );
-
-        textTechnicalSymbology = findViewById(
-                R.id.textTechnicalSymbology
-        );
-
-        textTechnicalByteSegments = findViewById(
-                R.id.textTechnicalByteSegments
-        );
-
-        textTechnicalStructuredAppend = findViewById(
-                R.id.textTechnicalStructuredAppend
-        );
-
-        // Interpretation and Validation
-
-        textDataInterpretation = findViewById(
-                R.id.textDataInterpretation
-        );
-
-        textValidationStatus = findViewById(
-                R.id.textValidationStatus
-        );
-
-        textRawData = findViewById(
-                R.id.textRawData
-        );
+    private void initializeInterpretationViews() {
+       textDataInterpretation = findViewById(R.id.textDataInterpretation);
+        textValidationStatus = findViewById(R.id.textValidationStatus);
+        textRawData = findViewById(R.id.textRawData);
     }
 
     // Expandable sections
-
     private void setupExpandableSections() {
-
-        setupExpandableSection(
-                R.id.headerBarcodeInformation,
-                R.id.contentBarcodeInformation,
-                R.id.arrowBarcodeInformation,
-                true
-        );
-
-        setupExpandableSection(
-                R.id.headerContentAnalysis,
-                R.id.contentContentAnalysis,
-                R.id.arrowContentAnalysis,
-                false
-        );
-
-        setupExpandableSection(
-                R.id.headerTechnicalProperties,
-                R.id.contentTechnicalProperties,
-                R.id.arrowTechnicalProperties,
-                false
-        );
-
-        setupExpandableSection(
-                R.id.headerDataInterpretation,
-                R.id.contentDataInterpretation,
-                R.id.arrowDataInterpretation,
-                false
-        );
-
-        setupExpandableSection(
-                R.id.headerValidation,
-                R.id.contentValidation,
-                R.id.arrowValidation,
-                false
-        );
-
-        setupExpandableSection(
-                R.id.headerRawData,
-                R.id.contentRawData,
-                R.id.arrowRawData,
-                false
-        );
+        for (int[] section : expandableSections) {
+            setupExpandableSection(
+                    section[0],
+                    section[1],
+                    section[2],
+                    section[3] == 1
+            );
+        }
     }
 
     private void setupExpandableSection(
@@ -284,129 +194,110 @@ public class DecodeActivity extends AppCompatActivity {
             int arrowId,
             boolean initiallyExpanded
     ) {
-
         View header = findViewById(headerId);
         View content = findViewById(contentId);
         TextView arrow = findViewById(arrowId);
 
-        content.setVisibility(
-                initiallyExpanded
-                        ? View.VISIBLE
-                        : View.GONE
-        );
-
-        arrow.setRotation(
-                initiallyExpanded ? 180f : 0f
-        );
+        setSectionState(content, arrow, initiallyExpanded);
 
         header.setOnClickListener(view -> {
-
-            boolean isExpanded =
-                    content.getVisibility() == View.VISIBLE;
-
-            content.setVisibility(
-                    isExpanded
-                            ? View.GONE
-                            : View.VISIBLE
-            );
-
-            arrow.animate()
-                    .rotation(isExpanded ? 0f : 180f)
-                    .setDuration(180)
-                    .start();
+            boolean expanded = content.getVisibility() != View.VISIBLE;
+            setSectionState(content, arrow, expanded);
 
             header.setContentDescription(
-                    isExpanded
-                            ? "Expand section"
-                            : "Collapse section"
+                    expanded ? "Collapse section" : "Expand section"
             );
         });
     }
 
-    // ViewModel
-
-    private void initializeViewModel() {
-
-        decodeViewModel = new ViewModelProvider(this)
-                .get(DecoderViewModel.class);
-
-        observeDecodedResult();
+    private void setSectionState(
+            View content,
+            View arrow,
+            boolean expanded
+    ) {
+        content.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        arrow.setRotation(expanded ? 180f : 0f);
     }
 
-    private void observeDecodedResult() {
+    private void resetExpandableSections() {
+        for (int[] section : expandableSections) {
+            collapseSection(
+                    section[1],
+                    section[2],
+                    section[3] == 1
+            );
+        }
+    }
 
-        decodeViewModel.getDecodedResult().observe(
-                this,
-                result -> {
-
-                    if (result == null) {
-                        return;
-                    }
-
-                    isScanning = false;
-
-                    cameraPreview.setVisibility(View.GONE);
-                    scannerPlaceholder.setVisibility(View.GONE);
-                    decodeResultPanel.setVisibility(View.VISIBLE);
-
-                    if (zoomControlsController != null) {
-                        zoomControlsController.hide();
-                    }
-
-                    textDecodeStatus.setText("DETECTED");
-
-                    displayBarcodeDetails(result);
-                }
+    private void collapseSection(
+            int contentId,
+            int arrowId,
+            boolean expanded
+    ) {
+        setSectionState(
+                findViewById(contentId),
+                findViewById(arrowId),
+                expanded
         );
     }
 
-    // Camera permissions
+    // ViewModel
+    private void initializeViewModel() {
+        decodeViewModel = new ViewModelProvider(this)
+                .get(DecoderViewModel.class);
 
+        decodeViewModel.getDecodedResult().observe(this, result -> {
+            if (result == null) return;
+
+            isScanning = false;
+            cameraPreview.setVisibility(View.GONE);
+            scannerPlaceholder.setVisibility(View.GONE);
+            decodeResultPanel.setVisibility(View.VISIBLE);
+
+            if (zoomControlsController != null) {
+                zoomControlsController.hide();
+            }
+
+            textDecodeStatus.setText("DETECTED");
+            displayBarcodeDetails(result);
+        });
+    }
+
+    // Camera permission
     private void registerCameraPermissionLauncher() {
-
         cameraPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 granted -> {
-
                     if (granted) {
-
                         startScanning();
-
                     } else {
-
                         textDecodeStatus.setText("PERMISSION REQUIRED");
-
-                        Toast.makeText(
-                                this,
+                        showToast(
                                 "Camera permission is needed to scan barcodes.",
                                 Toast.LENGTH_LONG
-                        ).show();
+                        );
                     }
                 }
         );
     }
 
     private void checkCameraPermission() {
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED) {
-
+        if (hasCameraPermission()) {
             startScanning();
-
         } else {
-
-            cameraPermissionLauncher.launch(
-                    Manifest.permission.CAMERA
-            );
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
     }
 
-    // Barcode decoder
+    private boolean hasCameraPermission() {
+        return ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
 
+    // Decoder controller
     private void initializeDecoder() {
-
         decodeController = new BarcodeDecoderController(
                 this,
                 cameraPreview,
@@ -415,123 +306,89 @@ public class DecodeActivity extends AppCompatActivity {
 
                     @Override
                     public void onBarcodeDetected(Result result) {
-
                         runOnUiThread(() -> {
-
-                            if (isFinishing() || isDestroyed()) {
-                                return;
-                            }
+                            if (isFinishing() || isDestroyed()) return;
 
                             isScanning = false;
-
                             decodeController.stopCamera();
-
                             decodeViewModel.onBarcodeDetected(result);
                         });
                     }
 
                     @Override
-                    public void onZoomCapabilitiesChanged(
-                            float maxZoomRatio
-                    ) {
-
+                    public void onZoomCapabilitiesChanged(float maxZoomRatio) {
                         runOnUiThread(() -> {
-
                             if (zoomControlsController != null) {
-
-                                zoomControlsController
-                                        .onZoomCapabilitiesChanged(
-                                                maxZoomRatio
-                                        );
+                                zoomControlsController.onZoomCapabilitiesChanged(
+                                        maxZoomRatio
+                                );
                             }
                         });
                     }
 
                     @Override
-                    public void onScanError(
-                            String message,
-                            Exception error
-                    ) {
-
+                    public void onScanError(String message, Exception error) {
                         runOnUiThread(() -> {
-
-                            if (isFinishing() || isDestroyed()) {
-                                return;
-                            }
+                            if (isFinishing() || isDestroyed()) return;
 
                             isScanning = false;
-
                             textDecodeStatus.setText("CAMERA ERROR");
-
-                            Toast.makeText(
-                                    DecodeActivity.this,
-                                    message,
-                                    Toast.LENGTH_LONG
-                            ).show();
+                            showToast(message, Toast.LENGTH_LONG);
                         });
                     }
                 }
         );
     }
 
-    // Barcode result
-
+    // Barcode result display
     private void displayBarcodeDetails(DecodeResult result) {
-
         String content = result.getContent();
         BarcodeFormat format = result.getFormat();
-
-        // Reset section states for each new scan.
+        String formattedType = format.toString().replace("_", " ");
 
         resetExpandableSections();
 
-        // Main result
+        displayBasicInformation(result, content, format);
+        displayContentAnalysis(result);
+        displayTechnicalProperties(result, formattedType);
+        displayInterpretation(result, content);
+    }
 
-        textDecodedFormat.setText(
-                format.toString().replace("_", " ")
-        );
-
+    private void displayBasicInformation(
+            DecodeResult result,
+            String content,
+            BarcodeFormat format
+    ) {
+        textDecodedFormat.setText(format.toString().replace("_", " "));
         textDecodedContent.setText(content);
 
-        // Barcode Information
-
         textDecodedType.setText(
-                "Barcode type: "
-                        + (result.isTwoDimensional() ? "2D" : "Linear")
+                "Barcode type: " +
+                        (result.isTwoDimensional() ? "2D" : "Linear")
         );
 
         int characterCount = result.getCharacterCount();
 
         textDecodedLength.setText(
-                "Content length: "
-                        + characterCount
-                        + (characterCount == 1
-                        ? " character"
-                        : " characters")
+                "Content length: " + characterCount +
+                        (characterCount == 1 ? " character" : " characters")
         );
 
         String checkDigitStatus = result.isProductBarcode()
-                ? BarcodeValidator.getCheckDigitStatus(
-                content,
-                format
-        )
+                ? BarcodeValidator.getCheckDigitStatus(content, format)
                 : "Not applicable";
 
-        textDecodedCheckDigit.setText(
-                "Check digit: " + checkDigitStatus
-        );
+        textDecodedCheckDigit.setText("Check digit: " + checkDigitStatus);
 
         String scanTime = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM,
                 DateFormat.SHORT
         ).format(new Date(result.getScannedAt()));
 
-        textDecodedTime.setText(
-                "Scanned: " + scanTime
-        );
+        textDecodedTime.setText("Scanned: " + scanTime);
+    }
 
-        // Content Analysis
-
+    private void displayContentAnalysis(DecodeResult result) {
         textAnalysisCharacters.setText(
                 "Characters: " + result.getCharacterCount()
         );
@@ -555,144 +412,83 @@ public class DecodeActivity extends AppCompatActivity {
         textAnalysisSymbols.setText(
                 "Symbols: " + result.getSymbolCount()
         );
+    }
 
-        // Technical Properties
-
-        textTechnicalFormat.setText(
-                "Format: " + format.toString().replace("_", " ")
-        );
+    private void displayTechnicalProperties(
+            DecodeResult result,
+            String formattedType
+    ) {
+        textTechnicalFormat.setText("Format: " + formattedType);
 
         String errorCorrection = result.getErrorCorrectionLevel();
 
         textTechnicalErrorCorrection.setText(
-                "Error correction: "
-                        + (errorCorrection == null
-                        ? "Not available"
-                        : errorCorrection)
+                "Error correction: " +
+                        (errorCorrection == null
+                                ? "Not available"
+                                : errorCorrection)
         );
 
         String symbologyIdentifier = result.getSymbologyIdentifier();
 
         textTechnicalSymbology.setText(
-                "Symbology identifier: "
-                        + (symbologyIdentifier == null
-                        ? "Not available"
-                        : symbologyIdentifier)
+                "Symbology identifier: " +
+                        (symbologyIdentifier == null
+                                ? "Not available"
+                                : symbologyIdentifier)
         );
-
-        int byteSegmentCount = result.getByteSegmentCount();
-        int byteSegmentSize = result.getByteSegmentSize();
 
         textTechnicalByteSegments.setText(
-                "Byte segments: "
-                        + byteSegmentCount
-                        + " ("
-                        + byteSegmentSize
-                        + " bytes)"
+                "Byte segments: " +
+                        result.getByteSegmentCount() +
+                        " (" +
+                        result.getByteSegmentSize() +
+                        " bytes)"
         );
 
-        if (result.hasStructuredAppend()) {
+        displayStructuredAppend(result);
+    }
 
-            String sequence = result.getStructuredAppendSequence();
-            String parity = result.getStructuredAppendParity();
-
-            textTechnicalStructuredAppend.setText(
-                    "Structured append: Detected"
-                            + "\nSequence: "
-                            + (sequence == null ? "Unknown" : sequence)
-                            + "\nParity: "
-                            + (parity == null ? "Unknown" : parity)
-            );
-
-        } else {
-
+    private void displayStructuredAppend(DecodeResult result) {
+        if (!result.hasStructuredAppend()) {
             textTechnicalStructuredAppend.setText(
                     "Structured append: Not detected"
             );
+            return;
         }
 
-        // Data Interpretation
+        String sequence = result.getStructuredAppendSequence();
+        String parity = result.getStructuredAppendParity();
 
+        textTechnicalStructuredAppend.setText(
+                "Structured append: Detected" +
+                        "\nSequence: " +
+                        (sequence == null ? "Unknown" : sequence) +
+                        "\nParity: " +
+                        (parity == null ? "Unknown" : parity)
+        );
+    }
+
+    private void displayInterpretation(
+            DecodeResult result,
+            String content
+    ) {
         textDataInterpretation.setText(
                 "Interpretation: " + result.getInterpretation()
         );
-
-        // Validation
 
         textValidationStatus.setText(
                 "Validation: " + result.getValidationStatus()
         );
 
-        // Raw Data
-
         textRawData.setText(content);
     }
 
-    private void resetExpandableSections() {
-
-        collapseSection(
-                R.id.contentBarcodeInformation,
-                R.id.arrowBarcodeInformation,
-                true
-        );
-
-        collapseSection(
-                R.id.contentContentAnalysis,
-                R.id.arrowContentAnalysis,
-                false
-        );
-
-        collapseSection(
-                R.id.contentTechnicalProperties,
-                R.id.arrowTechnicalProperties,
-                false
-        );
-
-        collapseSection(
-                R.id.contentDataInterpretation,
-                R.id.arrowDataInterpretation,
-                false
-        );
-
-        collapseSection(
-                R.id.contentValidation,
-                R.id.arrowValidation,
-                false
-        );
-
-        collapseSection(
-                R.id.contentRawData,
-                R.id.arrowRawData,
-                false
-        );
-    }
-
-    private void collapseSection(
-            int contentId,
-            int arrowId,
-            boolean expanded
-    ) {
-
-        View content = findViewById(contentId);
-        View arrow = findViewById(arrowId);
-
-        content.setVisibility(
-                expanded ? View.VISIBLE : View.GONE
-        );
-
-        arrow.setRotation(
-                expanded ? 180f : 0f
-        );
-    }
-
     // Scanning
-
     private void startScanning() {
-
         if (decodeController == null
                 || isScanning
                 || decodeViewModel.hasResult()) {
-
             return;
         }
 
@@ -701,105 +497,88 @@ public class DecodeActivity extends AppCompatActivity {
         scannerPlaceholder.setVisibility(View.GONE);
         decodeResultPanel.setVisibility(View.GONE);
         cameraPreview.setVisibility(View.VISIBLE);
-
-        textDecodeStatus.setText("SCANNING");
-
         scannerOverlay.setVisibility(View.VISIBLE);
+        textDecodeStatus.setText("SCANNING");
 
         decodeController.startCamera();
     }
 
     // Gallery
-
     private void setupGalleryButton() {
-
-        findViewById(R.id.buttonGallery).setOnClickListener(view -> {
-
-            Toast.makeText(
-                    this,
-                    "Gallery decoding is coming next.",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        findViewById(R.id.buttonGallery).setOnClickListener(view ->
+                showToast(
+                        "Gallery decoding is coming next.",
+                        Toast.LENGTH_SHORT
+                )
+        );
     }
 
     // Result actions
-
     private void setupResultActions() {
+        findViewById(R.id.buttonCopyResult).setOnClickListener(view ->
+                copyDecodedContent()
+        );
 
-        findViewById(R.id.buttonCopyResult).setOnClickListener(view -> {
+        findViewById(R.id.buttonShareResult).setOnClickListener(view ->
+                shareDecodedContent()
+        );
 
-            DecodeResult result =
-                    decodeViewModel.getDecodedResult().getValue();
+        findViewById(R.id.buttonScanAgain).setOnClickListener(view ->
+                scanAgain()
+        );
+    }
 
-            if (result == null) {
-                return;
-            }
+    private DecodeResult getCurrentResult() {
+        return decodeViewModel.getDecodedResult().getValue();
+    }
 
-            ClipboardManager clipboard =
-                    (ClipboardManager) getSystemService(
-                            Context.CLIPBOARD_SERVICE
-                    );
+    private void copyDecodedContent() {
+        DecodeResult result = getCurrentResult();
+        if (result == null) return;
 
-            ClipData clip = ClipData.newPlainText(
-                    "Decoded barcode",
-                    result.getContent()
-            );
+        ClipboardManager clipboard = (ClipboardManager)
+                getSystemService(Context.CLIPBOARD_SERVICE);
 
-            clipboard.setPrimaryClip(clip);
+        clipboard.setPrimaryClip(
+                ClipData.newPlainText(
+                        "Decoded barcode",
+                        result.getContent()
+                )
+        );
 
-            Toast.makeText(
-                    this,
-                    "Copied to clipboard",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        showToast("Copied to clipboard", Toast.LENGTH_SHORT);
+    }
 
-        findViewById(R.id.buttonShareResult).setOnClickListener(view -> {
+    private void shareDecodedContent() {
+        DecodeResult result = getCurrentResult();
+        if (result == null) return;
 
-            DecodeResult result =
-                    decodeViewModel.getDecodedResult().getValue();
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, result.getContent());
 
-            if (result == null) {
-                return;
-            }
+        startActivity(
+                Intent.createChooser(
+                        shareIntent,
+                        "Share decoded barcode content"
+                )
+        );
+    }
 
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+    private void scanAgain() {
+        decodeViewModel.clearResult();
 
-            shareIntent.setType("text/plain");
+        decodeResultPanel.setVisibility(View.GONE);
+        cameraPreview.setVisibility(View.VISIBLE);
+        scannerOverlay.setVisibility(View.VISIBLE);
 
-            shareIntent.putExtra(
-                    Intent.EXTRA_TEXT,
-                    result.getContent()
-            );
-
-            startActivity(
-                    Intent.createChooser(
-                            shareIntent,
-                            "Share decoded barcode content"
-                    )
-            );
-        });
-
-        findViewById(R.id.buttonScanAgain).setOnClickListener(view -> {
-
-            decodeViewModel.clearResult();
-
-            decodeResultPanel.setVisibility(View.GONE);
-            cameraPreview.setVisibility(View.VISIBLE);
-            scannerOverlay.setVisibility(View.VISIBLE);
-
-            decodeController.resetScanning();
-
-            startScanning();
-        });
+        decodeController.resetScanning();
+        startScanning();
     }
 
     // Zoom touch events
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-
         if (zoomControlsController != null) {
             zoomControlsController.onTouchEvent(event);
         }
@@ -807,18 +586,12 @@ public class DecodeActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(event);
     }
 
-    // Activity lifecycle
-
+    // Lifecycle
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (decodeController != null
-                && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED) {
-
+        if (decodeController != null && hasCameraPermission()) {
             startScanning();
         }
     }
@@ -842,5 +615,10 @@ public class DecodeActivity extends AppCompatActivity {
             decodeController.close();
             decodeController = null;
         }
+    }
+
+    // Utilities
+    private void showToast(String message, int duration) {
+        Toast.makeText(this, message, duration).show();
     }
 }

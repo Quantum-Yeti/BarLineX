@@ -3,11 +3,11 @@ package me.theoria.barlinex.ui.scanner;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -16,76 +16,113 @@ public class ScannerOverlay extends View {
     private final Paint dimPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint clearPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint cornerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint scanLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint instructionPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final RectF guideRect = new RectF();
 
-    private static final int NONE = 0;
-    private static final int TOP_LEFT = 1;
-    private static final int TOP_RIGHT = 2;
-    private static final int BOTTOM_LEFT = 3;
-    private static final int BOTTOM_RIGHT = 4;
-    private static final int MOVE = 5;
+    private boolean frameInitialized = false;
 
-    private int activeTouch = NONE;
+    private static final int ACCENT_COLOR = 0xFF5278FF;
+    private static final int LIGHT_ACCENT = 0xFF91A8FF;
+
+    private static final float CORNER_LENGTH_DP = 28f;
+    private static final float CORNER_RADIUS_DP = 14f;
+    private static final float MIN_FRAME_WIDTH_DP = 120f;
+    private static final float MIN_FRAME_HEIGHT_DP = 55f;
+    private static final float TOUCH_RADIUS_DP = 40f;
+
+    private enum TouchMode {
+        NONE,
+        MOVE,
+        RESIZE
+    }
+
+    private TouchMode touchMode = TouchMode.NONE;
 
     private float lastTouchX;
     private float lastTouchY;
-
-    private boolean frameInitialized = false;
-
-    public ScannerOverlay(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initialize();
-    }
 
     public ScannerOverlay(Context context) {
         super(context);
         initialize();
     }
 
+    public ScannerOverlay(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initialize();
+    }
+
+    public ScannerOverlay(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initialize();
+    }
+
     private void initialize() {
 
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        setClickable(true);
 
-        dimPaint.setColor(0x99000000);
+        // Background dimming
+        dimPaint.setColor(0x55000000);
+        dimPaint.setStyle(Paint.Style.FILL);
 
+        // Transparent scanner window
+        clearPaint.setColor(0xFFFFFFFF);
+        clearPaint.setStyle(Paint.Style.FILL);
         clearPaint.setXfermode(
                 new PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         );
 
-        cornerPaint.setColor(0xFF8B9EFF);
+        // Scanner corner brackets
+        cornerPaint.setColor(ACCENT_COLOR);
         cornerPaint.setStyle(Paint.Style.STROKE);
-        cornerPaint.setStrokeWidth(dp(4));
+        cornerPaint.setStrokeWidth(dp(3f));
         cornerPaint.setStrokeCap(Paint.Cap.ROUND);
         cornerPaint.setStrokeJoin(Paint.Join.ROUND);
 
-        instructionPaint.setColor(0xFFFFFFFF);
-        instructionPaint.setTextSize(sp(13));
+        // Subtle corner glow
+        glowPaint.setColor(ACCENT_COLOR);
+        glowPaint.setStyle(Paint.Style.STROKE);
+        glowPaint.setStrokeWidth(dp(6f));
+        glowPaint.setStrokeCap(Paint.Cap.ROUND);
+        glowPaint.setStrokeJoin(Paint.Join.ROUND);
+        glowPaint.setShadowLayer(dp(7f), 0f, 0f, ACCENT_COLOR);
+
+        // Animated scan line
+        scanLinePaint.setColor(LIGHT_ACCENT);
+        scanLinePaint.setStyle(Paint.Style.STROKE);
+        scanLinePaint.setStrokeWidth(dp(1.5f));
+        scanLinePaint.setStrokeCap(Paint.Cap.ROUND);
+        scanLinePaint.setShadowLayer(dp(5f), 0f, 0f, ACCENT_COLOR);
+
+        // Scanner instructions
+        instructionPaint.setColor(0xFFE0E0E0);
+        instructionPaint.setTextSize(sp(12f));
         instructionPaint.setTextAlign(Paint.Align.CENTER);
         instructionPaint.setAntiAlias(true);
+
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(
+            int width,
+            int height,
+            int oldWidth,
+            int oldHeight
+    ) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
 
-        if (w <= 0 || h <= 0) {
-            return;
-        }
+        if (!frameInitialized && width > 0 && height > 0) {
 
-        if (!frameInitialized) {
-
-            float frameWidth = w * 0.84f;
-
+            float frameWidth = width * 0.84f;
             float frameHeight = Math.min(
-                    h * 0.34f,
+                    height * 0.34f,
                     frameWidth * 0.38f
             );
 
-            float centerX = w / 2f;
-            float centerY = h * 0.46f;
+            float centerX = width / 2f;
+            float centerY = height * 0.46f;
 
             guideRect.set(
                     centerX - frameWidth / 2f,
@@ -98,81 +135,221 @@ public class ScannerOverlay extends View {
         }
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        if (!frameInitialized) {
+            return;
+        }
+
+        // Dim the camera preview
+        canvas.drawRect(
+                0f,
+                0f,
+                getWidth(),
+                getHeight(),
+                dimPaint
+        );
+
+        // Cut out the scanner window
+        canvas.drawRoundRect(
+                guideRect,
+                dp(CORNER_RADIUS_DP),
+                dp(CORNER_RADIUS_DP),
+                clearPaint
+        );
+
+        // Draw scanner frame
+        drawScannerFrame(canvas);
+
+        // Draw animated scanning line
+        drawScanLine(canvas);
+
+        // Scanner instructions
+        drawInstruction(canvas);
+
+        // Continue animation while visible
+        if (getVisibility() == VISIBLE) {
+            postInvalidateOnAnimation();
+        }
+    }
+
+    private void drawScannerFrame(Canvas canvas) {
+
+        float left = guideRect.left;
+        float top = guideRect.top;
+        float right = guideRect.right;
+        float bottom = guideRect.bottom;
+
+        float cornerLength = dp(CORNER_LENGTH_DP);
+        float radius = dp(CORNER_RADIUS_DP);
+
+        // Glow layer
+        drawCornerLines(
+                canvas,
+                left,
+                top,
+                right,
+                bottom,
+                cornerLength,
+                radius,
+                glowPaint
+        );
+
+        // Main corner layer
+        drawCornerLines(
+                canvas,
+                left,
+                top,
+                right,
+                bottom,
+                cornerLength,
+                radius,
+                cornerPaint
+        );
+    }
+
+    private void drawCornerLines(
+            Canvas canvas,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            float cornerLength,
+            float radius,
+            Paint paint
+    ) {
+
+        // Top-left
+        canvas.drawLine(
+                left,
+                top + cornerLength,
+                left,
+                top + radius,
+                paint
+        );
+
+        canvas.drawLine(
+                left + radius,
+                top,
+                left + cornerLength,
+                top,
+                paint
+        );
+
+        // Top-right
+        canvas.drawLine(
+                right - cornerLength,
+                top,
+                right - radius,
+                top,
+                paint
+        );
+
+        canvas.drawLine(
+                right,
+                top + radius,
+                right,
+                top + cornerLength,
+                paint
+        );
+
+        // Bottom-left
+        canvas.drawLine(
+                left,
+                bottom - cornerLength,
+                left,
+                bottom - radius,
+                paint
+        );
+
+        canvas.drawLine(
+                left + radius,
+                bottom,
+                left + cornerLength,
+                bottom,
+                paint
+        );
+
+        // Bottom-right
+        canvas.drawLine(
+                right - cornerLength,
+                bottom,
+                right - radius,
+                bottom,
+                paint
+        );
+
+        canvas.drawLine(
+                right,
+                bottom - radius,
+                right,
+                bottom - cornerLength,
+                paint
+        );
+    }
+
+    private void drawScanLine(Canvas canvas) {
+
+        float scanHeight = guideRect.height();
+
+        long animationDuration = 2200L;
+        long elapsed = android.os.SystemClock.uptimeMillis() % animationDuration;
+
+        float progress = elapsed / (float) animationDuration;
+
+        // Ping-pong movement
+        float movement = progress < 0.5f
+                ? progress * 2f
+                : (1f - progress) * 2f;
+
+        float scanY = guideRect.top + scanHeight * movement;
+
+        float horizontalInset = dp(14f);
+
+        float startX = guideRect.left + horizontalInset;
+        float endX = guideRect.right - horizontalInset;
+
+        // Soft scan line
+        canvas.drawLine(
+                startX,
+                scanY,
+                endX,
+                scanY,
+                scanLinePaint
+        );
+    }
+
+    private void drawInstruction(Canvas canvas) {
+
+        float textY = guideRect.bottom + dp(32f);
+
+        String instruction = "Align barcode within the frame";
+
+        canvas.drawText(
+                instruction,
+                getWidth() / 2f,
+                textY,
+                instructionPaint
+        );
+    }
+
     /**
-     * Returns a copy of the current scanning frame.
+     * Returns a copy of the scanner guide rectangle.
+     * BarcodeDecoderController uses this rectangle
+     * to determine the image crop region.
      */
     public RectF getGuideRect() {
         return new RectF(guideRect);
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        float width = getWidth();
-        float height = getHeight();
-
-        if (width == 0 || height == 0 || !frameInitialized) {
-            return;
-        }
-
-        // Darken the camera preview.
-        int saveCount = canvas.saveLayer(
-                0, 0, width, height, null
-        );
-
-        canvas.drawRect(0, 0, width, height, dimPaint);
-
-        // Keep the scanning area transparent.
-        canvas.drawRoundRect(
-                guideRect,
-                dp(12),
-                dp(12),
-                clearPaint
-        );
-
-        canvas.restoreToCount(saveCount);
-
-        // Draw four corner brackets.
-        float cornerLength = dp(30);
-
-        float left = guideRect.left;
-        float right = guideRect.right;
-        float top = guideRect.top;
-        float bottom = guideRect.bottom;
-
-        // Top-left
-        canvas.drawLine(left, top + cornerLength, left, top, cornerPaint);
-        canvas.drawLine(left, top, left + cornerLength, top, cornerPaint);
-
-        // Top-right
-        canvas.drawLine(right - cornerLength, top, right, top, cornerPaint);
-        canvas.drawLine(right, top, right, top + cornerLength, cornerPaint);
-
-        // Bottom-left
-        canvas.drawLine(left, bottom - cornerLength, left, bottom, cornerPaint);
-        canvas.drawLine(left, bottom, left + cornerLength, bottom, cornerPaint);
-
-        // Bottom-right
-        canvas.drawLine(right - cornerLength, bottom, right, bottom, cornerPaint);
-        canvas.drawLine(right, bottom - cornerLength, right, bottom, cornerPaint);
-
-        // Instruction below the guide.
-        float instructionY = Math.min(
-                bottom + dp(34),
-                height - dp(20)
-        );
-
-        canvas.drawText(
-                "Drag corners to resize",
-                width / 2f,
-                instructionY,
-                instructionPaint
-        );
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if (!frameInitialized) {
+            return false;
+        }
 
         float x = event.getX();
         float y = event.getY();
@@ -181,14 +358,17 @@ public class ScannerOverlay extends View {
 
             case MotionEvent.ACTION_DOWN:
 
-                activeTouch = getTouchedArea(x, y);
-
-                if (activeTouch == NONE) {
-                    return false;
-                }
-
                 lastTouchX = x;
                 lastTouchY = y;
+
+                if (isNearCorner(x, y)) {
+                    touchMode = TouchMode.RESIZE;
+                } else if (guideRect.contains(x, y)) {
+                    touchMode = TouchMode.MOVE;
+                } else {
+                    touchMode = TouchMode.NONE;
+                    return false;
+                }
 
                 return true;
 
@@ -197,62 +377,37 @@ public class ScannerOverlay extends View {
                 float dx = x - lastTouchX;
                 float dy = y - lastTouchY;
 
-                if (activeTouch == MOVE) {
+                if (touchMode == TouchMode.MOVE) {
                     moveFrame(dx, dy);
-                } else {
-                    resizeFrame(x, y);
+                } else if (touchMode == TouchMode.RESIZE) {
+                    resizeFrame(dx, dy);
                 }
 
                 lastTouchX = x;
                 lastTouchY = y;
 
                 invalidate();
-
                 return true;
 
             case MotionEvent.ACTION_UP:
-
-                activeTouch = NONE;
-                performClick();
-
-                return true;
-
             case MotionEvent.ACTION_CANCEL:
 
-                activeTouch = NONE;
+                touchMode = TouchMode.NONE;
+                performClick();
                 return true;
         }
 
         return true;
     }
 
-    private int getTouchedArea(float x, float y) {
+    private boolean isNearCorner(float x, float y) {
 
-        float touchRadius = dp(40);
+        float radius = dp(TOUCH_RADIUS_DP);
 
-        // Check corners first.
-        if (isNear(x, y, guideRect.left, guideRect.top, touchRadius)) {
-            return TOP_LEFT;
-        }
-
-        if (isNear(x, y, guideRect.right, guideRect.top, touchRadius)) {
-            return TOP_RIGHT;
-        }
-
-        if (isNear(x, y, guideRect.left, guideRect.bottom, touchRadius)) {
-            return BOTTOM_LEFT;
-        }
-
-        if (isNear(x, y, guideRect.right, guideRect.bottom, touchRadius)) {
-            return BOTTOM_RIGHT;
-        }
-
-        // Touching inside the frame moves it.
-        if (guideRect.contains(x, y)) {
-            return MOVE;
-        }
-
-        return NONE;
+        return isNear(x, y, guideRect.left, guideRect.top, radius)
+                || isNear(x, y, guideRect.right, guideRect.top, radius)
+                || isNear(x, y, guideRect.left, guideRect.bottom, radius)
+                || isNear(x, y, guideRect.right, guideRect.bottom, radius);
     }
 
     private boolean isNear(
@@ -271,96 +426,51 @@ public class ScannerOverlay extends View {
 
     private void moveFrame(float dx, float dy) {
 
+        float width = guideRect.width();
+        float height = guideRect.height();
+
         float newLeft = guideRect.left + dx;
         float newTop = guideRect.top + dy;
 
-        float frameWidth = guideRect.width();
-        float frameHeight = guideRect.height();
-
+        // Keep the frame inside the overlay
         newLeft = Math.max(
-                0,
-                Math.min(newLeft, getWidth() - frameWidth)
+                0f,
+                Math.min(getWidth() - width, newLeft)
         );
 
         newTop = Math.max(
-                0,
-                Math.min(newTop, getHeight() - frameHeight)
+                0f,
+                Math.min(getHeight() - height, newTop)
         );
 
         guideRect.set(
                 newLeft,
                 newTop,
-                newLeft + frameWidth,
-                newTop + frameHeight
+                newLeft + width,
+                newTop + height
         );
     }
 
-    private void resizeFrame(float x, float y) {
+    private void resizeFrame(float dx, float dy) {
 
-        float minWidth = dp(120);
-        float minHeight = dp(55);
+        float minWidth = dp(MIN_FRAME_WIDTH_DP);
+        float minHeight = dp(MIN_FRAME_HEIGHT_DP);
 
-        float maxWidth = getWidth();
-        float maxHeight = getHeight();
+        float newRight = guideRect.right + dx;
+        float newBottom = guideRect.bottom + dy;
 
-        switch (activeTouch) {
+        newRight = Math.max(
+                guideRect.left + minWidth,
+                Math.min(getWidth(), newRight)
+        );
 
-            case TOP_LEFT:
+        newBottom = Math.max(
+                guideRect.top + minHeight,
+                Math.min(getHeight(), newBottom)
+        );
 
-                guideRect.left = Math.max(
-                        0,
-                        Math.min(x, guideRect.right - minWidth)
-                );
-
-                guideRect.top = Math.max(
-                        0,
-                        Math.min(y, guideRect.bottom - minHeight)
-                );
-
-                break;
-
-            case TOP_RIGHT:
-
-                guideRect.right = Math.min(
-                        maxWidth,
-                        Math.max(x, guideRect.left + minWidth)
-                );
-
-                guideRect.top = Math.max(
-                        0,
-                        Math.min(y, guideRect.bottom - minHeight)
-                );
-
-                break;
-
-            case BOTTOM_LEFT:
-
-                guideRect.left = Math.max(
-                        0,
-                        Math.min(x, guideRect.right - minWidth)
-                );
-
-                guideRect.bottom = Math.min(
-                        maxHeight,
-                        Math.max(y, guideRect.top + minHeight)
-                );
-
-                break;
-
-            case BOTTOM_RIGHT:
-
-                guideRect.right = Math.min(
-                        maxWidth,
-                        Math.max(x, guideRect.left + minWidth)
-                );
-
-                guideRect.bottom = Math.min(
-                        maxHeight,
-                        Math.max(y, guideRect.top + minHeight)
-                );
-
-                break;
-        }
+        guideRect.right = newRight;
+        guideRect.bottom = newBottom;
     }
 
     @Override
@@ -370,18 +480,14 @@ public class ScannerOverlay extends View {
     }
 
     private float dp(float value) {
-        return TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                getResources().getDisplayMetrics()
-        );
+        return value * getResources()
+                .getDisplayMetrics()
+                .density;
     }
 
     private float sp(float value) {
-        return TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP,
-                value,
-                getResources().getDisplayMetrics()
-        );
+        return value * getResources()
+                .getDisplayMetrics()
+                .scaledDensity;
     }
 }

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardContentAnalysis"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_barcode_details"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/headerContentAnalysis"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Content Analysis"
+            android:textColor="#F5F5F5"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/arrowContentAnalysis"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="⌄"
+            android:textColor="#91A8FF"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/contentContentAnalysis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textAnalysisCharacters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textAnalysisBytes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textAnalysisLetters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textAnalysisNumbers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textAnalysisWhitespace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textAnalysisSymbols"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

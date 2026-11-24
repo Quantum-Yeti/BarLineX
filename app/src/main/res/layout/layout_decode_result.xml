@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/decodeResultPanel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="12dp"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Result Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_scan_number"
+                android:tint="#91A8FF"
+                android:contentDescription="Barcode detected" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingStart="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Barcode detected"
+                    android:textColor="#F5F5F5"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Successfully decoded"
+                    android:textColor="#A1A1AA"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textDecodedFormat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_barcode_details"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
+                android:textColor="#91A8FF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Decoded Content Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="DECODED CONTENT"
+            android:textColor="#A1A1AA"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Content Card -->
+        <TextView
+            android:id="@+id/textDecodedContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_barcode_details"
+            android:minHeight="76dp"
+            android:padding="16dp"
+            android:textColor="#F5F5F5"
+            android:textSize="15sp"
+            android:selectable="true"
+            android:maxLines="5"
+            android:ellipsize="end" />
+
+        <!-- Copy / Share -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonCopyResult"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Copy"
+                android:textAllCaps="false"
+                android:textColor="#F5F5F5"
+                app:backgroundTint="#1C1C1E"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonShareResult"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Share"
+                android:textAllCaps="false"
+                android:textColor="#F5F5F5"
+                app:backgroundTint="#1C1C1E"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+        <!-- Scan Details Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="SCAN DETAILS"
+            android:textColor="#A1A1AA"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Details Sections -->
+        <include
+            layout="@layout/layout_decode_scan_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Scan Again -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonScanAgain"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="Scan Again"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="#5278FF"
+            app:cornerRadius="14dp" />
+
+    </LinearLayout>
+
+</ScrollView>

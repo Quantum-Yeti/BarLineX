@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardTechnicalProperties"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_barcode_details"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/headerTechnicalProperties"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Technical Properties"
+            android:textColor="#F5F5F5"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/arrowTechnicalProperties"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="⌄"
+            android:textColor="#91A8FF"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/contentTechnicalProperties"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textTechnicalFormat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textTechnicalErrorCorrection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textTechnicalSymbology"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textTechnicalByteSegments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textTechnicalStructuredAppend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="8dp"
+            android:textColor="#F5F5F5"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

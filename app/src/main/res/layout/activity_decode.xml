@@ -12,32 +12,27 @@
     <include
         android:id="@+id/decodeAppHeader"
         layout="@layout/layout_app_header"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="68dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Screen Header -->
+    <!-- Decode Header -->
     <LinearLayout
         android:id="@+id/decodeHeader"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toBottomOf="@id/decodeAppHeader"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/decodeAppHeader">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:includeFontPadding="false"
             android:text="Decode Barcode"
             android:textColor="#F5F5F5"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
@@ -45,744 +40,51 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="READY"
-            android:textColor="#A9BDFF"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.08" />
+            android:textColor="#91A8FF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
-    <!-- Scanner Workspace -->
+    <!-- Scanner / Result Workspace -->
     <FrameLayout
         android:id="@+id/cardScanner"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_barcode_details"
+        android:clipToPadding="false"
+        android:clipChildren="false"
         app:layout_constraintTop_toBottomOf="@id/decodeHeader"
         app:layout_constraintBottom_toTopOf="@id/decodeActions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Camera Preview -->
-        <androidx.camera.view.PreviewView
-            android:id="@+id/decodeCameraPreview"
+        <include
+            layout="@layout/layout_decode_scanner"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible" />
+            android:layout_height="match_parent" />
 
-        <!-- Scanner Overlay -->
-        <me.theoria.barlinex.ui.scanner.ScannerOverlay
-            android:id="@+id/scannerOverlay"
+        <include
+            layout="@layout/layout_decode_result"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-        <!-- Zoom Controls -->
-        <LinearLayout
-            android:id="@+id/zoomControls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="16dp"
-            android:background="#CC121212"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/textZoomLevel"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                android:text="1.0×"
-                android:textColor="#F5F5F5"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.slider.Slider
-                android:id="@+id/sliderZoom"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:value="1.0"
-                android:valueFrom="1.0"
-                android:valueTo="5.0"
-                android:stepSize="0.1"
-                app:haloColor="#33527AFF"
-                app:thumbColor="#8B9EFF" />
-
-            <ImageButton
-                android:id="@+id/buttonResetZoom"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Reset zoom"
-                android:padding="9dp"
-                android:src="@drawable/ic_refresh"
-                app:tint="#A9BDFF" />
-
-        </LinearLayout>
-
-        <!-- Scanner Placeholder -->
-        <LinearLayout
-            android:id="@+id/scannerPlaceholder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="28dp">
-
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:contentDescription="Barcode scanner"
-                android:src="@drawable/ic_scan_number"
-                app:tint="#8B9EFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Ready to scan"
-                android:textColor="#F5F5F5"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="Point your camera at a barcode or QR code."
-                android:textColor="#A1A1AA"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-        <!-- Decoded Result -->
-        <ScrollView
-            android:id="@+id/decodeResultPanel"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#121212"
-            android:clipToPadding="false"
-            android:fillViewport="true"
-            android:scrollbars="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="20dp">
-
-                <!-- Result Heading -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:contentDescription="Successful scan"
-                        android:src="@drawable/ic_scan_number"
-                        app:tint="#8B9EFF" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Barcode detected"
-                            android:textColor="#F5F5F5"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="Successfully decoded"
-                            android:textColor="#A1A1AA"
-                            android:textSize="12sp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/textDecodedFormat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#232B43"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="7dp"
-                        android:text="QR CODE"
-                        android:textColor="#A9BDFF"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <!-- Decoded Content Label -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="DECODED CONTENT"
-                    android:textColor="#A1A1AA"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08" />
-
-                <!-- Decoded Content -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="9dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/textDecodedContent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="76dp"
-                        android:ellipsize="end"
-                        android:maxLines="5"
-                        android:textColor="#F5F5F5"
-                        android:textSize="15sp"
-                        android:textIsSelectable="true" />
-
-                </LinearLayout>
-
-                <!-- Content Actions -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonCopyResult"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_weight="1"
-                        android:text="Copy"
-                        android:textAllCaps="false"
-                        android:textColor="#F5F5F5"
-                        android:textSize="13sp"
-                        app:backgroundTint="#232326"
-                        app:cornerRadius="10dp"
-                        app:icon="@drawable/ic_copy"
-                        app:iconTint="#A9BDFF"
-                        app:strokeColor="#303034"
-                        app:strokeWidth="1dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonShareResult"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:text="Share"
-                        android:textAllCaps="false"
-                        android:textColor="#F5F5F5"
-                        android:textSize="13sp"
-                        app:backgroundTint="#232326"
-                        app:cornerRadius="10dp"
-                        app:icon="@drawable/ic_share"
-                        app:iconTint="#A9BDFF"
-                        app:strokeColor="#303034"
-                        app:strokeWidth="1dp" />
-
-                </LinearLayout>
-
-                <!-- Scan Details Heading -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="26dp"
-                    android:layout_marginBottom="12dp"
-                    android:text="SCAN DETAILS"
-                    android:textColor="#A1A1AA"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.08" />
-
-                <!-- Barcode Information -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerBarcodeInformation"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Barcode Information"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowBarcodeInformation"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentBarcodeInformation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="visible">
-
-                        <TextView
-                            android:id="@+id/textDecodedType"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Barcode type: Unknown" />
-
-                        <TextView
-                            android:id="@+id/textDecodedLength"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Content length: 0 characters" />
-
-                        <TextView
-                            android:id="@+id/textDecodedCheckDigit"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Check digit: Not applicable" />
-
-                        <TextView
-                            android:id="@+id/textDecodedTime"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Scanned: Just now" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Content Analysis -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerContentAnalysis"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Content Analysis"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowContentAnalysis"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentContentAnalysis"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/textAnalysisCharacters"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Characters: 0" />
-
-                        <TextView
-                            android:id="@+id/textAnalysisBytes"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="UTF-8 bytes: 0" />
-
-                        <TextView
-                            android:id="@+id/textAnalysisLetters"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Letters: 0" />
-
-                        <TextView
-                            android:id="@+id/textAnalysisNumbers"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Numbers: 0" />
-
-                        <TextView
-                            android:id="@+id/textAnalysisWhitespace"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Whitespace: 0" />
-
-                        <TextView
-                            android:id="@+id/textAnalysisSymbols"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Symbols: 0" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Technical Properties -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerTechnicalProperties"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Technical Properties"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowTechnicalProperties"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentTechnicalProperties"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/textTechnicalFormat"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Format: Unknown" />
-
-                        <TextView
-                            android:id="@+id/textTechnicalErrorCorrection"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Error correction: Not available" />
-
-                        <TextView
-                            android:id="@+id/textTechnicalSymbology"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Symbology identifier: Not available" />
-
-                        <TextView
-                            android:id="@+id/textTechnicalByteSegments"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Byte segments: 0" />
-
-                        <TextView
-                            android:id="@+id/textTechnicalStructuredAppend"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Structured append: Not detected" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Data Interpretation -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerDataInterpretation"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Data Interpretation"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowDataInterpretation"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentDataInterpretation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/textDataInterpretation"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Interpretation: Plain text" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Validation -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerValidation"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Validation"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowValidation"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentValidation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/textValidationStatus"
-                            style="@style/DecodeDetailValue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Validation: Not available" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Raw Data -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/bg_barcode_details"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:id="@+id/headerRawData"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:includeFontPadding="false"
-                            android:text="Raw Data"
-                            android:textColor="#F5F5F5"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/arrowRawData"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⌄"
-                            android:textColor="#A9BDFF"
-                            android:textSize="24sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/contentRawData"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/textRawData"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textColor="#F5F5F5"
-                            android:textSize="13sp"
-                            android:textIsSelectable="true"
-                            android:breakStrategy="simple" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Scan Again -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonScanAgain"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Scan Again"
-                    android:textAllCaps="false"
-                    android:textColor="#121212"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#8B9EFF"
-                    app:cornerRadius="12dp" />
-
-            </LinearLayout>
-
-        </ScrollView>
+            android:layout_height="match_parent" />
 
     </FrameLayout>
 
-    <!-- Bottom Actions -->
+    <!-- Gallery Action -->
     <LinearLayout
         android:id="@+id/decodeActions"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="20dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/decodeBottomNavigation"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@id/decodeBottomNavigation">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonGallery"
@@ -791,13 +93,10 @@
             android:text="Choose from Gallery"
             android:textAllCaps="false"
             android:textColor="#F5F5F5"
-            android:textSize="15sp"
-            app:backgroundTint="#232326"
-            app:cornerRadius="14dp"
             app:icon="@drawable/ic_history"
-            app:iconTint="#A9BDFF"
-            app:strokeColor="#303034"
-            app:strokeWidth="1dp" />
+            app:iconTint="#91A8FF"
+            app:backgroundTint="#1C1C1E"
+            app:cornerRadius="14dp" />
 
     </LinearLayout>
 
@@ -806,13 +105,9 @@
         android:id="@+id/decodeBottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1A1A1D"
-        app:itemIconTint="@color/nav_item_color"
-        app:itemTextColor="@color/nav_item_color"
-        app:labelVisibilityMode="labeled"
+        android:background="#1C1C1E"
         app:menu="@menu/menu_bottom_navigation"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
