@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A1D"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#121212">
 
     <!-- App Header -->
     <include
@@ -18,8 +19,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="#121212"
-        android:clipToPadding="false"
         android:fillViewport="true"
+        android:clipToPadding="false"
         android:overScrollMode="never"
         android:scrollbars="none">
 
@@ -27,25 +28,72 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="12dp">
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="28dp">
 
-            <!-- Live barcode preview -->
-            <include
-                layout="@layout/layout_main_barcode_preview" />
+            <!-- Workspace Introduction -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
 
-            <!-- Barcode settings -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Barcode"
+                    android:textColor="#F5F5F5"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.02" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="Generate, customize, and save your barcodes."
+                    android:textColor="#A1A1AA"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Live Barcode Preview -->
             <include
-                layout="@layout/layout_main_barcode_options" />
+                android:id="@+id/mainBarcodePreview"
+                layout="@layout/layout_main_barcode_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Configuration Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Barcode Settings"
+                    android:textColor="#F5F5F5"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <include
+                    layout="@layout/layout_main_barcode_options"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </ScrollView>
 
-
-
-    <!-- Persistent save actions and navigation -->
+    <!-- Persistent Bottom Navigation -->
     <include
         layout="@layout/layout_bottom_dock" />
 

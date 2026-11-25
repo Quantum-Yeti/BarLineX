@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PREVIEW (hero) -->
+
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,49 +9,64 @@
     app:cardBackgroundColor="#1C1C1E"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp"
-    app:strokeColor="#303034"
-    app:strokeWidth="1dp">
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="16dp">
 
+        <!-- Preview Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Live preview"
-                android:textColor="#F5F5F5"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Live preview"
+                    android:textColor="#F5F5F5"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="Updates as you type"
+                    android:textColor="#85858F"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textPreviewFormat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_format_badge"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="5dp"
+                android:paddingHorizontal="11dp"
+                android:paddingVertical="6dp"
                 android:text="QR CODE"
                 android:textColor="#E4E8FF"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
-        <!-- Barcode canvas -->
+        <!-- Barcode Canvas -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="176dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="190dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_barcode_canvas"
             android:padding="12dp">
 
@@ -71,30 +86,30 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/ic_barcode"
-                    />
+                    android:src="@drawable/ic_barcode" />
 
                 <TextView
                     android:id="@+id/textPlaceholder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="10dp"
                     android:gravity="center"
                     android:text="@string/barcode_preview"
-                    android:textColor="#5B5B63"
+                    android:textColor="#777780"
                     android:textSize="13sp" />
 
             </LinearLayout>
 
         </FrameLayout>
 
+        <!-- Barcode Information -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -107,40 +122,47 @@
                 android:maxLines="1"
                 android:text="Enter text to begin"
                 android:textColor="#E5E5E5"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/textPreviewInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="8dp"
                 android:text="QR Code • 0 characters"
-                android:textColor="#A1A1AA"
-                android:textSize="12sp" />
+                android:textColor="#85858F"
+                android:textSize="11sp" />
 
         </LinearLayout>
 
-        <!-- Actions -->
+        <!-- Subtle Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="#303034" />
+
+        <!-- Preview Actions -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="-4dp"
             android:layout_marginTop="12dp"
             android:orientation="horizontal">
 
+            <!-- Share -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/buttonShare"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="4dp"
+                android:layout_height="66dp"
+                android:layout_marginEnd="5dp"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#232326"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#25252B"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#303034"
-                app:strokeWidth="1dp">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -149,35 +171,37 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="21dp"
+                        android:layout_height="21dp"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_share"
-                        />
+                        android:src="@drawable/ic_share" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:text="Share"
                         android:textColor="#D4D4D8"
-                        android:textSize="12sp" />
+                        android:textSize="11sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Customize -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/buttonCustomizeBarcode"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="4dp"
+                android:layout_height="66dp"
+                android:layout_marginHorizontal="3dp"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#232326"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#25252B"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#303034"
-                app:strokeWidth="1dp">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -186,35 +210,37 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="21dp"
+                        android:layout_height="21dp"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_custom"
-                        />
+                        android:src="@drawable/ic_custom" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:text="@string/customize"
                         android:textColor="#D4D4D8"
-                        android:textSize="12sp" />
+                        android:textSize="11sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Print -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/buttonPrintText"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="4dp"
+                android:layout_height="66dp"
+                android:layout_marginHorizontal="3dp"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#232326"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#25252B"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#303034"
-                app:strokeWidth="1dp">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -223,35 +249,37 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="21dp"
+                        android:layout_height="21dp"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_print"
-                        />
+                        android:src="@drawable/ic_print" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:text="@string/print"
                         android:textColor="#D4D4D8"
-                        android:textSize="12sp" />
+                        android:textSize="11sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Expand -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/buttonEnlarge"
                 android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="4dp"
+                android:layout_height="66dp"
+                android:layout_marginStart="5dp"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#232326"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#25252B"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#303034"
-                app:strokeWidth="1dp">
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -260,20 +288,21 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="21dp"
+                        android:layout_height="21dp"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_enlarge"
-                        />
+                        android:src="@drawable/ic_enlarge" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="5dp"
                         android:text="Expand"
                         android:textColor="#D4D4D8"
-                        android:textSize="12sp" />
+                        android:textSize="11sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>

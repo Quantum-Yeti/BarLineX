@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- FORMAT (chips are added in MainActivity) -->
+    <!-- FORMAT SECTION -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="9dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -18,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:letterSpacing="0.1"
+            android:letterSpacing="0.05"
             android:text="@string/barcode_type"
             android:textColor="#A1A1AA"
             android:textSize="12sp"
@@ -28,17 +30,18 @@
             android:id="@+id/textFormatCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#A1A1AA"
+            android:textColor="#85858F"
             android:textSize="12sp" />
 
     </LinearLayout>
 
+    <!-- FORMAT DROPDOWN -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/formatDropdownLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="#1C1C1E"
+        app:boxBackgroundColor="#202024"
         app:boxCornerRadiusBottomEnd="14dp"
         app:boxCornerRadiusBottomStart="14dp"
         app:boxCornerRadiusTopEnd="14dp"
@@ -46,12 +49,13 @@
         app:boxStrokeColor="#8B9EFF"
         app:boxStrokeWidth="1dp"
         app:boxStrokeWidthFocused="2dp"
-        app:endIconTint="#8B9EFF">
+        app:endIconTint="#91A8FF">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/barcodeFormatDropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:dropDownHeight="wrap_content"
             android:inputType="none"
             android:paddingHorizontal="16dp"
             android:paddingVertical="16dp"
@@ -59,32 +63,33 @@
             android:text="@string/qr_code"
             android:textColor="#F5F5F5"
             android:textColorHint="#A1A1AA"
-            android:textSize="15sp"
-            android:dropDownHeight="wrap_content" />
+            android:textSize="15sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- QR CONTENT TYPE -->
     <include
         layout="@layout/layout_qr_content_type" />
 
-    <!-- NAME -->
+    <!-- BARCODE NAME LABEL -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:letterSpacing="0.1"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="9dp"
+        android:letterSpacing="0.05"
         android:text="@string/barcode_name"
         android:textColor="#A1A1AA"
         android:textSize="12sp"
         android:textStyle="bold" />
 
+    <!-- BARCODE NAME INPUT -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/barcodeUserNameLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="#1C1C1E"
+        app:boxBackgroundColor="#202024"
         app:boxCornerRadiusBottomEnd="14dp"
         app:boxCornerRadiusBottomStart="14dp"
         app:boxCornerRadiusTopEnd="14dp"
@@ -99,35 +104,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Give your barcode a name..."
-            android:inputType="textCapSentences"
             android:imeOptions="actionNext"
+            android:inputType="textCapSentences"
             android:padding="16dp"
             android:singleLine="true"
             android:textColor="#F5F5F5"
-            android:textColorHint="#A1A1AA"
+            android:textColorHint="#85858F"
             android:textSize="15sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- CONTENT -->
+    <!-- BARCODE CONTENT LABEL -->
     <TextView
         android:id="@+id/barcodeContentLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:letterSpacing="0.1"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="9dp"
+        android:letterSpacing="0.05"
         android:text="@string/barcode_content_field"
         android:textColor="#A1A1AA"
         android:textSize="12sp"
         android:textStyle="bold" />
 
+    <!-- BARCODE CONTENT INPUT -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/barcodeUserContentLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="#1C1C1E"
+        app:boxBackgroundColor="#202024"
         app:boxCornerRadiusBottomEnd="14dp"
         app:boxCornerRadiusBottomStart="14dp"
         app:boxCornerRadiusTopEnd="14dp"
@@ -139,7 +145,7 @@
         app:counterEnabled="false"
         app:endIconCheckable="false"
         app:endIconMode="custom"
-        app:endIconTint="#8B9EFF"
+        app:endIconTint="#91A8FF"
         app:errorEnabled="true"
         app:errorIconDrawable="@null"
         app:errorTextColor="#FF9A9A"
@@ -155,26 +161,26 @@
             android:hint="Enter text, URL, or other content..."
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
-            android:minHeight="80dp"
             android:maxHeight="200dp"
-            android:minLines="4"
             android:maxLines="8"
+            android:minHeight="80dp"
+            android:minLines="4"
+            android:padding="16dp"
             android:scrollHorizontally="false"
             android:scrollbars="vertical"
-            android:padding="16dp"
             android:singleLine="false"
             android:textColor="#F5F5F5"
-            android:textColorHint="#A1A1AA"
-            android:textSize="16sp" />
+            android:textColorHint="#85858F"
+            android:textSize="15sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- SAVE ACTION -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonSaveBarcodeToDB"
-        android:layout_width="190dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="24dp"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:text="Save Barcode"
@@ -182,8 +188,8 @@
         android:textColor="#121212"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:backgroundTint="#8B9EFF"
-        app:cornerRadius="12dp"
+        app:backgroundTint="#91A8FF"
+        app:cornerRadius="14dp"
         app:icon="@drawable/ic_save"
         app:iconGravity="textStart"
         app:iconTint="#121212" />

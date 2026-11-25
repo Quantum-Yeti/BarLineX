@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -52,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView textPreviewContent;
     private TextView textPreviewInfo;
 
+    private View previewSection;
+    private View bottomDock;
+    private ScrollView createContent;
+
     private BottomNavigationView bottomNavigation;
 
     private View qrContentTypeSection;
@@ -83,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize views and dependencies
         initializeViews();
         initializeWindowInsets();
+        setupKeyboardHandling();
         initializeViewModel();
         initializeLaunchers();
         initializeControllers();
@@ -128,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
         textPreviewFormat = findViewById(R.id.textPreviewFormat);
         textPreviewContent = findViewById(R.id.textPreviewContent);
         textPreviewInfo = findViewById(R.id.textPreviewInfo);
+
+        createContent = findViewById(R.id.createContent);
+        previewSection = findViewById(R.id.mainBarcodePreview);
+        bottomDock = findViewById(R.id.bottomDock);
 
         qrContentTypeSection = findViewById(R.id.qrContentTypeSection);
         qrContentTypeDropdown = findViewById(R.id.qrContentTypeDropdown);
@@ -364,5 +376,24 @@ public class MainActivity extends AppCompatActivity {
         historyLauncher.launch(
                 new Intent(this, HistoryActivity.class)
         );
+    }
+
+    private void setupKeyboardHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(createContent, (view, insets) -> {
+            boolean keyboardVisible =
+                    insets.isVisible(WindowInsetsCompat.Type.ime());
+
+            previewSection.setVisibility(
+                    keyboardVisible ? View.GONE : View.VISIBLE
+            );
+
+            bottomDock.setVisibility(
+                    keyboardVisible ? View.GONE : View.VISIBLE
+            );
+
+            return insets;
+        });
+
+        ViewCompat.requestApplyInsets(createContent);
     }
 }

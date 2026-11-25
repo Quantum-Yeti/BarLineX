@@ -19,6 +19,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
@@ -27,9 +28,13 @@ import java.util.Date;
 
 import me.theoria.barlinex.R;
 import me.theoria.barlinex.domain.barcode.BarcodeValidator;
+import me.theoria.barlinex.ui.advanced.AdvancedActivity;
+import me.theoria.barlinex.ui.common.BottomNavigationHelper;
 import me.theoria.barlinex.ui.common.WindowsInsetHelper;
 import me.theoria.barlinex.ui.common.ZoomControlsController;
 import me.theoria.barlinex.ui.controller.BarcodeDecoderController;
+import me.theoria.barlinex.ui.history.HistoryActivity;
+import me.theoria.barlinex.ui.main.MainActivity;
 import me.theoria.barlinex.ui.scanner.ScannerOverlay;
 
 public class DecodeActivity extends AppCompatActivity {
@@ -40,6 +45,7 @@ public class DecodeActivity extends AppCompatActivity {
     private View decodeResultPanel;
     private TextView textDecodeStatus;
     private ScannerOverlay scannerOverlay;
+    private BottomNavigationView bottomNavigation;
 
     // Barcode information
     private TextView textDecodedFormat;
@@ -119,6 +125,7 @@ public class DecodeActivity extends AppCompatActivity {
         initializeViewModel();
         registerCameraPermissionLauncher();
         initializeDecoder();
+        setupBottomNavigation();
 
         zoomControlsController = new ZoomControlsController(
                 this,
@@ -137,6 +144,7 @@ public class DecodeActivity extends AppCompatActivity {
         textDecodeStatus = findViewById(R.id.textDecodeStatus);
         decodeResultPanel = findViewById(R.id.decodeResultPanel);
         scannerOverlay = findViewById(R.id.scannerOverlay);
+        bottomNavigation = findViewById(R.id.decodeBottomNavigation);
 
         initializeBarcodeInformationViews();
         initializeAnalysisViews();
@@ -574,6 +582,48 @@ public class DecodeActivity extends AppCompatActivity {
 
         decodeController.resetScanning();
         startScanning();
+    }
+
+    private void setupBottomNavigation() {
+
+        BottomNavigationHelper.setup(
+                bottomNavigation,
+                R.id.nav_advanced,
+                new BottomNavigationHelper.Listener() {
+
+                    @Override
+                    public void onCreateSelected() {
+                        Intent intent = new Intent(
+                                DecodeActivity.this,
+                                MainActivity.class
+                        );
+
+                        intent.addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                        Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        );
+
+                        startActivity(intent);
+                        finish();
+                    }
+
+                    @Override
+                    public void onAdvancedSelected() {
+                        openActivity(AdvancedActivity.class);
+                    }
+
+                    @Override
+                    public void onHistorySelected() {
+                        openActivity(HistoryActivity.class);
+                    }
+                }
+        );
+    }
+
+    private void openActivity(Class<?> activityClass) {
+
+        startActivity(new Intent(this, activityClass));
+        finish();
     }
 
     // Zoom touch events
